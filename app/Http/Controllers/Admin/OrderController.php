@@ -1,0 +1,108 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\Order;
+use App\Models\OrderStatusHistory;
+use App\Models\ProductSize;
+use App\Models\User;
+use App\Notifications\OrderCancelled;
+use App\Notifications\OrderStatusUpdated;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+
+class OrderController extends Controller
+{
+    public function index(Request $request)
+    {
+        $orders = Order::with('payment')
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
+            ->when($request->payment_status, fn ($q) => $q->whereHas('payment', fn ($p) => $p->where('status', $request->payment_status)))
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.orders.index', compact('orders'));
+    }
+
+    public function show(Order $order)
+    {
+        $order->load(['items', 'statusHistories.changedBy', 'payment', 'shippingMethod', 'user']);
+
+        return view('admin.orders.show', compact('order'));
+    }
+
+    public function updateStatus(Request $request, Order $order): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:pending,processing,shipped,delivered,cancelled'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        $order->update(['status' => $validated['status']]);
+
+        OrderStatusHistory::create([
+            'order_id' => $order->id,
+            'status' => $validated['status'],
+            'note' => $validated['note'] ?? null,
+            'changed_by' => $request->user()->id,
+        ]);
+
+        if ($order->user) {
+            $order->user->notify(new OrderStatusUpdated($order));
+        }
+
+        ActivityLog::record('updated', $order, "Updated order {$order->order_number} status to {$validated['status']}");
+
+        $restoredCount = null;
+
+        if ($validated['status'] === 'cancelled') {
+            Notification::send(User::admins(), new OrderCancelled($order));
+
+            if ($order->stock_deducted_at && ! $order->stock_restored_at) {
+                $restoredCount = $this->restoreStock($order);
+            }
+        }
+
+        return back()->with('status', $restoredCount !== null
+            ? "Order status updated. Stock restored for {$restoredCount} item(s)."
+            : 'Order status updated.');
+    }
+
+    /**
+     * Return an order's items to stock. Guarded by stock_restored_at so a
+     * cancellation can never be "double restored" (e.g. re-saving the same
+     * status, or a retried request).
+     */
+    protected function restoreStock(Order $order): int
+    {
+        return DB::transaction(function () use ($order) {
+            $order->load('items');
+            $restored = 0;
+
+            foreach ($order->items as $item) {
+                if (! $item->product_id) {
+                    continue;
+                }
+
+                $productSize = ProductSize::where('product_id', $item->product_id)
+                    ->where('size', $item->size)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($productSize) {
+                    $productSize->increment('stock', $item->quantity);
+                    $restored++;
+                }
+            }
+
+            $order->forceFill(['stock_restored_at' => now()])->save();
+
+            return $restored;
+        });
+    }
+}
