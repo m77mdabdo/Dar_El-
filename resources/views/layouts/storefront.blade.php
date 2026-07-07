@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>window.djI18n = { close: @json(__('Close')) };</script>
+    <meta name="description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
+    <meta property="og:title" content="@yield('title', config('app.name', 'Dar El-Jamila'))">
+    <meta property="og:description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
+    <meta property="og:image" content="@yield('og_image', asset('favicon.ico'))">
+    <meta property="og:type" content="website">
+    <title>@yield('title', config('app.name', 'Dar El-Jamila'))</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="dj-storefront min-h-screen flex flex-col {{ app()->getLocale() === 'en' ? 'dj-en' : '' }}">
+
+    <div id="dj-splash"><div class="dj-splash-mark">{{ __('Dar El-Jamila') }}</div><div class="dj-splash-line"></div></div>
+    <div id="dj-scroll-progress"></div>
+    <button id="dj-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="{{ __('Back to top') }}">↑</button>
+
+    <div x-data="{ mobileNavOpen: false }">
+    <nav class="dj-nav">
+        <div class="dj-nav-logo"><a href="{{ route('home') }}"><span class="dj-mark">{{ __('Dar El-Jamila') }}</span></a></div>
+
+        <div class="dj-nav-links">
+            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'dj-active' : '' }}">{{ __('Home') }}</a>
+            <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'dj-active' : '' }}">{{ __('Shop') }}</a>
+            <a href="{{ route('services') }}" class="{{ request()->routeIs('services') ? 'dj-active' : '' }}">{{ __('Services') }}</a>
+            <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'dj-active' : '' }}">{{ __('About') }}</a>
+            <a href="{{ route('blog.index') }}" class="{{ request()->routeIs('blog.*') ? 'dj-active' : '' }}">{{ __('Blog') }}</a>
+            <a href="{{ route('contact.show') }}" class="{{ request()->routeIs('contact.*') ? 'dj-active' : '' }}">{{ __('Contact') }}</a>
+        </div>
+
+        <div class="dj-nav-right">
+            @auth
+                <a href="{{ route('wishlist.index') }}" class="dj-cart-btn" aria-label="{{ __('Wishlist') }}">
+                    ♡ <span>{{ __('Wishlist') }}</span> <span class="dj-cart-count" id="dj-wishlist-count">{{ $wishlistCount ?? 0 }}</span>
+                </a>
+            @else
+                <a href="{{ route('login', ['redirect' => url()->current()]) }}" class="dj-cart-btn" aria-label="{{ __('Wishlist') }}">
+                    ♡ <span>{{ __('Wishlist') }}</span> <span class="dj-cart-count" id="dj-wishlist-count">0</span>
+                </a>
+            @endauth
+
+            <button type="button" class="dj-cart-btn" onclick="djOpenCart()" aria-label="{{ __('Shopping Cart') }}">
+                🛍️ <span>{{ __('Cart') }}</span> <span class="dj-cart-count" id="dj-cart-count">{{ $cartCount ?? 0 }}</span>
+            </button>
+
+            <a href="{{ route('lang.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="dj-lang-btn">
+                🌐 <span>{{ app()->getLocale() === 'ar' ? 'EN' : 'AR' }}</span>
+            </a>
+
+            @auth
+                <div class="relative hidden sm:block" x-data="{ open: false }">
+                    <button @click="open = !open" class="text-cream-2 text-sm hover:text-gold">{{ auth()->user()->name }}</button>
+                    <div x-show="open" @click.outside="open = false" x-cloak class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-44 bg-white border border-stone-200 rounded shadow-lg py-1 z-10 text-sm text-stone-700">
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('Profile') }}</a>
+                        <a href="{{ route('account.orders.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('My Orders') }}</a>
+                        @if (auth()->user()->hasRole('admin'))
+                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('Admin') }}</a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="w-full text-left px-4 py-2 hover:bg-stone-50">{{ __('Log Out') }}</button>
+                        </form>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('login') }}" class="hidden sm:inline text-cream-2 text-sm hover:text-gold">{{ __('Login') }}</a>
+            @endauth
+
+            <button @click="mobileNavOpen = !mobileNavOpen" class="dj-burger" aria-label="{{ __('Menu') }}" :aria-expanded="mobileNavOpen.toString()">☰</button>
+        </div>
+    </nav>
+
+    <div class="dj-mobile-menu" x-show="mobileNavOpen" x-cloak @click.outside="mobileNavOpen = false">
+        <a href="{{ route('home') }}" @click="mobileNavOpen = false">{{ __('Home') }}</a>
+        <a href="{{ route('shop.index') }}" @click="mobileNavOpen = false">{{ __('Shop') }}</a>
+        <a href="{{ route('services') }}" @click="mobileNavOpen = false">{{ __('Services') }}</a>
+        <a href="{{ route('about') }}" @click="mobileNavOpen = false">{{ __('About') }}</a>
+        <a href="{{ route('blog.index') }}" @click="mobileNavOpen = false">{{ __('Blog') }}</a>
+        <a href="{{ route('contact.show') }}" @click="mobileNavOpen = false">{{ __('Contact') }}</a>
+        @auth
+            <a href="{{ route('profile.edit') }}" @click="mobileNavOpen = false">{{ __('Profile') }}</a>
+            <a href="{{ route('account.orders.index') }}" @click="mobileNavOpen = false">{{ __('My Orders') }}</a>
+            @if (auth()->user()->hasRole('admin'))
+                <a href="{{ route('admin.dashboard') }}" @click="mobileNavOpen = false">{{ __('Admin') }}</a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button class="w-full text-left">{{ __('Log Out') }}</button>
+            </form>
+        @else
+            <a href="{{ route('login') }}" @click="mobileNavOpen = false">{{ __('Login') }}</a>
+        @endauth
+    </div>
+    </div>
+
+    <main class="flex-1 dj-page-enter">
+        @if (session('status'))
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
+                <div class="bg-cream-2 text-maroon border border-gold/40 rounded-full px-5 py-3 text-sm text-center">{{ session('status') }}</div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 mt-4">
+                <div class="bg-rose-dust/10 text-rose-dust border border-rose-dust/30 rounded-full px-5 py-3 text-sm text-center">{{ session('error') }}</div>
+            </div>
+        @endif
+
+        @yield('content')
+    </main>
+
+    <footer class="dj-footer">
+        <div class="dj-f-logo">{{ __('Dar El-Jamila') }}</div>
+        <p>{{ __('Beautiful you are for choosing Dar El-Jamila. To order, reach out to us directly via social media or email.') }}</p>
+
+        <form method="POST" action="{{ route('newsletter.store') }}" class="dj-newsletter-form" style="margin-bottom:30px;">
+            @csrf
+            <input type="email" name="email" required placeholder="{{ __('Your email address') }}" aria-label="{{ __('Your email address') }}">
+            <button type="submit">{{ __('Subscribe') }}</button>
+        </form>
+
+        <div class="dj-socials">
+            @if ($facebook = \App\Models\Setting::get('facebook_url'))
+                <a href="{{ $facebook }}" title="Facebook" target="_blank" rel="noopener">FB</a>
+            @endif
+            @if ($instagram = \App\Models\Setting::get('instagram_url'))
+                <a href="{{ $instagram }}" title="Instagram" target="_blank" rel="noopener">IG</a>
+            @endif
+            @if ($whatsapp = \App\Models\Setting::get('whatsapp_number'))
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsapp) }}" title="WhatsApp" target="_blank" rel="noopener">WA</a>
+            @endif
+            <a href="mailto:{{ \App\Models\Setting::get('support_email', 'hello@dar-el-jamila.com') }}" title="Email">✉</a>
+        </div>
+
+        <div class="dj-fine">&copy; {{ date('Y') }} {{ __('Dar El-Jamila. All rights reserved.') }}</div>
+    </footer>
+
+    @include('partials.cart-drawer')
+    @include('partials.product-modal')
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(php -i)",
+      "Bash(pkill -f \"artisan serve --port=8123\")",
+      "Bash(php -d upload_max_filesize=10M -d post_max_size=10M artisan serve --port=8123)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://127.0.0.1:8123/)",
+      "Bash(python3 __TRACKED_VAR__/upload_test2.py http://127.0.0.1:8123/admin/products/create '{\"name_en\":\"Big Upload Test\",\"name_ar\":\"اختبار كبير\",\"category_id\":\"1\",\"price\":\"500\"}' '{\"input[name='\\\\''images[]'\\\\'']\":\"__TRACKED_VAR__/too-big.png\"}' button[type=submit])",
+      "Bash(php artisan tinker '--execute= *)",
+      "Bash(php artisan *)",
+      "Bash(php -l app/Models/Product.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ProductController.php)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost/dar-el-jamila/public/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8765/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8765/admin/products)",
+      "Bash(kill %1)",
+      "Bash(jobs -l)",
+      "Bash(curl -s -o /dev/null -w \"admin redirect: %{http_code}\\\\n\" http://127.0.0.1:8787/admin)",
+      "Bash(curl -s -o /dev/null -w \"login: %{http_code}\\\\n\" http://127.0.0.1:8787/login)",
+      "Bash(pkill -f \"artisan serve --port=8787\")",
+      "Bash(rm -f /tmp/rwd*.png /tmp/shop-raw.html /tmp/dj-serve3.log)",
+      "Bash(pkill -f \"php artisan serve --port=8787\")",
+      "Bash(rm -f /tmp/dj-serve.log)",
+      "Bash(grep -rn 'Event::listen\\\\|\\\\$listen' app/Providers/)",
+      "Bash(xargs -I{} sh -c 'echo ==={}===; cat {}')",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(php -l resources/views/admin/dashboard.blade.php)",
+      "Bash(curl -s -o /dev/null -w \"dashboard direct http_code check needs auth, skipping raw curl\\\\n\")",
+      "Bash(node admin-debug.js)",
+      "Bash(node admin-responsive-check.js)",
+      "Bash(node admin-visual-check.js)"
+    ]
+  }
+}
