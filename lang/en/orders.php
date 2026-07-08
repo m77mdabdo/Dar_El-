@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'title' => 'Orders',
+    'all_statuses' => 'All Statuses',
+    'all_payment_statuses' => 'All Payment Statuses',
+    'order_number' => 'Order #',
+    'customer' => 'Customer',
+    'total' => 'Total',
+    'payment' => 'Payment',
+    'no_orders' => 'No orders yet.',
+    'view' => 'View',
+    'all_orders' => 'All Orders',
+    'download_invoice' => 'Download Invoice',
+    'push_new_status' => 'Push New Status',
+    'note_optional' => 'Note (optional)',
+    'status_history' => 'Status History',
+    'by' => 'by',
+    'shipping_address' => 'Shipping Address',
+    'subtotal' => 'Subtotal',
+    'shipping' => 'Shipping',
+    'discount' => 'Discount',
+
+    'status_pending' => 'Pending',
+    'status_processing' => 'Processing',
+    'status_shipped' => 'Shipped',
+    'status_delivered' => 'Delivered',
+    'status_cancelled' => 'Cancelled',
+    'payment_status_pending' => 'Pending',
+    'payment_status_paid' => 'Paid',
+    'payment_status_failed' => 'Failed',
+    'payment_status_refunded' => 'Refunded',
+];

@@ -5,8 +5,24 @@ window.Alpine = Alpine;
 Alpine.start();
 
 Chart.register(...registerables);
-Chart.defaults.font.family = "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif";
-Chart.defaults.color = '#78716c';
+
+const djIsArabic = document.documentElement.lang?.startsWith('ar');
+Chart.defaults.font.family = djIsArabic
+    ? "'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif"
+    : "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif";
+Chart.defaults.color = '#8a6b70';
+Chart.defaults.borderColor = 'rgba(60,11,23,0.08)';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.padding = 16;
+Chart.defaults.plugins.tooltip.backgroundColor = '#3C0B17';
+Chart.defaults.plugins.tooltip.titleColor = '#E8C39A';
+Chart.defaults.plugins.tooltip.bodyColor = '#F7EFE4';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.titleFont = { weight: '600' };
+Chart.defaults.plugins.tooltip.displayColors = true;
+Chart.defaults.plugins.tooltip.boxPadding = 4;
 
 /* =========================================================
    Admin dashboard behavior — kept separate from the storefront

@@ -1,9 +1,11 @@
 @extends('admin.layout')
 
-@section('title', 'Add Category')
+@section('title', __('categories.add_category'))
 
 @section('content')
-    <form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data" class="space-y-4 max-w-xl">
-        @include('admin.categories._form')
-    </form>
+    <div class="dj-admin-card p-4 sm:p-6 max-w-xl">
+        <form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data" class="space-y-4">
+            @include('admin.categories._form')
+        </form>
+    </div>
 @endsection

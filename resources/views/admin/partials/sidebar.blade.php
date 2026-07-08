@@ -28,7 +28,7 @@
             <a
                 href="{{ route($entry['route']) }}"
                 @click="sidebarOpen = false"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors {{ request()->routeIs($entry['match']) ? 'bg-rose-700 text-white' : 'text-stone-300 hover:bg-stone-800 hover:text-white' }}"
+                class="dj-admin-nav-link {{ request()->routeIs($entry['match']) ? 'dj-active' : '' }}"
             >
                 <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="{{ $djIcons[$entry['icon']] }}" /></svg>
                 <span class="truncate">{{ __('admin.'.$entry['label']) }}</span>
@@ -39,7 +39,7 @@
                 <button
                     type="button"
                     @click="open = !open"
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-300 hover:bg-stone-800 hover:text-white transition-colors"
+                    class="dj-admin-nav-group-btn"
                     :aria-expanded="open.toString()"
                 >
                     <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="{{ $djIcons[$entry['icon']] }}" /></svg>
@@ -48,20 +48,20 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ app()->getLocale() === 'ar' ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}" />
                     </svg>
                 </button>
-                <div x-show="open" x-cloak class="ms-4 ps-4 border-s border-stone-800 mt-1 space-y-0.5">
+                <div x-show="open" x-cloak class="dj-admin-nav-sub">
                     @foreach ($entry['items'] as $item)
                         @if (! empty($item['route']))
                             <a
                                 href="{{ route($item['route']) }}"
                                 @click="sidebarOpen = false"
-                                class="block px-3 py-2 rounded-lg truncate {{ request()->routeIs($item['match']) ? 'bg-rose-700 text-white' : 'text-stone-400 hover:bg-stone-800 hover:text-white' }}"
+                                class="dj-admin-nav-sub-link {{ request()->routeIs($item['match']) ? 'dj-active' : '' }}"
                             >
                                 {{ __('admin.'.$item['label']) }}
                             </a>
                         @else
-                            <span class="flex items-center justify-between px-3 py-2 rounded-lg text-stone-600 cursor-not-allowed select-none">
+                            <span class="dj-admin-nav-soon">
                                 <span class="truncate">{{ __('admin.'.$item['label']) }}</span>
-                                <span class="text-[10px] uppercase tracking-wide bg-stone-800 text-stone-500 px-1.5 py-0.5 rounded shrink-0 ms-2">{{ __('admin.soon') }}</span>
+                                <span class="dj-admin-soon-badge">{{ __('admin.soon') }}</span>
                             </span>
                         @endif
                     @endforeach

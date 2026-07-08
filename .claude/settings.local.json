@@ -31,7 +31,15 @@
       "Bash(curl -s -o /dev/null -w \"dashboard direct http_code check needs auth, skipping raw curl\\\\n\")",
       "Bash(node admin-debug.js)",
       "Bash(node admin-responsive-check.js)",
-      "Bash(node admin-visual-check.js)"
+      "Bash(node admin-visual-check.js)",
+      "Bash(xargs -I{} echo {})",
+      "Bash(sed -n '/ADMIN/,$p')",
+      "Bash(awk '/ADMIN PANEL DESIGN SYSTEM/,0' /Applications/XAMPP/xamppfiles/htdocs/dar-el-jamila/resources/css/app.css)",
+      "Bash(node admin-debug2.js)",
+      "Bash(node admin-viewport-shot.js)",
+      "Bash(node admin-full-check.js)",
+      "Bash(pkill -f \"php artisan serve\")",
+      "Bash(rm -f /tmp/dj-serve*.log /tmp/admin-*.png /tmp/spot-*.png /tmp/products-mobile-viewport.png /tmp/final-*.png /tmp/checkbox-check.png)"
     ]
   }
 }

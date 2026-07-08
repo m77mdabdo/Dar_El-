@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'title' => 'الطلبات',
+    'all_statuses' => 'كل الحالات',
+    'all_payment_statuses' => 'كل حالات الدفع',
+    'order_number' => 'رقم الطلب',
+    'customer' => 'العميل',
+    'total' => 'الإجمالي',
+    'payment' => 'الدفع',
+    'no_orders' => 'لا توجد طلبات بعد.',
+    'view' => 'عرض',
+    'all_orders' => 'كل الطلبات',
+    'download_invoice' => 'تحميل الفاتورة',
+    'push_new_status' => 'تحديث الحالة',
+    'note_optional' => 'ملاحظة (اختياري)',
+    'status_history' => 'سجل الحالة',
+    'by' => 'بواسطة',
+    'shipping_address' => 'عنوان الشحن',
+    'subtotal' => 'المجموع الفرعي',
+    'shipping' => 'الشحن',
+    'discount' => 'الخصم',
+
+    'status_pending' => 'قيد الانتظار',
+    'status_processing' => 'قيد المعالجة',
+    'status_shipped' => 'تم الشحن',
+    'status_delivered' => 'تم التوصيل',
+    'status_cancelled' => 'ملغي',
+    'payment_status_pending' => 'قيد الانتظار',
+    'payment_status_paid' => 'مدفوع',
+    'payment_status_failed' => 'فشل',
+    'payment_status_refunded' => 'مسترد',
+];
