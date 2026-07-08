@@ -1,38 +1,40 @@
 @extends('admin.layout')
 
-@section('title', 'Categories')
+@section('title', __('categories.title'))
 
 @section('content')
     <div class="flex justify-end mb-4">
-        <a href="{{ route('admin.categories.create') }}" class="bg-rose-700 hover:bg-rose-800 text-white text-sm px-4 py-2 rounded">Add Category</a>
+        <a href="{{ route('admin.categories.create') }}" class="dj-admin-btn dj-admin-btn-primary">+ {{ __('categories.add_category') }}</a>
     </div>
 
-    <div class="bg-white border border-stone-200 rounded-lg overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-stone-50 text-left text-xs uppercase text-stone-500">
+    <div class="dj-admin-card dj-admin-table-wrap">
+        <table class="dj-admin-table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Products</th>
-                    <th class="px-4 py-3">Active</th>
-                    <th class="px-4 py-3"></th>
+                    <th>{{ __('general.name') }}</th>
+                    <th>{{ __('categories.products_count') }}</th>
+                    <th>{{ __('general.status') }}</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-stone-100">
-                @foreach ($categories as $category)
+            <tbody>
+                @forelse ($categories as $category)
                     <tr>
-                        <td class="px-4 py-3">{{ $category->name_en }}</td>
-                        <td class="px-4 py-3">{{ $category->products_count }}</td>
-                        <td class="px-4 py-3">{{ $category->is_active ? 'Yes' : 'No' }}</td>
-                        <td class="px-4 py-3 text-right space-x-2">
-                            <a href="{{ route('admin.categories.edit', $category) }}" class="text-rose-700 underline">Edit</a>
-                            <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="inline" onsubmit="return confirm('Delete this category?')">
+                        <td class="font-medium text-[var(--dj-ink)]">{{ $category->name_en }}</td>
+                        <td>{{ $category->products_count }}</td>
+                        <td><span class="dj-admin-badge {{ $category->is_active ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">{{ $category->is_active ? __('general.active') : __('general.inactive') }}</span></td>
+                        <td class="text-end space-x-3 rtl:space-x-reverse">
+                            <a href="{{ route('admin.categories.edit', $category) }}" class="dj-admin-link">{{ __('general.edit') }}</a>
+                            <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="inline" onsubmit="return confirm('{{ __('categories.confirm_delete') }}')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="text-stone-500 underline">Delete</button>
+                                <button class="dj-admin-link-muted">{{ __('general.delete') }}</button>
                             </form>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="4" class="dj-admin-table-empty">{{ __('categories.no_categories') }}</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

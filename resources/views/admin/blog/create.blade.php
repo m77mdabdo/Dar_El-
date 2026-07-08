@@ -1,9 +1,11 @@
 @extends('admin.layout')
 
-@section('title', 'Add Post')
+@section('title', __('blog.add_post'))
 
 @section('content')
-    <form method="POST" action="{{ route('admin.blog.store') }}" enctype="multipart/form-data" class="space-y-4 max-w-2xl">
-        @include('admin.blog._form')
-    </form>
+    <div class="dj-admin-card p-4 sm:p-6 max-w-2xl">
+        <form method="POST" action="{{ route('admin.blog.store') }}" enctype="multipart/form-data" class="space-y-4">
+            @include('admin.blog._form')
+        </form>
+    </div>
 @endsection

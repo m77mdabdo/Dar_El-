@@ -1,48 +1,50 @@
 @extends('admin.layout')
 
-@section('title', 'Blog')
+@section('title', __('blog.title'))
 
 @section('content')
     <div class="flex flex-col sm:flex-row sm:justify-between gap-3 mb-4">
         <form method="GET" class="flex gap-2">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search posts..." class="w-full sm:w-auto rounded border-stone-300 text-sm">
-            <button class="bg-stone-800 text-white text-sm px-4 py-2 rounded shrink-0">Search</button>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('blog.search_placeholder') }}" class="dj-admin-input w-full sm:w-auto">
+            <button class="dj-admin-btn dj-admin-btn-secondary shrink-0">{{ __('general.search') }}</button>
         </form>
-        <a href="{{ route('admin.blog.create') }}" class="bg-rose-700 hover:bg-rose-800 text-white text-sm px-4 py-2 rounded text-center">Add Post</a>
+        <a href="{{ route('admin.blog.create') }}" class="dj-admin-btn dj-admin-btn-primary text-center">+ {{ __('blog.add_post') }}</a>
     </div>
 
-    <div class="bg-white border border-stone-200 rounded-lg overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-stone-50 text-left text-xs uppercase text-stone-500">
+    <div class="dj-admin-card dj-admin-table-wrap">
+        <table class="dj-admin-table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3">Cover</th>
-                    <th class="px-4 py-3">Title</th>
-                    <th class="px-4 py-3">Published</th>
-                    <th class="px-4 py-3">Date</th>
-                    <th class="px-4 py-3"></th>
+                    <th>{{ __('blog.cover') }}</th>
+                    <th>{{ __('blog.post_title') }}</th>
+                    <th>{{ __('general.published') }}</th>
+                    <th>{{ __('general.date') }}</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-stone-100">
-                @foreach ($posts as $post)
+            <tbody>
+                @forelse ($posts as $post)
                     <tr>
-                        <td class="px-4 py-3">
+                        <td>
                             @if ($post->cover_image)
-                                <img src="{{ asset('storage/'.$post->cover_image) }}" class="w-12 h-12 object-cover rounded border border-stone-200">
+                                <img src="{{ asset('storage/'.$post->cover_image) }}" class="w-12 h-12 object-cover rounded-lg border border-[var(--dj-cream-2)]">
                             @endif
                         </td>
-                        <td class="px-4 py-3">{{ $post->title_en }}</td>
-                        <td class="px-4 py-3">{{ $post->is_published ? 'Yes' : 'No' }}</td>
-                        <td class="px-4 py-3">{{ $post->published_at?->format('M j, Y') ?? '-' }}</td>
-                        <td class="px-4 py-3 text-right space-x-2">
-                            <a href="{{ route('admin.blog.edit', $post) }}" class="text-rose-700 underline">Edit</a>
-                            <form method="POST" action="{{ route('admin.blog.destroy', $post) }}" class="inline" onsubmit="return confirm('Delete this post?')">
+                        <td class="font-medium text-[var(--dj-ink)]">{{ $post->title_en }}</td>
+                        <td><span class="dj-admin-badge {{ $post->is_published ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">{{ $post->is_published ? __('general.published') : __('general.draft') }}</span></td>
+                        <td>{{ $post->published_at?->format('M j, Y') ?? '-' }}</td>
+                        <td class="text-end space-x-3 rtl:space-x-reverse">
+                            <a href="{{ route('admin.blog.edit', $post) }}" class="dj-admin-link">{{ __('general.edit') }}</a>
+                            <form method="POST" action="{{ route('admin.blog.destroy', $post) }}" class="inline" onsubmit="return confirm('{{ __('blog.confirm_delete') }}')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="text-stone-500 underline">Delete</button>
+                                <button class="dj-admin-link-muted">{{ __('general.delete') }}</button>
                             </form>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="5" class="dj-admin-table-empty">{{ __('blog.no_posts') }}</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

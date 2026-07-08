@@ -875,3 +875,288 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
 @media (max-width: 840px) {
     .dj-order-summary { position: static; top: auto; }
 }
+
+/* =========================================================
+   ADMIN PANEL DESIGN SYSTEM
+   Everything below is scoped to `.dj-admin-shell` (the admin
+   <body>) so it can never leak into the storefront, which shares
+   this same compiled stylesheet. Classes are `dj-admin-` prefixed
+   for the same reason.
+   ========================================================= */
+
+.dj-admin-shell {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--dj-cream);
+    color: var(--dj-ink);
+}
+.dj-admin-shell.dj-en { font-family: 'Poppins', sans-serif; }
+.dj-admin-shell:not(.dj-en) { font-family: 'Tajawal', sans-serif; }
+.dj-admin-shell h1, .dj-admin-shell h2, .dj-admin-shell h3, .dj-admin-brand {
+    font-family: 'Aref Ruqaa', serif;
+}
+.dj-admin-shell.dj-en h1, .dj-admin-shell.dj-en h2, .dj-admin-shell.dj-en h3, .dj-admin-shell.dj-en .dj-admin-brand {
+    font-family: 'Playfair Display', serif;
+}
+
+/* ----- Sidebar -----
+   No `position` declared here on purpose: the <aside> element already
+   controls its own positioning via Tailwind utilities (fixed on mobile,
+   relative on desktop) so the responsive fixed/relative toggle keeps
+   working. Setting position here would silently win the cascade (same
+   specificity, declared after Tailwind's utility layer) and break it. */
+.dj-admin-sidebar {
+    background: linear-gradient(180deg, var(--dj-maroon-dark) 0%, var(--dj-maroon) 100%);
+}
+.dj-admin-sidebar::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+        radial-gradient(circle at 15% 8%, rgba(232,195,154,.16), transparent 40%),
+        radial-gradient(circle at 90% 92%, rgba(122,32,56,.35), transparent 45%);
+}
+.dj-admin-sidebar > * { position: relative; z-index: 1; }
+.dj-admin-sidebar-scroll::-webkit-scrollbar { width: 6px; }
+.dj-admin-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(232,195,154,.25); border-radius: 10px; }
+
+.dj-admin-brand-block {
+    padding: 20px 18px; border-bottom: 1px solid rgba(232,195,154,.15);
+}
+.dj-admin-brand-mark {
+    font-family: 'Aref Ruqaa', serif; font-size: 22px; color: var(--dj-gold); letter-spacing: .5px;
+}
+.dj-admin-shell.dj-en .dj-admin-brand-mark { font-family: 'Playfair Display', serif; font-size: 19px; }
+
+.dj-admin-nav-link {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px;
+    color: rgba(247,239,228,.72); font-size: 13.5px; font-weight: 500; transition: background .18s, color .18s;
+}
+.dj-admin-nav-link:hover { background: rgba(232,195,154,.1); color: var(--dj-cream); }
+.dj-admin-nav-link.dj-active {
+    background: linear-gradient(135deg, var(--dj-gold), var(--dj-gold-bright));
+    color: var(--dj-maroon-dark); font-weight: 700; box-shadow: 0 8px 20px -10px rgba(0,0,0,.5);
+}
+.dj-admin-nav-link.dj-active svg { color: var(--dj-maroon-dark); }
+.dj-admin-nav-group-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 12px;
+    color: rgba(247,239,228,.72); font-size: 13.5px; font-weight: 500; transition: background .18s, color .18s;
+}
+.dj-admin-nav-group-btn:hover { background: rgba(232,195,154,.1); color: var(--dj-cream); }
+.dj-admin-nav-sub {
+    margin-inline-start: 18px; padding-inline-start: 14px; border-inline-start: 1px solid rgba(232,195,154,.18);
+    margin-top: 4px; display: flex; flex-direction: column; gap: 2px;
+}
+.dj-admin-nav-sub-link {
+    display: block; padding: 9px 12px; border-radius: 10px; color: rgba(247,239,228,.58);
+    font-size: 13px; transition: background .18s, color .18s;
+}
+.dj-admin-nav-sub-link:hover { background: rgba(232,195,154,.08); color: var(--dj-cream); }
+.dj-admin-nav-sub-link.dj-active { background: rgba(232,195,154,.16); color: var(--dj-gold); font-weight: 600; }
+.dj-admin-nav-soon {
+    display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px;
+    color: rgba(247,239,228,.32); font-size: 13px; cursor: not-allowed; user-select: none;
+}
+.dj-admin-soon-badge {
+    font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; background: rgba(232,195,154,.12);
+    color: rgba(232,195,154,.6); padding: 2px 7px; border-radius: 6px; flex-shrink: 0; margin-inline-start: 8px;
+}
+.dj-admin-sidebar-footer {
+    border-top: 1px solid rgba(232,195,154,.15); padding: 10px; margin-top: 8px;
+}
+.dj-admin-sidebar-footer a, .dj-admin-sidebar-footer button {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px;
+    color: rgba(247,239,228,.55); font-size: 12.5px; transition: background .18s, color .18s;
+}
+.dj-admin-sidebar-footer a:hover, .dj-admin-sidebar-footer button:hover { background: rgba(232,195,154,.1); color: var(--dj-cream); }
+
+/* ----- Topbar ----- */
+.dj-admin-topbar {
+    background: rgba(255,255,255,.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 16px -4px rgba(60,11,23,.1); position: relative; z-index: 20;
+}
+.dj-admin-search {
+    position: relative; display: block;
+}
+.dj-admin-search input {
+    width: 100%; font-size: 13.5px; border-radius: 999px; border: 1.5px solid var(--dj-cream-2);
+    background: var(--dj-cream); padding: 9px 16px; transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.dj-admin-search input:focus {
+    outline: none; border-color: var(--dj-gold-bright); background: #fff;
+    box-shadow: 0 0 0 4px rgba(232,195,154,.25);
+}
+.dj-admin-icon-btn {
+    position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border-radius: 999px; color: var(--dj-maroon); transition: background .18s, color .18s;
+}
+.dj-admin-icon-btn:hover { background: var(--dj-cream); color: var(--dj-maroon-dark); }
+.dj-admin-notif-badge {
+    position: absolute; top: 4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--dj-rose-dust), var(--dj-maroon)); color: #fff;
+    font-size: 10px; line-height: 16px; text-align: center; font-weight: 700; box-shadow: 0 0 0 2px #fff;
+}
+.dj-admin-avatar {
+    width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--dj-maroon), var(--dj-maroon-soft));
+    color: var(--dj-gold); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; box-shadow: 0 0 0 2px rgba(232,195,154,.3);
+}
+.dj-admin-lang-pill {
+    display: inline-flex; align-items: center; gap: 2px; background: var(--dj-cream);
+    border: 1px solid var(--dj-cream-2); border-radius: 999px; padding: 3px; font-size: 11.5px;
+}
+.dj-admin-lang-pill a { padding: 5px 11px; border-radius: 999px; color: var(--dj-rose-dust); font-weight: 600; transition: .18s; }
+.dj-admin-lang-pill a.dj-active { background: var(--dj-maroon); color: var(--dj-gold); }
+.dj-admin-lang-pill a:not(.dj-active):hover { color: var(--dj-maroon); }
+
+.dj-admin-dropdown {
+    background: #fff; border: 1px solid var(--dj-cream-2); border-radius: 16px;
+    box-shadow: var(--dj-shadow); overflow: hidden;
+}
+.dj-admin-dropdown-head {
+    display: flex; align-items: center; justify-content: space-between; padding: 14px 16px;
+    border-bottom: 1px solid var(--dj-cream-2); background: var(--dj-cream);
+}
+.dj-admin-dropdown-head span:first-child { font-weight: 700; font-size: 13.5px; color: var(--dj-maroon-dark); }
+.dj-admin-dropdown-link {
+    display: block; text-align: center; font-size: 12px; font-weight: 700; color: var(--dj-maroon);
+    padding: 12px 16px; border-top: 1px solid var(--dj-cream-2); transition: background .18s;
+}
+.dj-admin-dropdown-link:hover { background: var(--dj-cream); }
+.dj-admin-profile-menu a, .dj-admin-profile-menu button {
+    display: block; width: 100%; text-align: start; padding: 10px 16px; font-size: 13.5px; color: var(--dj-ink);
+    transition: background .18s;
+}
+.dj-admin-profile-menu a:hover, .dj-admin-profile-menu button:hover { background: var(--dj-cream); }
+
+/* ----- Notification items ----- */
+.dj-admin-notif-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; transition: background .18s; }
+.dj-admin-notif-item + .dj-admin-notif-item { border-top: 1px solid var(--dj-cream-2); }
+.dj-admin-notif-item.dj-admin-notif-unread { background: rgba(232,195,154,.12); }
+.dj-admin-notif-icon {
+    width: 34px; height: 34px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 15px;
+}
+.dj-admin-notif-title { font-size: 13px; font-weight: 700; color: var(--dj-ink); }
+.dj-admin-notif-title a:hover { color: var(--dj-maroon); }
+.dj-admin-notif-message { font-size: 12px; color: #8a6b70; margin-top: 1px; }
+.dj-admin-notif-time { font-size: 10.5px; color: #b89aa0; margin-top: 3px; }
+.dj-admin-notif-mark { font-size: 10.5px; color: var(--dj-maroon); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.dj-admin-notif-mark:hover { text-decoration: underline; }
+
+/* ----- Cards ----- */
+.dj-admin-card {
+    background: #fff; border: 1px solid var(--dj-cream-2); border-radius: 16px;
+    box-shadow: 0 10px 28px -20px rgba(60,11,23,.25);
+}
+.dj-admin-card-header {
+    display: flex; align-items: center; justify-content: space-between; padding: 14px 18px;
+    border-bottom: 1px solid var(--dj-cream-2);
+}
+.dj-admin-card-header span:first-child { font-weight: 700; font-size: 14px; color: var(--dj-maroon-dark); }
+
+.dj-admin-stat-card {
+    background: linear-gradient(160deg, #fff 60%, var(--dj-cream) 130%);
+    border: 1px solid var(--dj-cream-2); border-radius: 16px; padding: 16px;
+    box-shadow: 0 10px 28px -20px rgba(60,11,23,.25); transition: transform .18s, box-shadow .18s;
+    position: relative; overflow: hidden;
+}
+.dj-admin-stat-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -18px rgba(60,11,23,.3); }
+.dj-admin-stat-card.dj-admin-warn { border-color: var(--dj-rose-dust); box-shadow: 0 10px 28px -20px rgba(156,80,100,.4); }
+.dj-admin-stat-icon {
+    width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--dj-maroon), var(--dj-maroon-soft)); color: var(--dj-gold);
+    margin-bottom: 10px;
+}
+.dj-admin-stat-card.dj-admin-warn .dj-admin-stat-icon { background: linear-gradient(135deg, var(--dj-rose-dust), var(--dj-maroon)); }
+.dj-admin-stat-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; color: #a67b83; font-weight: 600; }
+.dj-admin-stat-value { font-size: 22px; font-weight: 700; color: var(--dj-ink); margin-top: 3px; }
+.dj-admin-stat-trend { font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px; }
+.dj-admin-stat-trend.dj-up { color: #2f7a4d; }
+.dj-admin-stat-trend.dj-down { color: var(--dj-rose-dust); }
+
+/* ----- Buttons ----- */
+.dj-admin-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 10px;
+    transition: transform .15s, box-shadow .15s, background .15s, color .15s; white-space: nowrap;
+}
+.dj-admin-btn:active { transform: translateY(1px); }
+.dj-admin-btn-primary {
+    background: linear-gradient(135deg, var(--dj-maroon), var(--dj-maroon-dark)); color: var(--dj-gold);
+    box-shadow: 0 10px 24px -12px rgba(60,11,23,.55);
+}
+.dj-admin-btn-primary:hover { box-shadow: 0 14px 28px -12px rgba(60,11,23,.65); }
+.dj-admin-btn-secondary { background: var(--dj-cream); color: var(--dj-maroon-dark); border: 1px solid var(--dj-cream-2); }
+.dj-admin-btn-secondary:hover { background: var(--dj-cream-2); }
+.dj-admin-btn-danger { background: #fdf2f2; color: #b42318; border: 1px solid #f8d7d7; }
+.dj-admin-btn-danger:hover { background: #fbe4e4; }
+.dj-admin-btn-sm { padding: 6px 13px; font-size: 12px; border-radius: 8px; }
+
+.dj-admin-link { color: var(--dj-maroon); font-weight: 600; font-size: 12.5px; transition: color .15s; }
+.dj-admin-link:hover { color: var(--dj-maroon-dark); text-decoration: underline; }
+.dj-admin-link-muted { color: #a67b83; font-weight: 500; font-size: 12.5px; transition: color .15s; }
+.dj-admin-link-muted:hover { color: var(--dj-rose-dust); text-decoration: underline; }
+
+/* ----- Badges ----- */
+.dj-admin-badge {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px; letter-spacing: .2px; white-space: nowrap;
+}
+.dj-admin-badge-gold { background: rgba(232,195,154,.35); color: #8a5a2a; }
+.dj-admin-badge-info { background: #e0f0fb; color: #0d6faa; }
+.dj-admin-badge-success { background: #e3f3e6; color: #237a3f; }
+.dj-admin-badge-danger { background: #fbe4e4; color: #b42318; }
+.dj-admin-badge-neutral { background: var(--dj-cream); color: #8a6b70; }
+
+/* ----- Tables ----- */
+.dj-admin-table-wrap { overflow-x: auto; }
+.dj-admin-table-wrap::-webkit-scrollbar { height: 6px; }
+.dj-admin-table-wrap::-webkit-scrollbar-thumb { background: var(--dj-cream-2); border-radius: 10px; }
+.dj-admin-table { width: 100%; font-size: 13px; border-collapse: collapse; }
+.dj-admin-table thead { background: var(--dj-cream); }
+.dj-admin-table thead th {
+    text-align: start; padding: 12px 16px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px;
+    color: var(--dj-maroon); font-weight: 700; white-space: nowrap;
+}
+.dj-admin-table tbody tr { border-top: 1px solid var(--dj-cream-2); transition: background .15s; }
+.dj-admin-table tbody tr:hover { background: rgba(232,195,154,.09); }
+.dj-admin-table td { padding: 12px 16px; color: var(--dj-ink); vertical-align: middle; }
+.dj-admin-table-empty { padding: 48px 20px; text-align: center; color: #a67b83; font-size: 13.5px; }
+
+/* ----- Forms ----- */
+.dj-admin-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--dj-maroon-dark); margin-bottom: 6px; }
+.dj-admin-input {
+    width: 100%; border-radius: 10px; border: 1.5px solid var(--dj-cream-2); background: #fff;
+    padding: 9px 13px; font-size: 13.5px; color: var(--dj-ink); transition: border-color .18s, box-shadow .18s;
+}
+.dj-admin-input:focus {
+    outline: none; border-color: var(--dj-gold-bright); box-shadow: 0 0 0 3.5px rgba(232,195,154,.3);
+}
+textarea.dj-admin-input { min-height: 100px; resize: vertical; }
+.dj-admin-error { color: #b42318; font-size: 11.5px; margin-top: 4px; }
+.dj-admin-hint { color: #a67b83; font-size: 11.5px; margin-top: 4px; }
+.dj-admin-checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dj-ink); }
+/* @tailwindcss/forms renders the checked state via `background-color: currentColor`
+   (not accent-color), so `color` is what actually needs to change here. */
+.dj-admin-shell input[type="checkbox"] { color: var(--dj-maroon); accent-color: var(--dj-maroon); width: 16px; height: 16px; border-radius: 5px; }
+.dj-admin-shell input[type="checkbox"]:focus { outline: none; box-shadow: 0 0 0 3px rgba(232,195,154,.4); border-color: var(--dj-maroon); }
+
+/* ----- Alerts / empty states ----- */
+.dj-admin-alert { border-radius: 12px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; }
+.dj-admin-alert-success { background: #e3f3e6; color: #237a3f; border: 1px solid #c5e6cc; }
+.dj-admin-alert-error { background: #fbe4e4; color: #b42318; border: 1px solid #f5c6c6; }
+.dj-admin-empty { text-align: center; padding: 56px 20px; color: #a67b83; }
+.dj-admin-empty svg { width: 40px; height: 40px; margin: 0 auto 10px; opacity: .35; }
+
+/* Laravel's default Tailwind pagination view */
+.dj-admin-shell nav[role="navigation"] { font-size: 13px; }
+.dj-admin-shell nav[role="navigation"] span[aria-current="page"] span {
+    background: var(--dj-maroon) !important; border-color: var(--dj-maroon) !important; color: var(--dj-gold) !important;
+}
+.dj-admin-shell nav[role="navigation"] a:hover { color: var(--dj-maroon) !important; }
+
+@media (max-width: 640px) {
+    .dj-admin-stat-value { font-size: 19px; }
+    .dj-admin-card-header { padding: 12px 14px; }
+    .dj-admin-table thead th, .dj-admin-table td { padding: 10px 12px; }
+}

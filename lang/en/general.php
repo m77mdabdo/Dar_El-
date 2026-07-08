@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'save' => 'Save',
+    'view' => 'View',
+    'search' => 'Search',
+    'export' => 'Export',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'name' => 'Name',
+    'email' => 'Email',
+    'date' => 'Date',
+    'status' => 'Status',
+    'actions' => 'Actions',
+    'published' => 'Published',
+    'draft' => 'Draft',
+    'approved' => 'Approved',
+    'pending' => 'Pending',
+    'mark_as_read' => 'Mark as read',
+    'download' => 'Download',
+    'back' => 'Back',
+    'update' => 'Update',
+];

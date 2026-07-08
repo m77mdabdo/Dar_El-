@@ -1,59 +1,62 @@
 @extends('admin.layout')
 
-@section('title', 'Products')
+@section('title', __('products.title'))
 
 @section('content')
     <div class="flex flex-col sm:flex-row sm:justify-between gap-3 mb-4">
         <form method="GET" class="flex flex-wrap gap-2">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." class="w-full sm:w-auto rounded border-stone-300 text-sm">
-            <select name="stock_status" onchange="this.form.submit()" class="rounded border-stone-300 text-sm">
-                <option value="">All stock levels</option>
-                <option value="in_stock" {{ request('stock_status') === 'in_stock' ? 'selected' : '' }}>In Stock</option>
-                <option value="low_stock" {{ request('stock_status') === 'low_stock' ? 'selected' : '' }}>Low Stock</option>
-                <option value="out_of_stock" {{ request('stock_status') === 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('products.search_placeholder') }}" class="dj-admin-input w-full sm:w-auto">
+            <select name="stock_status" onchange="this.form.submit()" class="dj-admin-input w-auto">
+                <option value="">{{ __('products.all_stock_levels') }}</option>
+                <option value="in_stock" {{ request('stock_status') === 'in_stock' ? 'selected' : '' }}>{{ __('products.in_stock') }}</option>
+                <option value="low_stock" {{ request('stock_status') === 'low_stock' ? 'selected' : '' }}>{{ __('products.low_stock') }}</option>
+                <option value="out_of_stock" {{ request('stock_status') === 'out_of_stock' ? 'selected' : '' }}>{{ __('products.out_of_stock') }}</option>
             </select>
-            <button class="bg-stone-800 text-white text-sm px-4 py-2 rounded shrink-0">Search</button>
+            <button class="dj-admin-btn dj-admin-btn-secondary shrink-0">{{ __('general.search') }}</button>
         </form>
-        <a href="{{ route('admin.products.create') }}" class="bg-rose-700 hover:bg-rose-800 text-white text-sm px-4 py-2 rounded text-center">Add Product</a>
+        <a href="{{ route('admin.products.create') }}" class="dj-admin-btn dj-admin-btn-primary text-center">+ {{ __('products.add_product') }}</a>
     </div>
 
-    <div class="bg-white border border-stone-200 rounded-lg overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-stone-50 text-left text-xs uppercase text-stone-500">
+    <div class="dj-admin-card dj-admin-table-wrap">
+        <table class="dj-admin-table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Category</th>
-                    <th class="px-4 py-3">Price</th>
-                    <th class="px-4 py-3">Stock</th>
-                    <th class="px-4 py-3">Active</th>
-                    <th class="px-4 py-3"></th>
+                    <th>{{ __('general.name') }}</th>
+                    <th>{{ __('products.category') }}</th>
+                    <th>{{ __('products.price') }}</th>
+                    <th>{{ __('products.stock') }}</th>
+                    <th>{{ __('general.status') }}</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-stone-100">
-                @foreach ($products as $product)
+            <tbody>
+                @forelse ($products as $product)
                     @php $status = $product->stockStatus((int) $product->total_stock); @endphp
                     <tr>
-                        <td class="px-4 py-3">{{ $product->name_en }}</td>
-                        <td class="px-4 py-3">{{ $product->category->name_en }}</td>
-                        <td class="px-4 py-3">{{ number_format($product->price) }} EGP</td>
-                        <td class="px-4 py-3">
+                        <td class="font-medium text-[var(--dj-ink)]">{{ $product->name_en }}</td>
+                        <td>{{ $product->category->name_en }}</td>
+                        <td>{{ number_format($product->price) }} EGP</td>
+                        <td>
                             {{ $product->total_stock }}
-                            <span class="ms-1 inline-block px-2 py-0.5 rounded-full text-xs font-semibold
-                                {{ $status['status'] === 'out_of_stock' ? 'bg-red-100 text-red-700' : ($status['status'] === 'low_stock' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
+                            <span class="dj-admin-badge {{ $status['status'] === 'out_of_stock' ? 'dj-admin-badge-danger' : ($status['status'] === 'low_stock' ? 'dj-admin-badge-gold' : 'dj-admin-badge-success') }}">
                                 {{ $status['label'] }}
                             </span>
                         </td>
-                        <td class="px-4 py-3">{{ $product->is_active ? 'Yes' : 'No' }}</td>
-                        <td class="px-4 py-3 text-right space-x-2">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="text-rose-700 underline">Edit</a>
-                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="inline" onsubmit="return confirm('Delete this product?')">
+                        <td>
+                            <span class="dj-admin-badge {{ $product->is_active ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">{{ $product->is_active ? __('general.active') : __('general.inactive') }}</span>
+                        </td>
+                        <td class="text-end space-x-3 rtl:space-x-reverse">
+                            <a href="{{ route('admin.products.edit', $product) }}" class="dj-admin-link">{{ __('general.edit') }}</a>
+                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="inline" onsubmit="return confirm('{{ __('products.confirm_delete') }}')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="text-stone-500 underline">Delete</button>
+                                <button class="dj-admin-link-muted">{{ __('general.delete') }}</button>
                             </form>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="6" class="dj-admin-table-empty">{{ __('products.no_products') }}</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

@@ -1,44 +1,46 @@
 @extends('admin.layout')
 
-@section('title', 'Reviews')
+@section('title', __('reviews.title'))
 
 @section('content')
-    <div class="bg-white border border-stone-200 rounded-lg overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-stone-50 text-left text-xs uppercase text-stone-500">
+    <div class="dj-admin-card dj-admin-table-wrap">
+        <table class="dj-admin-table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3">Product</th>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Rating</th>
-                    <th class="px-4 py-3">Comment</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3"></th>
+                    <th>{{ __('reviews.product') }}</th>
+                    <th>{{ __('general.name') }}</th>
+                    <th>{{ __('reviews.rating') }}</th>
+                    <th>{{ __('reviews.comment') }}</th>
+                    <th>{{ __('general.status') }}</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-stone-100">
-                @foreach ($reviews as $review)
+            <tbody>
+                @forelse ($reviews as $review)
                     <tr>
-                        <td class="px-4 py-3">{{ $review->product->name_en }}</td>
-                        <td class="px-4 py-3">{{ $review->name }}</td>
-                        <td class="px-4 py-3">{{ $review->rating }}/5</td>
-                        <td class="px-4 py-3">{{ str($review->comment)->limit(60) }}</td>
-                        <td class="px-4 py-3">{{ $review->is_approved ? 'Approved' : 'Pending' }}</td>
-                        <td class="px-4 py-3 text-right space-x-2">
+                        <td class="font-medium text-[var(--dj-ink)]">{{ $review->product->name_en }}</td>
+                        <td>{{ $review->name }}</td>
+                        <td class="text-[var(--dj-gold-bright)]">{{ str_repeat('★', $review->rating) }}<span class="text-[var(--dj-cream-2)]">{{ str_repeat('★', 5 - $review->rating) }}</span></td>
+                        <td>{{ str($review->comment)->limit(60) }}</td>
+                        <td><span class="dj-admin-badge {{ $review->is_approved ? 'dj-admin-badge-success' : 'dj-admin-badge-gold' }}">{{ $review->is_approved ? __('general.approved') : __('general.pending') }}</span></td>
+                        <td class="text-end space-x-3 rtl:space-x-reverse">
                             @unless ($review->is_approved)
                                 <form method="POST" action="{{ route('admin.reviews.approve', $review) }}" class="inline">
                                     @csrf @method('PATCH')
-                                    <button class="text-green-700 underline">Approve</button>
+                                    <button class="dj-admin-link" style="color:#237a3f;">{{ __('reviews.approve') }}</button>
                                 </form>
                             @endunless
                             @if ($review->is_approved)
                                 <form method="POST" action="{{ route('admin.reviews.reject', $review) }}" class="inline">
                                     @csrf @method('PATCH')
-                                    <button class="text-red-600 underline">Reject</button>
+                                    <button class="dj-admin-link-muted">{{ __('reviews.reject') }}</button>
                                 </form>
                             @endif
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="6" class="dj-admin-table-empty">{{ __('reviews.no_reviews') }}</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

@@ -1,27 +1,29 @@
 @extends('admin.layout')
 
-@section('title', 'Newsletter Subscribers')
+@section('title', __('newsletter.title'))
 
 @section('content')
     <div class="flex justify-end mb-4">
-        <a href="{{ route('admin.newsletter.export') }}" class="bg-stone-800 text-white text-sm px-4 py-2 rounded">Export CSV</a>
+        <a href="{{ route('admin.newsletter.export') }}" class="dj-admin-btn dj-admin-btn-secondary">{{ __('newsletter.export_csv') }}</a>
     </div>
 
-    <div class="bg-white border border-stone-200 rounded-lg overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-stone-50 text-left text-xs uppercase text-stone-500">
+    <div class="dj-admin-card dj-admin-table-wrap">
+        <table class="dj-admin-table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3">Email</th>
-                    <th class="px-4 py-3">Subscribed At</th>
+                    <th>{{ __('general.email') }}</th>
+                    <th>{{ __('newsletter.subscribed_at') }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-stone-100">
-                @foreach ($subscribers as $subscriber)
+            <tbody>
+                @forelse ($subscribers as $subscriber)
                     <tr>
-                        <td class="px-4 py-3">{{ $subscriber->email }}</td>
-                        <td class="px-4 py-3">{{ $subscriber->created_at->format('M j, Y H:i') }}</td>
+                        <td class="font-medium text-[var(--dj-ink)]">{{ $subscriber->email }}</td>
+                        <td>{{ $subscriber->created_at->format('M j, Y H:i') }}</td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="2" class="dj-admin-table-empty">{{ __('newsletter.no_subscribers') }}</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>
