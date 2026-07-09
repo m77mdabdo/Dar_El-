@@ -26,8 +26,8 @@ return [
         'icon' => 'chart-bar',
         'items' => [
             ['label' => 'nav.orders', 'route' => 'admin.orders.index', 'match' => 'admin.orders.*'],
-            ['label' => 'nav.customers', 'route' => null],
-            ['label' => 'nav.carts', 'route' => null],
+            ['label' => 'nav.customers', 'route' => 'admin.customers.index', 'match' => 'admin.customers.*'],
+            ['label' => 'nav.carts', 'route' => 'admin.carts.index', 'match' => 'admin.carts.*'],
         ],
     ],
     [
@@ -65,6 +65,7 @@ return [
         'icon' => 'document',
         'items' => [
             ['label' => 'nav.blog', 'route' => 'admin.blog.index', 'match' => 'admin.blog.*'],
+            ['label' => 'nav.blog_comments', 'route' => 'admin.blog-comments.index', 'match' => 'admin.blog-comments.*'],
             ['label' => 'nav.services', 'route' => null],
             ['label' => 'nav.faq', 'route' => null],
             ['label' => 'nav.testimonials', 'route' => null],

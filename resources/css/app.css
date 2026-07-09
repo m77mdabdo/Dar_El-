@@ -392,6 +392,24 @@ body.dj-en .dj-modal-info h2 { font-family: 'Playfair Display'; }
 .dj-size-opt { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid var(--dj-cream-2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--dj-maroon); transition: .2s; }
 .dj-size-opt.dj-active, .dj-size-opt:hover { border-color: var(--dj-maroon); background: var(--dj-maroon); color: var(--dj-gold); }
 .dj-size-opt.dj-disabled { opacity: .35; pointer-events: none; text-decoration: line-through; }
+.dj-star-picker { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; direction: ltr; }
+.dj-star-picker input { position: absolute; opacity: 0; width: 0; height: 0; }
+.dj-star-picker label { font-size: 30px; line-height: 1; cursor: pointer; color: var(--dj-cream-2); transition: color .15s; }
+.dj-star-picker label:hover, .dj-star-picker label:hover ~ label, .dj-star-picker input:checked ~ label { color: var(--dj-gold-bright); }
+.dj-review-card { border-bottom: 1px solid var(--dj-cream-2); padding: 18px 0; }
+.dj-review-photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.dj-review-photo { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; border: 1px solid var(--dj-cream-2); }
+.dj-review-helpful { font-size: 12.5px; color: #8a6b70; background: none; border: 1px solid var(--dj-cream-2); border-radius: 999px; padding: 4px 12px; margin-top: 8px; transition: .2s; }
+.dj-review-helpful:hover { border-color: var(--dj-maroon); color: var(--dj-maroon); }
+.dj-rating-bar-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #8a6b70; margin-bottom: 6px; }
+.dj-rating-bar-track { flex: 1; height: 8px; border-radius: 999px; background: var(--dj-cream-2); overflow: hidden; }
+.dj-rating-bar-fill { height: 100%; background: var(--dj-gold-bright); border-radius: 999px; }
+.dj-comment-card { display: flex; gap: 12px; background: var(--dj-cream); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.dj-comment-avatar { flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; background: var(--dj-maroon); color: var(--dj-gold); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+.dj-comment-body { flex: 1; min-width: 0; }
+.dj-comment-name { font-weight: 700; font-size: 13.5px; color: var(--dj-maroon); }
+.dj-comment-date { font-size: 11.5px; color: var(--dj-rose-dust); margin-inline-start: 8px; }
+.dj-comment-text { font-size: 13.5px; color: #5a4448; line-height: 1.8; margin-top: 4px; }
 .dj-modal-add { margin-top: auto; background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; font-size: 15px; padding: 16px; border-radius: 12px; width: 100%; }
 .dj-modal-add:disabled { opacity: .5; }
 .dj-modal-close { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,.55); color: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 18px; z-index: 6; }
@@ -698,6 +716,19 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 .dj-login-switch a { color: var(--dj-gold-bright); font-weight: 700; opacity: 1; margin-inline-start: 4px; }
 .dj-login-switch a:hover { text-decoration: underline; }
 
+.dj-login-icon {
+    width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%;
+    background: rgba(232,195,154,.12); border: 1px solid rgba(232,195,154,.35);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: scale(.85); animation: dj-loginIconIn .6s ease forwards .25s;
+}
+.dj-login-icon svg { width: 30px; height: 30px; color: var(--dj-gold); }
+@keyframes dj-loginIconIn { to { opacity: 1; transform: scale(1); } }
+
+.dj-login-note {
+    font-size: 12.5px; line-height: 1.75; color: var(--dj-cream-2); opacity: .8; text-align: center; margin-bottom: 22px;
+}
+
 /* ----- OTP verification page ----- */
 .dj-otp-boxes { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
 .dj-otp-input {
@@ -732,10 +763,18 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
     .dj-otp-input { width: 34px; height: 46px; font-size: 17px; }
     .dj-otp-boxes { gap: 6px; }
 }
+@media (max-width: 340px) {
+    .dj-login-page { padding: 24px 10px; }
+    .dj-login-card { padding: 26px 16px; }
+    .dj-login-heading h1 { font-size: 19px; }
+    .dj-login-icon { width: 56px; height: 56px; }
+    .dj-login-icon svg { width: 26px; height: 26px; }
+}
 @media (prefers-reduced-motion: reduce) {
     .dj-login-bg { animation: none; }
     .dj-login-card { animation: none; opacity: 1; transform: none; }
     .dj-login-submit::after { animation: none; }
+    .dj-login-icon { animation: none; opacity: 1; transform: none; }
 }
 
 /* =========================================================
@@ -1091,6 +1130,11 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
 .dj-admin-btn-danger { background: #fdf2f2; color: #b42318; border: 1px solid #f8d7d7; }
 .dj-admin-btn-danger:hover { background: #fbe4e4; }
 .dj-admin-btn-sm { padding: 6px 13px; font-size: 12px; border-radius: 8px; }
+.dj-admin-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--dj-cream-2); margin-bottom: 20px; }
+.dj-admin-tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: #a67b83; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: .15s; white-space: nowrap; }
+.dj-admin-tab:hover { color: var(--dj-maroon); }
+.dj-admin-tab.dj-active { color: var(--dj-maroon-dark); border-color: var(--dj-maroon); }
+.dj-admin-tab:disabled, .dj-admin-tab.dj-disabled { opacity: .45; cursor: not-allowed; }
 
 .dj-admin-link { color: var(--dj-maroon); font-weight: 600; font-size: 12.5px; transition: color .15s; }
 .dj-admin-link:hover { color: var(--dj-maroon-dark); text-decoration: underline; }
@@ -1108,6 +1152,30 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
 .dj-admin-badge-danger { background: #fbe4e4; color: #b42318; }
 .dj-admin-badge-neutral { background: var(--dj-cream); color: #8a6b70; }
 
+/* ----- Bulk action bar ----- */
+.dj-admin-bulk-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--dj-maroon-dark); color: var(--dj-cream);
+    border-radius: 14px; padding: 12px 18px; margin-bottom: 14px;
+    box-shadow: 0 10px 24px -12px rgba(60,11,23,.4);
+    position: sticky; top: 8px; z-index: 5;
+}
+.dj-admin-bulk-bar > span:first-child { font-size: 13px; font-weight: 600; margin-inline-end: 8px; }
+
+/* ----- Toast notifications ----- */
+.dj-admin-toast-stack {
+    position: fixed; bottom: 20px; inset-inline-end: 20px; z-index: 60;
+    display: flex; flex-direction: column; gap: 10px; max-width: min(360px, calc(100vw - 40px));
+}
+.dj-admin-toast {
+    border-radius: 12px; padding: 12px 16px; font-size: 13px; font-weight: 500;
+    box-shadow: 0 12px 28px -10px rgba(60,11,23,.35);
+    opacity: 0; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease;
+}
+.dj-admin-toast-visible { opacity: 1; transform: translateY(0); }
+.dj-admin-toast-success { background: #e3f3e6; color: #237a3f; border: 1px solid #c5e6cc; }
+.dj-admin-toast-error { background: #fbe4e4; color: #b42318; border: 1px solid #f5c6c6; }
+
 /* ----- Tables ----- */
 .dj-admin-table-wrap { overflow-x: auto; }
 .dj-admin-table-wrap::-webkit-scrollbar { height: 6px; }
@@ -1122,6 +1190,14 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
 .dj-admin-table tbody tr:hover { background: rgba(232,195,154,.09); }
 .dj-admin-table td { padding: 12px 16px; color: var(--dj-ink); vertical-align: middle; }
 .dj-admin-table-empty { padding: 48px 20px; text-align: center; color: #a67b83; font-size: 13.5px; }
+
+/* Large grids (200+ variant rows): scope the scroll to the table itself
+   with a sticky header, and let the browser skip layout/paint for
+   offscreen rows via content-visibility — a "virtual scroll"-equivalent
+   with zero JS and no change to how rows are rendered server-side. */
+.dj-admin-table-wrap[data-large-grid] { max-height: 70vh; overflow-y: auto; }
+.dj-admin-table-wrap[data-large-grid] thead th { position: sticky; top: 0; z-index: 1; }
+.dj-admin-table-wrap[data-large-grid] tbody tr { content-visibility: auto; contain-intrinsic-size: 0 45px; }
 
 /* ----- Forms ----- */
 .dj-admin-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--dj-maroon-dark); margin-bottom: 6px; }

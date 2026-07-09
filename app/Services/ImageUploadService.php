@@ -38,4 +38,25 @@ class ImageUploadService
 
         Storage::disk('public')->delete($path);
     }
+
+    /**
+     * Copy an existing stored image to a new path under the given directory,
+     * returning the new relative path. Used when duplicating records that
+     * reference the same image — copies the actual file so deleting one
+     * copy never orphans the other. External URLs and missing files are
+     * returned unchanged (nothing local to copy).
+     */
+    public function copy(?string $path, string $directory): ?string
+    {
+        if (! $path || Str::startsWith($path, ['http://', 'https://']) || ! Storage::disk('public')->exists($path)) {
+            return $path;
+        }
+
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $newPath = trim($directory, '/').'/'.Str::random(32).($extension ? ".{$extension}" : '');
+
+        Storage::disk('public')->put($newPath, Storage::disk('public')->get($path));
+
+        return $newPath;
+    }
 }

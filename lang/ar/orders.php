@@ -7,6 +7,8 @@ return [
     'order_number' => 'رقم الطلب',
     'customer' => 'العميل',
     'total' => 'الإجمالي',
+    'item' => 'الصنف',
+    'qty' => 'الكمية',
     'payment' => 'الدفع',
     'no_orders' => 'لا توجد طلبات بعد.',
     'view' => 'عرض',
@@ -30,4 +32,7 @@ return [
     'payment_status_paid' => 'مدفوع',
     'payment_status_failed' => 'فشل',
     'payment_status_refunded' => 'مسترد',
+
+    'status_updated' => 'تم تحديث حالة الطلب.',
+    'status_updated_with_restock' => 'تم تحديث حالة الطلب. تم استعادة المخزون لعدد :count صنف/أصناف.',
 ];

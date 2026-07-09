@@ -34,6 +34,15 @@
             </div>
 
             <div class="border-t border-[var(--dj-cream-2)] pt-4">
+                <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.security') }}</h2>
+                <label class="flex items-center gap-2 text-sm text-[var(--dj-ink)]">
+                    <input type="checkbox" name="login_alerts_enabled" value="1" {{ old('login_alerts_enabled', $settings['login_alerts_enabled'] ?? '1') === '1' ? 'checked' : '' }}>
+                    {{ __('settings.login_alerts_enabled') }}
+                </label>
+                <p class="dj-admin-hint">{{ __('settings.login_alerts_enabled_hint') }}</p>
+            </div>
+
+            <div class="border-t border-[var(--dj-cream-2)] pt-4">
                 <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.site_images') }}</h2>
 
                 @php

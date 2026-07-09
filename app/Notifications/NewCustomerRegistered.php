@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\NewCustomerRegisteredMail;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,7 +22,12 @@ class NewCustomerRegistered extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): NewCustomerRegisteredMail
+    {
+        return new NewCustomerRegisteredMail($this->customer, $notifiable);
     }
 
     /**

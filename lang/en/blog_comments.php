@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'title' => 'Blog Comments',
+    'comment' => 'Comment',
+    'no_comments' => 'No comments yet.',
+    'be_first_to_comment' => 'Be the first to comment on this post.',
+    'count_label' => 'comments',
+
+    'write_comment' => 'Write a Comment',
+    'edit_comment' => 'Edit Your Comment',
+    'your_comment' => 'Your Comment',
+    'your_comments' => 'Your Comments',
+    'comment_placeholder' => 'Share your thoughts on this article (5–1000 characters)...',
+    'submit' => 'Submit Comment',
+    'update_comment' => 'Update Comment',
+    'delete_comment' => 'Delete Comment',
+    'confirm_delete' => 'Delete your comment? This cannot be undone.',
+    'login_to_comment' => 'Please log in to leave a comment.',
+    'pending_notice' => 'Your comment is awaiting approval and can still be edited.',
+    'locked_notice' => 'Comments can only be edited while pending.',
+
+    'submitted' => 'Your comment has been submitted and is pending approval.',
+    'updated' => 'Your comment has been updated.',
+    'deleted' => 'Comment deleted.',
+    'approved_status' => 'Comment approved.',
+    'rejected_status' => 'Comment rejected.',
+    'reject_reason_placeholder' => 'Reason for rejection (optional)',
+    'rejection_reason_label' => 'Reason',
+
+    'status_pending' => 'Pending',
+    'status_approved' => 'Approved',
+    'status_rejected' => 'Rejected',
+
+    'commenter' => 'Commenter',
+    'blog_post' => 'Blog Post',
+    'all_statuses' => 'All statuses',
+    'all_posts' => 'All posts',
+    'search_placeholder' => 'Search commenter, post, or comment...',
+    'date_from' => 'From',
+    'date_to' => 'To',
+    'ip_address' => 'IP Address',
+    'user_agent' => 'User Agent',
+
+    'notification_subject' => 'Your comment has been reviewed',
+    'notification_status_line' => 'Your comment on :post is now :status.',
+    'notification_rejection_reason' => 'Reason: :reason',
+
+    'chart_by_status' => 'Comments by Status',
+    'chart_per_day' => 'Comments (Last 14 Days)',
+    'chart_top_commented' => 'Most Commented Posts',
+    'stat_total' => 'Total Comments',
+    'stat_pending' => 'Pending',
+    'stat_approved' => 'Approved',
+    'stat_rejected' => 'Rejected',
+    'stat_today' => 'Today',
+    'stat_this_month' => 'This Month',
+];

@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendLoginAlertNotification;
 use App\Services\CartService;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(Login::class, SendLoginAlertNotification::class);
+
         View::composer('layouts.storefront', function ($view) {
             $view->with('cartCount', app(CartService::class)->count());
             $view->with('wishlistCount', auth()->check() ? auth()->user()->wishlists()->count() : 0);

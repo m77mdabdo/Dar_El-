@@ -69,8 +69,8 @@ class OrderController extends Controller
         }
 
         return back()->with('status', $restoredCount !== null
-            ? "Order status updated. Stock restored for {$restoredCount} item(s)."
-            : 'Order status updated.');
+            ? __('orders.status_updated_with_restock', ['count' => $restoredCount])
+            : __('orders.status_updated'));
     }
 
     /**

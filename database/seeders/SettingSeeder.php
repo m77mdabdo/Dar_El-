@@ -19,6 +19,7 @@ class SettingSeeder extends Seeder
             'default_shipping_fee' => '75',
             'facebook_url' => '',
             'instagram_url' => '',
+            'login_alerts_enabled' => '1',
         ];
 
         foreach ($defaults as $key => $value) {

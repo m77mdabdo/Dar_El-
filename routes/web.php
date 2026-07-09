@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Account\AddressController;
+use App\Http\Controllers\Account\BlogCommentController as AccountBlogCommentController;
 use App\Http\Controllers\Account\OrderController as AccountOrderController;
+use App\Http\Controllers\Account\ReviewController as AccountReviewController;
+use App\Http\Controllers\BlogCommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -10,6 +13,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +33,8 @@ Route::get('/contact', [ContactController::class, 'show'])->name('contact.show')
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store');
+
+Route::post('/reviews/{review}/helpful', [ReviewController::class, 'markHelpful'])->name('reviews.helpful');
 
 Route::get('/lang/{locale}', function (string $locale) {
     if (in_array($locale, ['en', 'ar'], true)) {
@@ -68,12 +74,23 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{product:slug}', [WishlistController::class, 'destroy'])->name('remove');
         Route::post('/{product:slug}/move-to-cart', [WishlistController::class, 'moveToCart'])->name('move');
     });
+
+    Route::post('/shop/{product:slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::patch('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    Route::post('/blog/{post:slug}/comments', [BlogCommentController::class, 'store'])->name('blog.comments.store');
+    Route::patch('/blog-comments/{comment}', [BlogCommentController::class, 'update'])->name('blog.comments.update');
+    Route::delete('/blog-comments/{comment}', [BlogCommentController::class, 'destroy'])->name('blog.comments.destroy');
 });
 
 Route::prefix('account')->name('account.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [AccountOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AccountOrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/invoice', [AccountOrderController::class, 'invoice'])->name('orders.invoice');
+
+    Route::get('/reviews', [AccountReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/blog-comments', [AccountBlogCommentController::class, 'index'])->name('blog-comments.index');
 
     Route::resource('addresses', AddressController::class)->except(['show']);
 });

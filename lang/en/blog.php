@@ -20,4 +20,8 @@ return [
     'cover_image' => 'Cover Image',
     'cover_image_hint' => 'JPG, PNG, or WEBP. Max 4MB. Uploading a new image replaces the current one.',
     'save_post' => 'Save Post',
+
+    'created' => 'Post created.',
+    'updated' => 'Post updated.',
+    'deleted' => 'Post deleted.',
 ];

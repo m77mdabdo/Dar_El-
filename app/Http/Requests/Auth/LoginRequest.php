@@ -50,6 +50,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (Auth::user()->isDisabled()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.disabled'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

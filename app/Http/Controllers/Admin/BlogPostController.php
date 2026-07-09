@@ -49,7 +49,7 @@ class BlogPostController extends Controller
 
         ActivityLog::record('created', $post, "Created blog post {$post->title_en}");
 
-        return redirect()->route('admin.blog.index')->with('status', 'Post created.');
+        return redirect()->route('admin.blog.index')->with('status', __('blog.created'));
     }
 
     public function edit(BlogPost $post)
@@ -73,7 +73,7 @@ class BlogPostController extends Controller
 
         ActivityLog::record('updated', $post, "Updated blog post {$post->title_en}");
 
-        return redirect()->route('admin.blog.index')->with('status', 'Post updated.');
+        return redirect()->route('admin.blog.index')->with('status', __('blog.updated'));
     }
 
     public function destroy(BlogPost $post): RedirectResponse
@@ -85,7 +85,7 @@ class BlogPostController extends Controller
 
         ActivityLog::record('deleted', $post, "Deleted blog post {$title}");
 
-        return redirect()->route('admin.blog.index')->with('status', 'Post deleted.');
+        return redirect()->route('admin.blog.index')->with('status', __('blog.deleted'));
     }
 
     protected function validated(Request $request): array

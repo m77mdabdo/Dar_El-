@@ -19,6 +19,6 @@ class ContactMessageController extends Controller
     {
         $contactMessage->update(['is_read' => true]);
 
-        return back()->with('status', 'Marked as read.');
+        return back()->with('status', __('messages.marked_read'));
     }
 }

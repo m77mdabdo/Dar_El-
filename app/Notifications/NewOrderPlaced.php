@@ -2,10 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Mail\NewOrderPlacedMail;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewOrderPlaced extends Notification implements ShouldQueue
@@ -25,14 +25,9 @@ class NewOrderPlaced extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): NewOrderPlacedMail
     {
-        return (new MailMessage)
-            ->subject(__('New order :number', ['number' => $this->order->order_number]))
-            ->line(__('A new order has been placed.'))
-            ->line(__('Customer: :name', ['name' => $this->order->customer_name]))
-            ->line(__('Total: :total EGP', ['total' => number_format($this->order->total)]))
-            ->action(__('View Order'), route('admin.orders.show', $this->order));
+        return new NewOrderPlacedMail($this->order, $notifiable);
     }
 
     /**
