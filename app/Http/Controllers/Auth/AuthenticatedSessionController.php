@@ -51,7 +51,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('otp.notice');
         }
 
-        return redirect()->intended($user->postLoginRedirectRoute());
+        return $user->redirectResponseAfterAuth();
     }
 
     /**

@@ -6,7 +6,7 @@
 @endphp
 
 @section('content')
-    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family:sans-serif;">
+    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 26px;">
         {{ __('emails.admin_new_blog_comment_intro', ['post' => $comment->blogPost->title_en]) }}
     </p>
 

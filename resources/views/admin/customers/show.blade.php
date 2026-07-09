@@ -16,12 +16,15 @@
                         <h2 class="font-semibold text-lg text-[var(--dj-maroon-dark)]">{{ $customer->name }}</h2>
                         <p class="text-sm text-[var(--dj-rose-dust)]">{{ $customer->email }} &middot; {{ $customer->phone }}</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 flex-wrap justify-end">
                         <span class="dj-admin-badge {{ $customer->email_verified_at ? 'dj-admin-badge-success' : 'dj-admin-badge-gold' }}">
                             {{ $customer->email_verified_at ? __('customers.verified') : __('customers.unverified') }}
                         </span>
                         <span class="dj-admin-badge {{ $customer->isDisabled() ? 'dj-admin-badge-danger' : 'dj-admin-badge-success' }}">
                             {{ $customer->isDisabled() ? __('customers.disabled') : __('customers.enabled') }}
+                        </span>
+                        <span class="dj-admin-badge dj-admin-badge-info">
+                            {{ $customer->registrationMethodLabel() }}
                         </span>
                     </div>
                 </div>
@@ -146,6 +149,28 @@
         </div>
 
         <div class="space-y-4">
+            {{-- Login History --}}
+            <div class="dj-admin-card p-4 sm:p-6">
+                <h3 class="font-semibold text-[var(--dj-maroon-dark)] mb-3">{{ __('customers.login_history') }}</h3>
+                <div class="space-y-3">
+                    @forelse ($loginHistory as $entry)
+                        <div class="border-t border-[var(--dj-cream-2)] pt-2 text-xs">
+                            <p class="text-[var(--dj-ink)] font-medium">
+                                {{ \Illuminate\Support\Carbon::parse($entry->data['time'])->format('M j, Y H:i') }}
+                                @if ($entry->data['provider'] ?? null)
+                                    <span class="dj-admin-badge dj-admin-badge-info ms-1">{{ ucfirst($entry->data['provider']) }}</span>
+                                @endif
+                            </p>
+                            <p class="text-[var(--dj-rose-dust)] mt-0.5">
+                                {{ $entry->data['browser'] }} &middot; {{ $entry->data['device'] }} &middot; {{ $entry->data['ip'] }}
+                            </p>
+                        </div>
+                    @empty
+                        <p class="dj-admin-table-empty">{{ __('customers.no_login_history') }}</p>
+                    @endforelse
+                </div>
+            </div>
+
             {{-- Notes --}}
             <div class="dj-admin-card p-4 sm:p-6">
                 <h3 class="font-semibold text-[var(--dj-maroon-dark)] mb-3">{{ __('customers.notes') }}</h3>

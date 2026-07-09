@@ -22,6 +22,7 @@ class LoginAlertMail extends Mailable implements ShouldQueue
         public string $device,
         public string $browser,
         public Carbon $time,
+        public ?string $provider = null,
     ) {
         //
     }
@@ -44,6 +45,7 @@ class LoginAlertMail extends Mailable implements ShouldQueue
                 'device' => $this->device,
                 'browser' => $this->browser,
                 'time' => $this->time,
+                'provider' => $this->provider,
             ],
         );
     }

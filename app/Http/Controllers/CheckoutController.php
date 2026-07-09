@@ -82,6 +82,7 @@ class CheckoutController extends Controller
                     'city' => $validated['city'],
                     'address' => $validated['address'],
                     'notes' => $validated['notes'] ?? null,
+                    'locale' => app()->getLocale(),
                     'subtotal' => $subtotal,
                     'shipping_fee' => $shippingMethod->fee,
                     'coupon_code' => $coupon?->code,

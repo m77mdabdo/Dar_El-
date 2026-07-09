@@ -7,6 +7,7 @@ use App\Models\CartReminder;
 use App\Models\User;
 use App\Notifications\AbandonedCartReminderNotification;
 use App\Notifications\CartReminderFailedAdminNotification;
+use App\Support\CartReminderConfig;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -54,7 +55,7 @@ class SendAbandonedCartReminderJob implements ShouldQueue
                 return;
             }
 
-            if ($this->cart->reminder_count >= config('cart.max_reminders')) {
+            if ($this->cart->reminder_count >= CartReminderConfig::maxReminders()) {
                 Log::info('Cart reminder job skipped: reminder cap reached', ['cart_id' => $this->cart->id]);
 
                 return;
@@ -70,6 +71,7 @@ class SendAbandonedCartReminderJob implements ShouldQueue
                 'cart_id' => $this->cart->id,
                 'user_id' => $this->cart->user_id,
                 'channel' => 'mail',
+                'source' => $this->force ? 'manual' : 'automatic',
                 'status' => 'failed',
                 'error_message' => 'Customer has no email address on file.',
             ]);
@@ -100,6 +102,7 @@ class SendAbandonedCartReminderJob implements ShouldQueue
                 'cart_id' => $this->cart->id,
                 'user_id' => $this->cart->user_id,
                 'channel' => 'mail',
+                'source' => $this->force ? 'manual' : 'automatic',
                 'sent_at' => now(),
                 'status' => 'sent',
             ]);
@@ -113,6 +116,7 @@ class SendAbandonedCartReminderJob implements ShouldQueue
                 'cart_id' => $this->cart->id,
                 'user_id' => $this->cart->user_id,
                 'channel' => 'mail',
+                'source' => $this->force ? 'manual' : 'automatic',
                 'status' => 'failed',
                 'error_message' => $e->getMessage(),
             ]);

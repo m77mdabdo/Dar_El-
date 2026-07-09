@@ -95,6 +95,7 @@
                                 <tr>
                                     <th>{{ __('general.date') }}</th>
                                     <th>{{ __('carts.channel_mail') }} / {{ __('carts.channel_database') }}</th>
+                                    <th></th>
                                     <th>{{ __('general.status') }}</th>
                                     <th></th>
                                 </tr>
@@ -104,6 +105,9 @@
                                     <tr>
                                         <td>{{ $reminder->sent_at?->format('M j, Y H:i') ?? $reminder->created_at->format('M j, Y H:i') }}</td>
                                         <td>{{ __('carts.channel_'.$reminder->channel) }}</td>
+                                        <td>
+                                            <span class="dj-admin-badge {{ $reminder->source === 'manual' ? 'dj-admin-badge-gold' : 'dj-admin-badge-info' }}">{{ __('carts.source_'.$reminder->source) }}</span>
+                                        </td>
                                         <td>
                                             <span class="dj-admin-badge {{ $reminder->status === 'sent' ? 'dj-admin-badge-success' : 'dj-admin-badge-danger' }}">{{ __('carts.reminder_status_'.$reminder->status) }}</span>
                                             @if ($reminder->status === 'failed' && $reminder->error_message)
@@ -132,6 +136,10 @@
                 <div class="flex justify-between text-sm"><span class="text-[var(--dj-rose-dust)]">{{ __('carts.reminder_count') }}</span><span class="font-medium">{{ $cart->reminder_count }}</span></div>
                 @if ($cart->last_reminder_sent_at)
                     <div class="flex justify-between text-sm"><span class="text-[var(--dj-rose-dust)]">{{ __('carts.last_reminder') }}</span><span class="font-medium">{{ $cart->last_reminder_sent_at->format('M j, Y H:i') }}</span></div>
+                @endif
+                @php $djNextReminder = $cart->nextEligibleReminderAt(); @endphp
+                @if ($djNextReminder)
+                    <div class="flex justify-between text-sm"><span class="text-[var(--dj-rose-dust)]">{{ __('carts.next_reminder') }}</span><span class="font-medium">{{ $djNextReminder->isPast() ? __('general.now') : $djNextReminder->format('M j, Y H:i') }}</span></div>
                 @endif
 
                 @if ($cart->order)

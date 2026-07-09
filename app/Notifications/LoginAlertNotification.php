@@ -17,6 +17,7 @@ class LoginAlertNotification extends Notification implements ShouldQueue
         public string $device,
         public string $browser,
         public Carbon $time,
+        public ?string $provider = null,
     ) {
         //
     }
@@ -31,7 +32,7 @@ class LoginAlertNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): LoginAlertMail
     {
-        return new LoginAlertMail($notifiable, $this->ip, $this->device, $this->browser, $this->time);
+        return new LoginAlertMail($notifiable, $this->ip, $this->device, $this->browser, $this->time, $this->provider);
     }
 
     /**
@@ -45,6 +46,7 @@ class LoginAlertNotification extends Notification implements ShouldQueue
             'device' => $this->device,
             'browser' => $this->browser,
             'time' => $this->time->toIso8601String(),
+            'provider' => $this->provider,
         ];
     }
 }

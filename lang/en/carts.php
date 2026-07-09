@@ -17,7 +17,10 @@ return [
     'abandoned_duration' => 'Abandoned Duration',
     'reminder_count' => 'Reminder Count',
     'last_reminder' => 'Last Reminder',
+    'next_reminder' => 'Next Reminder',
     'reminder_history' => 'Reminder History',
+    'source_manual' => 'Manual',
+    'source_automatic' => 'Automatic',
 
     'status_active' => 'Active',
     'status_abandoned' => 'Abandoned',

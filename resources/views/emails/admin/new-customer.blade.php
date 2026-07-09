@@ -6,22 +6,18 @@
 @endphp
 
 @section('content')
-    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family:sans-serif;">
+    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 26px;">
         {{ __('emails.admin_new_customer_intro', ['name' => $customer->name]) }}
     </p>
 
-    <table style="width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px; font-family:sans-serif;">
-        <tr>
-            <td style="padding:4px 0; color:#9C5064; width:40%;">{{ __('emails.admin_new_customer_email') }}</td>
-            <td style="padding:4px 0; color:#2A1015;">{{ $customer->email }}</td>
-        </tr>
-        @if ($customer->phone)
-            <tr>
-                <td style="padding:4px 0; color:#9C5064;">{{ __('emails.admin_new_customer_phone') }}</td>
-                <td style="padding:4px 0; color:#2A1015;">{{ $customer->phone }}</td>
-            </tr>
-        @endif
-    </table>
+    @include('emails.partials.info-card', [
+        'djIcon' => 'user',
+        'djTitle' => __('emails.admin_customer_details_title'),
+        'djRows' => array_filter([
+            ['label' => __('emails.admin_new_customer_email'), 'value' => $customer->email],
+            $customer->phone ? ['label' => __('emails.admin_new_customer_phone'), 'value' => $customer->phone] : null,
+        ]),
+    ])
 
     @include('emails.partials.button', ['href' => route('admin.customers.show', $customer), 'label' => __('emails.admin_new_customer_button')])
 @endsection

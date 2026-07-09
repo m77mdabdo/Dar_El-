@@ -65,9 +65,30 @@ class PasswordResetTest extends TestCase
 
             $response
                 ->assertSessionHasNoErrors()
-                ->assertRedirect(route('login'));
+                ->assertRedirect(route('password.reset.success'));
 
             return true;
         });
+    }
+
+    public function test_reset_password_success_screen_can_be_rendered(): void
+    {
+        $response = $this->get('/reset-password-success');
+
+        $response->assertStatus(200);
+        $response->assertSee(route('login'), false);
+    }
+
+    public function test_password_reset_email_uses_the_branded_template_not_laravels_default(): void
+    {
+        app()->setLocale('en');
+
+        $user = User::factory()->create(['name' => 'Layla Hassan']);
+
+        $html = (new ResetPassword('sample-token'))->toMail($user)->render();
+
+        $this->assertStringContainsString('Dar El-Jamila', $html);
+        $this->assertStringContainsString(__('emails.password_reset_button'), $html);
+        $this->assertStringNotContainsString('You are receiving this email because we received a password reset request', $html);
     }
 }

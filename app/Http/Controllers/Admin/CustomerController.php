@@ -7,6 +7,7 @@ use App\Jobs\SendAbandonedCartReminderJob;
 use App\Models\ActivityLog;
 use App\Models\CustomerNote;
 use App\Models\User;
+use App\Notifications\LoginAlertNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -61,8 +62,13 @@ class CustomerController extends Controller
         $currentCart = $customer->carts()->open()->with('items')->latest()->first();
         $stats['cart_items_count'] = $currentCart?->items_count ?? 0;
         $wishlist = $customer->wishlists()->with('product')->latest()->take(8)->get();
+        $loginHistory = $customer->notifications()
+            ->where('type', LoginAlertNotification::class)
+            ->latest()
+            ->take(8)
+            ->get();
 
-        return view('admin.customers.show', compact('customer', 'stats', 'recentOrders', 'currentCart', 'wishlist'));
+        return view('admin.customers.show', compact('customer', 'stats', 'recentOrders', 'currentCart', 'wishlist', 'loginHistory'));
     }
 
     public function orders(User $customer)

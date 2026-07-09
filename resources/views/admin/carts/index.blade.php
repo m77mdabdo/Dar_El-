@@ -57,6 +57,8 @@
                         <th>{{ __('carts.last_updated') }}</th>
                         <th>{{ __('carts.abandoned_duration') }}</th>
                         <th>{{ __('carts.reminder_count') }}</th>
+                        <th>{{ __('carts.last_reminder') }}</th>
+                        <th>{{ __('carts.next_reminder') }}</th>
                         <th>{{ __('general.status') }}</th>
                         <th></th>
                     </tr>
@@ -84,6 +86,11 @@
                             <td>{{ $cart->last_activity_at->format('M j, Y H:i') }}</td>
                             <td>{{ $cart->abandonedDuration() ?? '-' }}</td>
                             <td>{{ $cart->reminder_count }}</td>
+                            <td>{{ $cart->last_reminder_sent_at?->format('M j, Y H:i') ?? '-' }}</td>
+                            <td>
+                                @php $djCartNextReminder = $cart->nextEligibleReminderAt(); @endphp
+                                {{ $djCartNextReminder ? ($djCartNextReminder->isPast() ? __('general.now') : $djCartNextReminder->format('M j, Y H:i')) : '-' }}
+                            </td>
                             <td><span class="dj-admin-badge {{ $djCartBadge }}">{{ __('carts.status_'.$cart->status) }}</span></td>
                             <td class="text-end space-x-3 rtl:space-x-reverse">
                                 <a href="{{ route('admin.carts.show', $cart) }}" class="dj-admin-link">{{ __('general.view') }}</a>
@@ -96,7 +103,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="dj-admin-table-empty">{{ __('carts.no_carts_found') }}</td></tr>
+                        <tr><td colspan="11" class="dj-admin-table-empty">{{ __('carts.no_carts_found') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

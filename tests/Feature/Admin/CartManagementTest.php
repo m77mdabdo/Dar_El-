@@ -117,6 +117,21 @@ class CartManagementTest extends TestCase
         $this->assertSame('abandoned', $cart->status);
         $this->assertSame(1, $cart->reminder_count);
         $this->assertSame(1, CartReminder::where('cart_id', $cart->id)->count());
+        $this->assertSame('manual', CartReminder::where('cart_id', $cart->id)->first()->source);
+    }
+
+    public function test_show_page_displays_reminder_source_and_next_reminder(): void
+    {
+        $admin = $this->admin();
+        $customer = $this->customer();
+        $cart = $this->cartWithItem($customer, ['status' => 'active']);
+
+        $this->actingAs($admin)->post(route('admin.carts.sendReminder', $cart))->assertRedirect();
+
+        $response = $this->actingAs($admin)->get(route('admin.carts.show', $cart));
+
+        $response->assertOk();
+        $response->assertSee(__('carts.source_manual'));
     }
 
     public function test_cannot_remind_a_converted_cart(): void

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\User;
 use App\Notifications\CartAbandonedAdminNotification;
+use App\Support\CartReminderConfig;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Notification;
 
@@ -19,7 +20,7 @@ class AbandonedCartReminderService
      */
     public function transitionAbandonedCarts(): Collection
     {
-        $threshold = now()->subMinutes(config('cart.abandoned_after_minutes'));
+        $threshold = now()->subMinutes(CartReminderConfig::firstDelayMinutes());
 
         $candidates = Cart::where('status', 'active')
             ->where('items_count', '>', 0)

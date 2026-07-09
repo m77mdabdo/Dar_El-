@@ -72,6 +72,9 @@ return [
     'no_recent_orders' => 'لا توجد طلبات بعد.',
     'no_current_cart' => 'لا توجد عناصر في السلة حاليًا.',
     'no_wishlist_items' => 'لا توجد عناصر في قائمة الرغبات.',
+    'login_history' => 'سجل تسجيل الدخول',
+    'no_login_history' => 'لا يوجد سجل تسجيل دخول بعد.',
+    'registration_method' => 'طريقة التسجيل',
 
     'note_added' => 'تمت إضافة الملاحظة.',
     'customer_disabled' => 'تم تعطيل العميل.',
