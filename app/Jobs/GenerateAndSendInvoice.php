@@ -8,7 +8,7 @@ use App\Models\Order;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\InvoiceGenerationFailedAdminNotification;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\InvoicePdfRenderer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\App;
@@ -71,14 +71,15 @@ class GenerateAndSendInvoice implements ShouldQueue
             $previousLocale = App::getLocale();
             App::setLocale($locale);
 
-            $pdf = Pdf::loadView('invoices.pdf', [
+            $pdf = app(InvoicePdfRenderer::class)->render('invoices.pdf', [
                 'order' => $this->order,
                 'invoiceNumber' => $invoiceNumber,
                 'locale' => $locale,
                 'isRtl' => $locale === 'ar',
                 'djSupportEmail' => Setting::get('support_email'),
+                'djWhatsapp' => Setting::get('whatsapp_number'),
             ]);
-            Storage::disk('local')->put($path, $pdf->output());
+            Storage::disk('local')->put($path, $pdf);
 
             App::setLocale($previousLocale);
 
