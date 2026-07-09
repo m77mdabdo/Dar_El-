@@ -20,7 +20,7 @@ class OtpVerificationController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended($user->postLoginRedirectRoute());
+            return $user->redirectResponseAfterAuth();
         }
 
         return view('auth.verify-otp', [
@@ -41,7 +41,7 @@ class OtpVerificationController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended($user->postLoginRedirectRoute());
+            return $user->redirectResponseAfterAuth();
         }
 
         if (! $this->otp->verify($user, $request->input('otp'))) {
@@ -52,7 +52,7 @@ class OtpVerificationController extends Controller
             ]);
         }
 
-        return redirect()->intended($user->postLoginRedirectRoute())
+        return $user->redirectResponseAfterAuth()
             ->with('status', __('Your account has been verified. Welcome to Dar El-Jamila!'));
     }
 
@@ -64,7 +64,7 @@ class OtpVerificationController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended($user->postLoginRedirectRoute());
+            return $user->redirectResponseAfterAuth();
         }
 
         if (! $this->otp->canResend($user)) {

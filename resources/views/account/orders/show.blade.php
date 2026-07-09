@@ -6,18 +6,30 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <a href="{{ route('account.orders.index') }}" class="text-sm text-rose-700 underline">&larr; {{ __('My Orders') }}</a>
 
-        <div class="flex items-center justify-between mt-4 mb-8">
-            <h1 class="font-serif text-3xl">{{ $order->order_number }}</h1>
-            <a href="{{ route('account.orders.invoice', $order) }}" class="bg-stone-800 text-white text-sm px-4 py-2 rounded">{{ __('Download Invoice') }}</a>
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-4 mb-8">
+            <div>
+                <h1 class="font-serif text-3xl">{{ $order->order_number }}</h1>
+                <p class="text-sm text-stone-500 mt-1">{{ $order->created_at->format('F j, Y') }} &middot; <span class="font-medium text-stone-700">{{ __('orders.status_'.$order->status) }}</span></p>
+            </div>
+            <a href="{{ route('account.orders.invoice', $order) }}" class="bg-stone-800 text-white text-sm px-4 py-2 rounded">{{ __('orders.download_invoice') }}</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="md:col-span-2 space-y-6">
                 <div class="bg-white border border-stone-200 rounded-lg divide-y divide-stone-200">
                     @foreach ($order->items as $item)
-                        <div class="p-4 flex justify-between text-sm">
-                            <span>{{ $item->product_name }} ({{ $item->size ?? '-' }}) &times; {{ $item->quantity }}</span>
-                            <span>{{ number_format($item->price * $item->quantity) }} EGP</span>
+                        <div class="p-4 flex items-center gap-4 text-sm">
+                            @if ($item->product?->cover_image_src)
+                                <img src="{{ $item->product->cover_image_src }}" alt="" class="w-14 h-14 rounded-lg object-cover border border-stone-200 shrink-0">
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium truncate">{{ $item->product_name }}</p>
+                                <p class="text-stone-500">
+                                    @if ($item->size){{ __('orders.item_size', ['size' => $item->size]) }} &middot; @endif
+                                    {{ __('orders.item_qty', ['qty' => $item->quantity]) }}
+                                </p>
+                            </div>
+                            <span class="font-medium shrink-0">{{ number_format($item->price * $item->quantity) }} EGP</span>
                         </div>
                     @endforeach
                 </div>
@@ -41,6 +53,10 @@
                     <p>{{ $order->address }}</p>
                     <p>{{ $order->city }}, {{ $order->governorate }}</p>
                     <p class="mt-2 text-stone-500">{{ $order->customer_phone }}</p>
+                </div>
+                <div class="bg-white border border-stone-200 rounded-lg p-4">
+                    <h2 class="font-medium mb-2">{{ __('orders.payment') }}</h2>
+                    <p>{{ $order->payment_method === 'cod' ? __('emails.order_payment_method_cod') : $order->payment_method }}</p>
                 </div>
                 <div class="bg-white border border-stone-200 rounded-lg p-4 space-y-1">
                     <div class="flex justify-between"><span>{{ __('Subtotal') }}</span><span>{{ number_format($order->subtotal) }} EGP</span></div>

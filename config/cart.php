@@ -8,9 +8,9 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'abandoned_after_minutes' => env('CART_ABANDONED_AFTER_MINUTES', 120),
+    'abandoned_after_minutes' => env('CART_ABANDONED_AFTER_MINUTES', 60),
 
-    'reminder_interval_hours' => env('CART_REMINDER_INTERVAL_HOURS', 2),
+    'reminder_interval_hours' => env('CART_REMINDER_INTERVAL_HOURS', 4),
 
     'max_reminders' => env('CART_MAX_REMINDERS', 3),
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CartReminder extends Model
 {
-    protected $fillable = ['cart_id', 'user_id', 'channel', 'sent_at', 'status', 'error_message'];
+    protected $fillable = ['cart_id', 'user_id', 'channel', 'source', 'sent_at', 'status', 'error_message'];
 
     protected function casts(): array
     {

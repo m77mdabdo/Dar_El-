@@ -6,16 +6,16 @@
 @endphp
 
 @section('content')
-    <h2 style="font-size:18px; color:#601526; margin-top:0; font-family:sans-serif;">
+    <h2 style="font-size:20px; color:#601526; margin:0 0 4px; font-family: Georgia, 'Times New Roman', serif; text-align:center;">
         {{ __('emails.review_rejected_greeting', ['name' => $review->user->name]) }}
     </h2>
 
-    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family:sans-serif;">
+    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 22px;">
         {{ __('emails.review_rejected_intro', ['product' => $review->product->name_en]) }}
     </p>
 
     @if ($review->rejection_reason)
-        <p style="font-size:13.5px; line-height:1.7; color:#9C5064; background:#F7EFE4; border-radius:8px; padding:12px 16px; font-family:sans-serif;">
+        <p style="font-size:13.5px; line-height:1.7; color:#9C5064; background:#F7EFE4; border-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}:3px solid #601526; border-radius:10px; padding:14px 18px; margin:0 0 22px; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
             {{ __('emails.review_rejected_reason', ['reason' => $review->rejection_reason]) }}
         </p>
     @endif

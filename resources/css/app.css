@@ -642,13 +642,16 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 }
 .dj-login-page.dj-en .dj-field-label { left: auto; right: 16px; }
 .dj-field-toggle {
-    position: absolute; top: 15px; left: 14px; width: 22px; height: 22px; color: var(--dj-cream-2);
+    /* Deliberately the OPPOSITE side from .dj-field-icon (which sits at
+       left:16px here) so the lock icon and the show/hide eye icon never
+       overlap — the base .dj-field input padding already reserves 46px
+       on this side (originally just symmetric breathing room), which is
+       plenty of room for the toggle without any extra padding override. */
+    position: absolute; top: 15px; right: 14px; width: 22px; height: 22px; color: var(--dj-cream-2);
     opacity: .75; transition: opacity .2s, color .2s; background: transparent;
 }
 .dj-field-toggle:hover { opacity: 1; color: var(--dj-gold); }
-.dj-login-page.dj-en .dj-field-toggle { left: auto; right: 14px; }
-.dj-login-page.dj-en .dj-field.dj-has-toggle input { padding-right: 44px; }
-.dj-field.dj-has-toggle input { padding-left: 44px; }
+.dj-login-page.dj-en .dj-field-toggle { right: auto; left: 14px; }
 .dj-field-error { color: #f0a8a8; font-size: 12px; margin-top: 6px; }
 
 .dj-login-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
@@ -716,6 +719,30 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 .dj-login-switch a { color: var(--dj-gold-bright); font-weight: 700; opacity: 1; margin-inline-start: 4px; }
 .dj-login-switch a:hover { text-decoration: underline; }
 
+/* ----- Social login (Google, etc.) ----- */
+.dj-login-divider {
+    display: flex; align-items: center; gap: 14px; margin: 22px 0 18px;
+    color: var(--dj-cream-2); opacity: .55; font-size: 11.5px; letter-spacing: .12em;
+}
+.dj-login-divider span { text-transform: uppercase; white-space: nowrap; }
+.dj-login-divider::before, .dj-login-divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(232,195,154,.25);
+}
+
+.dj-google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+    padding: 13px; border-radius: 14px; background: #fff; color: #3c4043; font-size: 14.5px;
+    font-weight: 600; font-family: inherit; text-decoration: none; border: 1px solid rgba(0,0,0,.05);
+    box-shadow: 0 12px 26px -12px rgba(0,0,0,.5); transition: transform .2s ease, box-shadow .2s ease;
+}
+.dj-google-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgba(0,0,0,.55); color: #3c4043; }
+.dj-google-btn:active { transform: translateY(0); }
+.dj-google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+@media (max-width: 480px) {
+    .dj-google-btn { padding: 12px; font-size: 13.5px; }
+}
+
 .dj-login-icon {
     width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%;
     background: rgba(232,195,154,.12); border: 1px solid rgba(232,195,154,.35);
@@ -728,6 +755,38 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 .dj-login-note {
     font-size: 12.5px; line-height: 1.75; color: var(--dj-cream-2); opacity: .8; text-align: center; margin-bottom: 22px;
 }
+
+/* ----- Password reset success screen ----- */
+.dj-login-success-icon {
+    width: 84px; height: 84px; margin: 0 auto 22px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--dj-gold), var(--dj-gold-bright));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 8px rgba(232,195,154,.12), 0 14px 30px -12px rgba(0,0,0,.5);
+    opacity: 0; transform: scale(.6); animation: dj-successIconIn .5s cubic-bezier(.34,1.56,.64,1) forwards .2s;
+}
+@keyframes dj-successIconIn { to { opacity: 1; transform: scale(1); } }
+.dj-login-success-icon svg { width: 38px; height: 38px; color: var(--dj-maroon-dark); }
+.dj-login-submit-link { display: block; text-align: center; text-decoration: none; }
+
+/* ----- Password strength meter (reset-password page) ----- */
+.dj-pw-strength { margin: -12px 0 22px; }
+.dj-pw-strength-track {
+    display: flex; gap: 5px; height: 5px; margin-bottom: 7px;
+}
+.dj-pw-strength-seg {
+    flex: 1; border-radius: 3px; background: rgba(247,239,228,.12); transition: background .25s ease;
+}
+.dj-pw-strength-label {
+    font-size: 11.5px; color: var(--dj-cream-2); opacity: .75; text-align: end; transition: color .25s ease;
+}
+.dj-pw-strength[data-level="1"] .dj-pw-strength-seg:nth-child(1) { background: #c0555f; }
+.dj-pw-strength[data-level="1"] .dj-pw-strength-label { color: #e59aa0; opacity: 1; }
+.dj-pw-strength[data-level="2"] .dj-pw-strength-seg:nth-child(-n+2) { background: #c98a3f; }
+.dj-pw-strength[data-level="2"] .dj-pw-strength-label { color: #e0b273; opacity: 1; }
+.dj-pw-strength[data-level="3"] .dj-pw-strength-seg:nth-child(-n+3) { background: var(--dj-gold); }
+.dj-pw-strength[data-level="3"] .dj-pw-strength-label { color: var(--dj-gold); opacity: 1; }
+.dj-pw-strength[data-level="4"] .dj-pw-strength-seg { background: #5fae7f; }
+.dj-pw-strength[data-level="4"] .dj-pw-strength-label { color: #7fce9d; opacity: 1; }
 
 /* ----- OTP verification page ----- */
 .dj-otp-boxes { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
@@ -769,12 +828,15 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
     .dj-login-heading h1 { font-size: 19px; }
     .dj-login-icon { width: 56px; height: 56px; }
     .dj-login-icon svg { width: 26px; height: 26px; }
+    .dj-login-success-icon { width: 68px; height: 68px; }
+    .dj-login-success-icon svg { width: 30px; height: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .dj-login-bg { animation: none; }
     .dj-login-card { animation: none; opacity: 1; transform: none; }
     .dj-login-submit::after { animation: none; }
     .dj-login-icon { animation: none; opacity: 1; transform: none; }
+    .dj-login-success-icon { animation: none; opacity: 1; transform: none; }
 }
 
 /* =========================================================

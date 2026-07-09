@@ -32,6 +32,10 @@
                 <label class="dj-admin-label">{{ __('settings.instagram_url') }}</label>
                 <input type="url" name="instagram_url" value="{{ old('instagram_url', $settings['instagram_url'] ?? '') }}" class="dj-admin-input">
             </div>
+            <div>
+                <label class="dj-admin-label">{{ __('settings.tiktok_url') }}</label>
+                <input type="url" name="tiktok_url" value="{{ old('tiktok_url', $settings['tiktok_url'] ?? '') }}" class="dj-admin-input">
+            </div>
 
             <div class="border-t border-[var(--dj-cream-2)] pt-4">
                 <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.security') }}</h2>
@@ -40,6 +44,39 @@
                     {{ __('settings.login_alerts_enabled') }}
                 </label>
                 <p class="dj-admin-hint">{{ __('settings.login_alerts_enabled_hint') }}</p>
+            </div>
+
+            <div class="border-t border-[var(--dj-cream-2)] pt-4">
+                <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.cart_reminders') }}</h2>
+
+                <label class="flex items-center gap-2 text-sm text-[var(--dj-ink)] mb-3">
+                    <input type="checkbox" name="cart_reminders_enabled" value="1" {{ old('cart_reminders_enabled', $settings['cart_reminders_enabled'] ?? '1') === '1' ? 'checked' : '' }}>
+                    {{ __('settings.cart_reminders_enabled') }}
+                </label>
+
+                <label class="flex items-center gap-2 text-sm text-[var(--dj-ink)] mb-3">
+                    <input type="checkbox" name="cart_reminder_notification_enabled" value="1" {{ old('cart_reminder_notification_enabled', $settings['cart_reminder_notification_enabled'] ?? '1') === '1' ? 'checked' : '' }}>
+                    {{ __('settings.cart_reminder_notification_enabled') }}
+                </label>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.cart_reminder_first_delay_hours') }}</label>
+                        <input type="number" min="1" max="72" name="cart_reminder_first_delay_hours" value="{{ old('cart_reminder_first_delay_hours', $settings['cart_reminder_first_delay_hours'] ?? 1) }}" class="dj-admin-input">
+                        @error('cart_reminder_first_delay_hours') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.cart_reminder_interval_hours') }}</label>
+                        <input type="number" min="1" max="168" name="cart_reminder_interval_hours" value="{{ old('cart_reminder_interval_hours', $settings['cart_reminder_interval_hours'] ?? 4) }}" class="dj-admin-input">
+                        @error('cart_reminder_interval_hours') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.cart_max_reminders') }}</label>
+                        <input type="number" min="0" max="10" name="cart_max_reminders" value="{{ old('cart_max_reminders', $settings['cart_max_reminders'] ?? 3) }}" class="dj-admin-input">
+                        @error('cart_max_reminders') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <p class="dj-admin-hint">{{ __('settings.cart_reminders_hint') }}</p>
             </div>
 
             <div class="border-t border-[var(--dj-cream-2)] pt-4">

@@ -69,6 +69,16 @@
                 @enderror
             </div>
 
+            <div class="dj-pw-strength" id="dj-pw-strength" data-level="0">
+                <div class="dj-pw-strength-track">
+                    <span class="dj-pw-strength-seg"></span>
+                    <span class="dj-pw-strength-seg"></span>
+                    <span class="dj-pw-strength-seg"></span>
+                    <span class="dj-pw-strength-seg"></span>
+                </div>
+                <div class="dj-pw-strength-label" id="dj-pw-strength-label">{{ __('Password strength') }}</div>
+            </div>
+
             <div class="dj-field dj-has-toggle">
                 <svg class="dj-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
                 <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder=" ">
@@ -103,6 +113,31 @@
                     toggleBtn.setAttribute('aria-pressed', (!showing).toString());
                     toggleBtn.setAttribute('aria-label', showing ? '{{ __('Show password') }}' : '{{ __('Hide password') }}');
                 });
+            });
+
+            // Password strength meter — purely a frontend hint, the real
+            // strength/complexity rules are still enforced server-side by
+            // Rules\Password::defaults() in NewPasswordController.
+            var strengthLabels = ['{{ __('Password strength') }}', '{{ __('Weak') }}', '{{ __('Fair') }}', '{{ __('Good') }}', '{{ __('Strong') }}'];
+            var strengthEl = document.getElementById('dj-pw-strength');
+            var strengthLabel = document.getElementById('dj-pw-strength-label');
+            var passwordInput = document.getElementById('password');
+
+            function scorePassword(value) {
+                if (!value) return 0;
+                var score = 0;
+                if (value.length >= 8) score++;
+                if (value.length >= 12) score++;
+                if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score++;
+                if (/[0-9]/.test(value) && /[^a-zA-Z0-9]/.test(value)) score++;
+                return Math.min(score, 4);
+            }
+
+            passwordInput.addEventListener('input', function () {
+                var value = passwordInput.value;
+                var level = value ? Math.max(scorePassword(value), 1) : 0;
+                strengthEl.dataset.level = level;
+                strengthLabel.textContent = strengthLabels[level];
             });
 
             var form = document.getElementById('dj-reset-form');

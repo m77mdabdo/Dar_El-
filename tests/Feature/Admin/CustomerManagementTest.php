@@ -42,6 +42,38 @@ class CustomerManagementTest extends TestCase
         $this->actingAs($customer)->get(route('admin.customers.show', $customer))->assertForbidden();
     }
 
+    public function test_show_page_displays_registration_method_and_login_history(): void
+    {
+        $admin = $this->admin();
+        $customer = $this->customer(['provider' => 'google', 'provider_id' => '123']);
+
+        $customer->notify(new \App\Notifications\LoginAlertNotification(
+            ip: '41.32.10.5',
+            device: 'Mac',
+            browser: 'Chrome',
+            time: now(),
+            provider: 'google',
+        ));
+
+        $response = $this->actingAs($admin)->get(route('admin.customers.show', $customer));
+
+        $response->assertOk();
+        $response->assertSee('Google');
+        $response->assertSee('41.32.10.5');
+    }
+
+    public function test_show_page_displays_email_as_registration_method_by_default(): void
+    {
+        $admin = $this->admin();
+        $customer = $this->customer();
+
+        $response = $this->actingAs($admin)->get(route('admin.customers.show', $customer));
+
+        $response->assertOk();
+        $response->assertSee(__('Email'));
+        $response->assertSee(__('customers.no_login_history'));
+    }
+
     public function test_index_search_narrows_results(): void
     {
         $admin = $this->admin();

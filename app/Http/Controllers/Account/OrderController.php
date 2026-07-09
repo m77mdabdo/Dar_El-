@@ -20,18 +20,32 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['items', 'statusHistories', 'shippingMethod']);
+        $order->load(['items.product', 'statusHistories', 'shippingMethod']);
 
         return view('account.orders.show', compact('order'));
     }
 
+    /**
+     * Shared by both the customer route (account.orders.invoice) and the
+     * admin route (admin.orders.invoice) — same policy-gated logic either
+     * way (an admin always passes OrderPolicy::before()).
+     */
     public function invoice(Request $request, Order $order)
     {
         $this->authorize('view', $order);
 
         $invoice = $order->invoice;
 
-        abort_unless($invoice && $invoice->pdf_path && Storage::disk('local')->exists($invoice->pdf_path), 404);
+        if (! $invoice || ! $invoice->pdf_path || ! Storage::disk('local')->exists($invoice->pdf_path)) {
+            // The order itself is real (route model binding already
+            // guaranteed that) — only the invoice isn't ready yet, e.g. its
+            // generation is still queued or previously failed. A bare 404
+            // here reads as a broken link; send the visitor back to the
+            // order they were just looking at with an explanation instead.
+            $showRoute = $request->route()->getName() === 'admin.orders.invoice' ? 'admin.orders.show' : 'account.orders.show';
+
+            return redirect()->route($showRoute, $order)->with('error', __('orders.invoice_not_ready'));
+        }
 
         return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
     }

@@ -35,4 +35,26 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Social (OAuth) Login Providers
+    |--------------------------------------------------------------------------
+    |
+    | 'oauth_providers' is the whitelist SocialAuthController checks the
+    | {provider} route parameter against — it's the only thing that needs a
+    | new entry (plus a driver config block below) to enable a new provider
+    | such as Apple, Facebook, or Microsoft. Every provider must have a
+    | matching Socialite driver installed and configured with the same keys
+    | (client_id, client_secret, redirect) that Socialite itself expects.
+    |
+    */
+
+    'oauth_providers' => array_filter(explode(',', env('OAUTH_PROVIDERS', 'google'))),
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_CALLBACK_URL'),
+    ],
+
 ];

@@ -17,7 +17,10 @@ return [
     'abandoned_duration' => 'مدة الترك',
     'reminder_count' => 'عدد التذكيرات',
     'last_reminder' => 'آخر تذكير',
+    'next_reminder' => 'التذكير القادم',
     'reminder_history' => 'سجل التذكيرات',
+    'source_manual' => 'يدوي',
+    'source_automatic' => 'تلقائي',
 
     'status_active' => 'نشطة',
     'status_abandoned' => 'متروكة',

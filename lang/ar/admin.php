@@ -147,6 +147,7 @@ return [
         'type_high_value_cart_abandoned' => 'سلة متروكة عالية القيمة',
         'type_cart_converted' => 'تم إتمام السلة',
         'type_cart_reminder_failed' => 'فشل إرسال التذكير',
+        'type_invoice_generation_failed' => 'فشل إنشاء الفاتورة',
         'type_default' => 'إشعار',
     ],
 

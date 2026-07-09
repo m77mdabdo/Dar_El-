@@ -32,11 +32,17 @@ class SendLoginAlertNotification
 
         $userAgent = Request::userAgent();
 
+        // Set by SocialAuthController right before Auth::login() for an
+        // OAuth login, and nowhere else — pulled (not just read) so it
+        // never leaks into a later, unrelated login in the same session.
+        $provider = session()->pull('login_via_provider');
+
         $event->user->notify(new LoginAlertNotification(
             ip: Request::ip(),
             device: UserAgentParser::device($userAgent),
             browser: UserAgentParser::browser($userAgent),
             time: now(),
+            provider: $provider,
         ));
     }
 }

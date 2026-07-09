@@ -147,6 +147,7 @@ return [
         'type_high_value_cart_abandoned' => 'High Value Cart Abandoned',
         'type_cart_converted' => 'Cart Converted',
         'type_cart_reminder_failed' => 'Reminder Failed',
+        'type_invoice_generation_failed' => 'Invoice Generation Failed',
         'type_default' => 'Notification',
     ],
 

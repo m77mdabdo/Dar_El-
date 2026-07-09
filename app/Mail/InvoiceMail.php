@@ -19,8 +19,13 @@ class InvoiceMail extends Mailable implements ShouldQueue
 
     /**
      * Create a new message instance.
+     *
+     * $invoice is nullable so a PDF-generation failure never blocks the
+     * order confirmation itself from going out — see
+     * GenerateAndSendInvoice, which catches that failure, notifies admins,
+     * and still sends this mail with $invoice = null.
      */
-    public function __construct(public Order $order, public Invoice $invoice)
+    public function __construct(public Order $order, public ?Invoice $invoice = null)
     {
         //
     }
@@ -53,7 +58,7 @@ class InvoiceMail extends Mailable implements ShouldQueue
      */
     public function attachments(): array
     {
-        if (! $this->invoice->pdf_path || ! Storage::disk('local')->exists($this->invoice->pdf_path)) {
+        if (! $this->invoice || ! $this->invoice->pdf_path || ! Storage::disk('local')->exists($this->invoice->pdf_path)) {
             return [];
         }
 

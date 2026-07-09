@@ -102,6 +102,8 @@
                 <a href="{{ route('login') }}">{{ __('Log in') }}</a>
             </p>
         </form>
+
+        @include('auth.partials.social-login', ['googleLabel' => __('Sign up with Google')])
     </div>
 
     <a href="{{ route('home') }}" class="dj-login-back">← {{ __('Back to Store') }}</a>

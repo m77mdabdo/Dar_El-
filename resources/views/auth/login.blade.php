@@ -86,6 +86,8 @@
                 </p>
             @endif
         </form>
+
+        @include('auth.partials.social-login', ['googleLabel' => __('Sign in with Google')])
     </div>
 
     <a href="{{ route('home') }}" class="dj-login-back">← {{ __('Back to Store') }}</a>

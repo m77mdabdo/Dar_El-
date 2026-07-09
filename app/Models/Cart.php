@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\CartReminderConfig;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,10 +60,10 @@ class Cart extends Model
     {
         return $query->abandoned()
             ->where('items_count', '>', 0)
-            ->where('reminder_count', '<', config('cart.max_reminders'))
+            ->where('reminder_count', '<', CartReminderConfig::maxReminders())
             ->where(function ($q) {
                 $q->whereNull('last_reminder_sent_at')
-                    ->orWhere('last_reminder_sent_at', '<=', now()->subHours(config('cart.reminder_interval_hours')));
+                    ->orWhere('last_reminder_sent_at', '<=', now()->subHours(CartReminderConfig::intervalHours()));
             });
     }
 
@@ -72,5 +74,31 @@ class Cart extends Model
         }
 
         return $this->last_activity_at->diffForHumans(now(), true);
+    }
+
+    /**
+     * When this cart will next become eligible for a reminder, for the
+     * admin carts list/detail pages. Null means "not eligible again" —
+     * either the cap has been reached or the cart is no longer open.
+     */
+    public function nextEligibleReminderAt(): ?CarbonInterface
+    {
+        if (! in_array($this->status, ['active', 'abandoned'], true) || $this->items_count === 0) {
+            return null;
+        }
+
+        if ($this->reminder_count >= CartReminderConfig::maxReminders()) {
+            return null;
+        }
+
+        if ($this->last_reminder_sent_at) {
+            return $this->last_reminder_sent_at->copy()->addHours(CartReminderConfig::intervalHours());
+        }
+
+        if ($this->status === 'abandoned') {
+            return now();
+        }
+
+        return $this->last_activity_at->copy()->addMinutes(CartReminderConfig::firstDelayMinutes());
     }
 }

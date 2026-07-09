@@ -7,38 +7,28 @@
 @endphp
 
 @section('content')
-    <h2 style="font-size:18px; color:#601526; margin-top:0; font-family:sans-serif;">
+    <h2 style="font-size:20px; color:#601526; margin:0 0 4px; font-family: Georgia, 'Times New Roman', serif; text-align:center;">
         {{ __('emails.login_alert_greeting', ['name' => $user->name]) }}
     </h2>
 
-    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family:sans-serif;">
+    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 26px;">
         {{ __('emails.login_alert_intro') }}
     </p>
 
-    <table style="width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px; font-family:sans-serif;">
-        <tr>
-            <td style="padding:4px 0; color:#9C5064; width:40%;">{{ __('emails.login_alert_email') }}</td>
-            <td style="padding:4px 0; color:#2A1015;">{{ $user->email }}</td>
-        </tr>
-        <tr>
-            <td style="padding:4px 0; color:#9C5064; width:40%;">{{ __('emails.login_alert_time') }}</td>
-            <td style="padding:4px 0; color:#2A1015;">{{ $time->format('M j, Y H:i') }}</td>
-        </tr>
-        <tr>
-            <td style="padding:4px 0; color:#9C5064;">{{ __('emails.login_alert_ip') }}</td>
-            <td style="padding:4px 0; color:#2A1015;">{{ $ip }}</td>
-        </tr>
-        <tr>
-            <td style="padding:4px 0; color:#9C5064;">{{ __('emails.login_alert_device') }}</td>
-            <td style="padding:4px 0; color:#2A1015;">{{ $device }}</td>
-        </tr>
-        <tr>
-            <td style="padding:4px 0; color:#9C5064;">{{ __('emails.login_alert_browser') }}</td>
-            <td style="padding:4px 0; color:#2A1015;">{{ $browser }}</td>
-        </tr>
-    </table>
+    @include('emails.partials.info-card', [
+        'djIcon' => 'shield',
+        'djTitle' => __('emails.login_alert_tagline'),
+        'djRows' => array_filter([
+            ['label' => __('emails.login_alert_email'), 'value' => $user->email],
+            ['label' => __('emails.login_alert_time'), 'value' => $time->format('M j, Y H:i')],
+            ['label' => __('emails.login_alert_ip'), 'value' => $ip],
+            ['label' => __('emails.login_alert_device'), 'value' => $device],
+            ['label' => __('emails.login_alert_browser'), 'value' => $browser],
+            ($provider ?? null) ? ['label' => __('emails.login_alert_provider'), 'value' => ucfirst($provider)] : null,
+        ]),
+    ])
 
-    <p style="font-size:13px; color:#5a4448; font-family:sans-serif;">
+    <p style="font-size:13px; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center;">
         {{ __('emails.login_alert_ok_note') }}
     </p>
 

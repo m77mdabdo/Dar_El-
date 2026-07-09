@@ -72,6 +72,9 @@ return [
     'no_recent_orders' => 'No orders yet.',
     'no_current_cart' => 'No items in cart right now.',
     'no_wishlist_items' => 'No wishlist items.',
+    'login_history' => 'Login History',
+    'no_login_history' => 'No login history yet.',
+    'registration_method' => 'Registration Method',
 
     'note_added' => 'Note added.',
     'customer_disabled' => 'Customer disabled.',

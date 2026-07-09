@@ -3,6 +3,8 @@
 return [
     // Shared layout
     'footer_contact' => 'هل تحتاجين للمساعدة؟ تواصلي معنا عبر :email',
+    'footer_whatsapp' => 'واتساب: :number',
+    'footer_visit_website' => 'زوري موقعنا الإلكتروني',
     'footer_copyright' => 'دار الجميلة. جميع الحقوق محفوظة.',
     'footer_disclaimer' => 'هذه رسالة آلية من دار الجميلة. يرجى عدم الرد مباشرة على هذا البريد الإلكتروني.',
     'ignore_note' => 'إذا لم تطلبي هذا البريد الإلكتروني، يرجى تجاهله.',
@@ -14,6 +16,14 @@ return [
     'otp_expires' => 'ستنتهي صلاحية هذا الرمز خلال :minutes دقيقة.',
     'otp_security_note' => 'إذا لم تطلبي هذا الرمز، يمكنك تجاهل هذا البريد الإلكتروني بأمان.',
 
+    // Password reset
+    'password_reset_subject' => 'إعادة تعيين كلمة مرور حسابك في دار الجميلة',
+    'password_reset_tagline' => 'إعادة تعيين كلمة المرور',
+    'password_reset_greeting' => 'مرحبًا :name',
+    'password_reset_intro' => 'تلقينا طلبًا لإعادة تعيين كلمة المرور الخاصة بك. اضغطي على الزر أدناه لاختيار كلمة مرور جديدة.',
+    'password_reset_button' => 'إعادة تعيين كلمة المرور',
+    'password_reset_expires' => 'ستنتهي صلاحية هذا الرابط خلال :minutes دقيقة.',
+
     // Login alert
     'login_alert_subject' => 'تم تسجيل الدخول إلى حسابك',
     'login_alert_tagline' => 'أمان الحساب',
@@ -24,6 +34,7 @@ return [
     'login_alert_ip' => 'عنوان IP',
     'login_alert_device' => 'الجهاز',
     'login_alert_browser' => 'المتصفح',
+    'login_alert_provider' => 'تم تسجيل الدخول باستخدام',
     'login_alert_ok_note' => 'إذا كان هذا أنتِ، فلا حاجة لاتخاذ أي إجراء.',
     'login_alert_not_you_note' => 'إذا لم يكن هذا أنتِ، يرجى إعادة تعيين كلمة المرور فورًا.',
     'login_alert_reset_button' => 'إعادة تعيين كلمة المرور',
@@ -33,6 +44,7 @@ return [
     'order_confirmation_tagline' => 'تأكيد الطلب',
     'order_confirmation_greeting' => 'شكرًا لطلبك، :name!',
     'order_confirmation_intro' => 'تم استلام طلبك رقم :number، وفاتورتك رقم :invoice مرفقة بهذا البريد الإلكتروني.',
+    'order_confirmation_intro_no_invoice' => 'تم استلام طلبك رقم :number. سنرسل لك الفاتورة عبر بريد إلكتروني منفصل قريبًا.',
     'order_item' => 'المنتج',
     'order_variant' => 'المقاس',
     'order_qty' => 'الكمية',
@@ -45,7 +57,9 @@ return [
     'order_payment_method' => 'طريقة الدفع',
     'order_payment_method_cod' => 'الدفع عند الاستلام',
     'order_shipping_address' => 'عنوان الشحن',
+    'order_details_title' => 'تفاصيل الطلب',
     'order_view_button' => 'عرض الطلب',
+    'order_download_invoice_button' => 'تحميل الفاتورة',
 
     'order_status_subject' => 'تم تحديث طلبك رقم :number',
     'order_status_tagline' => 'تحديث الطلب',
@@ -114,6 +128,7 @@ return [
     'admin_new_customer_email' => 'البريد الإلكتروني',
     'admin_new_customer_phone' => 'الهاتف',
     'admin_new_customer_button' => 'عرض العميل',
+    'admin_customer_details_title' => 'بيانات العميل',
 
     'admin_new_contact_message_subject' => 'رسالة جديدة عبر نموذج التواصل',
     'admin_new_contact_message_intro' => 'تم إرسال رسالة جديدة عبر نموذج التواصل.',
@@ -121,6 +136,8 @@ return [
     'admin_new_contact_message_email' => 'البريد الإلكتروني',
     'admin_new_contact_message_subject_label' => 'الموضوع',
     'admin_new_contact_message_button' => 'عرض الرسائل',
+    'admin_message_details_title' => 'بيانات الرسالة',
+    'admin_message_body_title' => 'الرسالة',
 
     // الدفع (تصميم فقط - غير مفعّل بعد)
     'payment_success_subject' => 'تم استلام الدفع لطلبك رقم :number',

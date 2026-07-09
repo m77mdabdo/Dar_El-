@@ -3,6 +3,8 @@
 return [
     // Shared layout
     'footer_contact' => 'Need help? Contact us at :email',
+    'footer_whatsapp' => 'WhatsApp: :number',
+    'footer_visit_website' => 'Visit our website',
     'footer_copyright' => 'Dar El-Jamila. All rights reserved.',
     'footer_disclaimer' => 'This is an automated message from Dar El-Jamila. Please do not reply directly to this email.',
     'ignore_note' => "If you did not request this email, please ignore it.",
@@ -14,6 +16,14 @@ return [
     'otp_expires' => 'This code will expire in :minutes minutes.',
     'otp_security_note' => 'If you did not request this code, you can safely ignore this email.',
 
+    // Password reset
+    'password_reset_subject' => 'Reset your Dar El-Jamila password',
+    'password_reset_tagline' => 'Password Reset',
+    'password_reset_greeting' => 'Hello :name',
+    'password_reset_intro' => 'We received a request to reset your password. Click the button below to choose a new one.',
+    'password_reset_button' => 'Reset My Password',
+    'password_reset_expires' => 'This link will expire in :minutes minutes.',
+
     // Login alert
     'login_alert_subject' => 'New login to your account',
     'login_alert_tagline' => 'Account Security',
@@ -24,6 +34,7 @@ return [
     'login_alert_ip' => 'IP Address',
     'login_alert_device' => 'Device',
     'login_alert_browser' => 'Browser',
+    'login_alert_provider' => 'Signed in with',
     'login_alert_ok_note' => 'If this was you, no action is needed.',
     'login_alert_not_you_note' => 'If this was not you, please reset your password immediately.',
     'login_alert_reset_button' => 'Reset Password',
@@ -33,6 +44,7 @@ return [
     'order_confirmation_tagline' => 'Order Confirmation',
     'order_confirmation_greeting' => 'Thank you for your order, :name!',
     'order_confirmation_intro' => 'Your order :number has been placed and your invoice #:invoice is attached to this email.',
+    'order_confirmation_intro_no_invoice' => 'Your order :number has been placed. We will email your invoice separately shortly.',
     'order_item' => 'Item',
     'order_variant' => 'Size',
     'order_qty' => 'Qty',
@@ -45,7 +57,9 @@ return [
     'order_payment_method' => 'Payment Method',
     'order_payment_method_cod' => 'Cash on Delivery',
     'order_shipping_address' => 'Shipping Address',
+    'order_details_title' => 'Order Details',
     'order_view_button' => 'View Order',
+    'order_download_invoice_button' => 'Download Invoice',
 
     'order_status_subject' => 'Your order :number has been updated',
     'order_status_tagline' => 'Order Update',
@@ -114,6 +128,7 @@ return [
     'admin_new_customer_email' => 'Email',
     'admin_new_customer_phone' => 'Phone',
     'admin_new_customer_button' => 'View Customer',
+    'admin_customer_details_title' => 'Customer Details',
 
     'admin_new_contact_message_subject' => 'New contact form message received',
     'admin_new_contact_message_intro' => 'A new message has been submitted through the contact form.',
@@ -121,6 +136,8 @@ return [
     'admin_new_contact_message_email' => 'Email',
     'admin_new_contact_message_subject_label' => 'Subject',
     'admin_new_contact_message_button' => 'View Messages',
+    'admin_message_details_title' => 'Message Details',
+    'admin_message_body_title' => 'Message',
 
     // Payment (template only — not wired to any trigger yet)
     'payment_success_subject' => 'Payment received for order :number',

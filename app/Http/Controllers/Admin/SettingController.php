@@ -13,7 +13,8 @@ class SettingController extends Controller
 {
     protected const KEYS = [
         'store_name', 'support_email', 'whatsapp_number',
-        'default_shipping_fee', 'facebook_url', 'instagram_url',
+        'default_shipping_fee', 'facebook_url', 'instagram_url', 'tiktok_url',
+        'cart_reminder_first_delay_hours', 'cart_reminder_interval_hours', 'cart_max_reminders',
     ];
 
     protected const IMAGE_KEYS = [
@@ -21,7 +22,9 @@ class SettingController extends Controller
         'shop_hero_image', 'blog_hero_image', 'contact_hero_image', 'checkout_hero_image',
     ];
 
-    protected const BOOLEAN_KEYS = ['login_alerts_enabled'];
+    protected const BOOLEAN_KEYS = [
+        'login_alerts_enabled', 'cart_reminders_enabled', 'cart_reminder_notification_enabled',
+    ];
 
     public function __construct(protected ImageUploadService $imageUploader)
     {
@@ -43,6 +46,10 @@ class SettingController extends Controller
             'default_shipping_fee' => ['nullable', 'integer', 'min:0'],
             'facebook_url' => ['nullable', 'url', 'max:255'],
             'instagram_url' => ['nullable', 'url', 'max:255'],
+            'tiktok_url' => ['nullable', 'url', 'max:255'],
+            'cart_reminder_first_delay_hours' => ['nullable', 'integer', 'min:1', 'max:72'],
+            'cart_reminder_interval_hours' => ['nullable', 'integer', 'min:1', 'max:168'],
+            'cart_max_reminders' => ['nullable', 'integer', 'min:0', 'max:10'],
         ];
         $messages = [];
 

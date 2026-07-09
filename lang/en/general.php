@@ -24,4 +24,5 @@ return [
     'download' => 'Download',
     'back' => 'Back',
     'update' => 'Update',
+    'now' => 'Now',
 ];
