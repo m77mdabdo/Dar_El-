@@ -46,7 +46,7 @@ class CategoryController extends Controller
 
         ActivityLog::record('created', $category, "Created category {$category->name_en}");
 
-        return redirect()->route('admin.categories.index')->with('status', 'Category created.');
+        return redirect()->route('admin.categories.index')->with('status', __('categories.created'));
     }
 
     public function edit(Category $category)
@@ -70,7 +70,7 @@ class CategoryController extends Controller
 
         ActivityLog::record('updated', $category, "Updated category {$category->name_en}");
 
-        return redirect()->route('admin.categories.index')->with('status', 'Category updated.');
+        return redirect()->route('admin.categories.index')->with('status', __('categories.updated'));
     }
 
     public function destroy(Category $category): RedirectResponse
@@ -82,7 +82,7 @@ class CategoryController extends Controller
 
         ActivityLog::record('deleted', $category, "Deleted category {$name}");
 
-        return redirect()->route('admin.categories.index')->with('status', 'Category deleted.');
+        return redirect()->route('admin.categories.index')->with('status', __('categories.deleted'));
     }
 
     protected function validated(Request $request): array

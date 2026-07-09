@@ -31,7 +31,7 @@ class InvoiceMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Your Dar El-Jamila Invoice #{$this->invoice->invoice_number}",
+            subject: __('emails.order_confirmation_subject', ['number' => $this->order->order_number]),
         );
     }
 
@@ -41,7 +41,7 @@ class InvoiceMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.invoice',
+            view: 'emails.orders.confirmation',
             with: ['order' => $this->order, 'invoice' => $this->invoice],
         );
     }

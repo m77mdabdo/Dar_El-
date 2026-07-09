@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\CartTrackingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -11,7 +12,7 @@ use Illuminate\View\View;
 
 class CartController extends Controller
 {
-    public function __construct(protected CartService $cart) {}
+    public function __construct(protected CartService $cart, protected CartTrackingService $cartTracking) {}
 
     public function index(): View
     {
@@ -43,6 +44,10 @@ class CartController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+        if ($request->user()) {
+            $this->cartTracking->sync($request->user(), $this->cart);
+        }
+
         if ($request->wantsJson()) {
             return $this->cartJson();
         }
@@ -66,12 +71,20 @@ class CartController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+        if ($request->user()) {
+            $this->cartTracking->sync($request->user(), $this->cart);
+        }
+
         return $request->wantsJson() ? $this->cartJson() : back();
     }
 
     public function remove(Request $request, string $key): RedirectResponse|JsonResponse
     {
         $this->cart->remove($key);
+
+        if ($request->user()) {
+            $this->cartTracking->sync($request->user(), $this->cart);
+        }
 
         return $request->wantsJson() ? $this->cartJson() : back();
     }

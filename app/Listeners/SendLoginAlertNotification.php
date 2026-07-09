@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Listeners;
+
+use App\Models\Setting;
+use App\Notifications\LoginAlertNotification;
+use App\Support\UserAgentParser;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Request;
+
+class SendLoginAlertNotification
+{
+    /**
+     * Deliberately NOT queued: must run synchronously within the original
+     * login request so request()->ip()/userAgent() reflect that request,
+     * not a queue worker's unrelated context. The actual mail/database send
+     * (LoginAlertNotification) is queued on its own.
+     */
+    public function handle(Login $event): void
+    {
+        if (Setting::get('login_alerts_enabled', '1') !== '1') {
+            return;
+        }
+
+        // Auth::attempt() fires this event before LoginRequest's disabled-
+        // account check runs and logs the user back out — without this
+        // guard a disabled account would get a "new login" email for a
+        // login the app itself immediately reversed a moment later.
+        if ($event->user->isDisabled()) {
+            return;
+        }
+
+        $userAgent = Request::userAgent();
+
+        $event->user->notify(new LoginAlertNotification(
+            ip: Request::ip(),
+            device: UserAgentParser::device($userAgent),
+            browser: UserAgentParser::browser($userAgent),
+            time: now(),
+        ));
+    }
+}

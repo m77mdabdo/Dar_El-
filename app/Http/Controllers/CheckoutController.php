@@ -11,6 +11,7 @@ use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Notifications\NewOrderPlaced;
 use App\Services\CartService;
+use App\Services\CartTrackingService;
 use App\Services\StockAlertService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,11 @@ use Illuminate\View\View;
 
 class CheckoutController extends Controller
 {
-    public function __construct(protected CartService $cart, protected StockAlertService $stockAlerts) {}
+    public function __construct(
+        protected CartService $cart,
+        protected StockAlertService $stockAlerts,
+        protected CartTrackingService $cartTracking,
+    ) {}
 
     public function show(): View|RedirectResponse
     {
@@ -139,6 +144,10 @@ class CheckoutController extends Controller
 
         GenerateAndSendInvoice::dispatch($order);
         Notification::send(User::admins(), new NewOrderPlaced($order));
+
+        if ($request->user()) {
+            $this->cartTracking->markConverted($request->user(), $order);
+        }
 
         $this->cart->clear();
 

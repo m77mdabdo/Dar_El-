@@ -23,7 +23,7 @@
                     @endif
                 </div>
                 <div class="dj-blog-body">
-                    <div class="dj-blog-date">{{ $post->published_at?->translatedFormat('F j, Y') }}</div>
+                    <div class="dj-blog-date">{{ $post->published_at?->translatedFormat('F j, Y') }} &middot; {{ $post->comments_count }} {{ __('blog_comments.count_label') }}</div>
                     <h3>{{ trans_field($post, 'title') }}</h3>
                     <p>{{ \Illuminate\Support\Str::limit(trans_field($post, 'excerpt'), 100) }}</p>
                     <span class="dj-read-more">{{ __('Read More →') }}</span>

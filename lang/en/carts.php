@@ -1,0 +1,73 @@
+<?php
+
+return [
+    'title' => 'Carts',
+    'abandoned_carts' => 'Abandoned Carts',
+    'active_carts' => 'Active Carts',
+    'converted_carts' => 'Converted Carts',
+    'cart_details' => 'Cart Details',
+    'no_carts_found' => 'No carts found.',
+
+    'customer' => 'Customer',
+    'cart_items' => 'Cart Items',
+    'cart_total' => 'Cart Total',
+    'cart_subtotal' => 'Cart Subtotal',
+    'estimated_total' => 'Estimated Total',
+    'last_updated' => 'Last Updated',
+    'abandoned_duration' => 'Abandoned Duration',
+    'reminder_count' => 'Reminder Count',
+    'last_reminder' => 'Last Reminder',
+    'reminder_history' => 'Reminder History',
+
+    'status_active' => 'Active',
+    'status_abandoned' => 'Abandoned',
+    'status_converted' => 'Converted',
+    'status_expired' => 'Expired',
+
+    'all_statuses' => 'All statuses',
+    'search_placeholder' => 'Search customer name, email, or phone...',
+    'date_from' => 'From',
+    'date_to' => 'To',
+
+    'send_reminder' => 'Send Reminder',
+    'send_bulk_reminder' => 'Send Bulk Reminder',
+    'reminder_sent' => 'Reminder sent.',
+    'bulk_reminders_sent' => ':count reminder(s) sent.',
+    'bulk_reminders_failed' => ':count reminder(s) failed to send.',
+    'reminder_failed' => 'The reminder could not be sent. Please check the error logs.',
+    'no_customer_email' => 'This customer has no email address to send the reminder to.',
+    'cannot_remind' => 'This cart has no items or has already been converted.',
+    'view_customer' => 'View Customer',
+    'view_product' => 'View Product',
+    'view_order' => 'View Order',
+    'converted_to_order' => 'Converted to order',
+
+    'quantity' => 'Quantity',
+    'unit_price' => 'Unit Price',
+    'total' => 'Total',
+    'stock_availability' => 'Stock',
+    'size' => 'Size',
+    'variant' => 'Variant',
+
+    'continue_checkout' => 'Continue Checkout',
+    'your_cart_is_waiting' => 'Your cart is waiting',
+    'complete_your_order' => 'Complete your order',
+
+    'stat_active' => 'Active Carts',
+    'stat_abandoned' => 'Abandoned Carts',
+    'stat_converted' => 'Converted Carts',
+    'stat_expired' => 'Expired Carts',
+    'stat_conversion_rate' => 'Cart Conversion Rate',
+    'stat_abandoned_value' => 'Abandoned Cart Value',
+    'stat_reminders_today' => 'Reminders Sent Today',
+
+    'chart_by_status' => 'Carts by Status',
+    'chart_abandoned_trend' => 'Abandoned Carts Over Time',
+    'chart_conversion_trend' => 'Cart Conversion Trend',
+    'chart_top_products' => 'Top Products in Carts',
+
+    'channel_mail' => 'Email',
+    'channel_database' => 'Notification',
+    'reminder_status_sent' => 'Sent',
+    'reminder_status_failed' => 'Failed',
+];

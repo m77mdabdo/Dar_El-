@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'title' => 'تعليقات المدونة',
+    'comment' => 'التعليق',
+    'no_comments' => 'لا توجد تعليقات بعد.',
+    'be_first_to_comment' => 'كن أول من يعلّق على هذا المقال.',
+    'count_label' => 'تعليق',
+
+    'write_comment' => 'اكتب تعليقًا',
+    'edit_comment' => 'تعديل تعليقك',
+    'your_comment' => 'تعليقك',
+    'your_comments' => 'تعليقاتك',
+    'comment_placeholder' => 'شاركنا رأيك حول هذا المقال (5-1000 حرف)...',
+    'submit' => 'إرسال التعليق',
+    'update_comment' => 'تحديث التعليق',
+    'delete_comment' => 'حذف التعليق',
+    'confirm_delete' => 'هل تريد حذف تعليقك؟ لا يمكن التراجع عن هذا الإجراء.',
+    'login_to_comment' => 'يرجى تسجيل الدخول لإضافة تعليق.',
+    'pending_notice' => 'تعليقك قيد المراجعة ولا يزال بإمكانك تعديله.',
+    'locked_notice' => 'يمكن تعديل التعليقات فقط أثناء انتظار المراجعة.',
+
+    'submitted' => 'تم إرسال تعليقك وهو الآن قيد المراجعة.',
+    'updated' => 'تم تحديث تعليقك.',
+    'deleted' => 'تم حذف التعليق.',
+    'approved_status' => 'تم اعتماد التعليق.',
+    'rejected_status' => 'تم رفض التعليق.',
+    'reject_reason_placeholder' => 'سبب الرفض (اختياري)',
+    'rejection_reason_label' => 'السبب',
+
+    'status_pending' => 'قيد الانتظار',
+    'status_approved' => 'معتمد',
+    'status_rejected' => 'مرفوض',
+
+    'commenter' => 'المعلّق',
+    'blog_post' => 'المقال',
+    'all_statuses' => 'كل الحالات',
+    'all_posts' => 'كل المقالات',
+    'search_placeholder' => 'ابحث عن معلّق أو مقال أو تعليق...',
+    'date_from' => 'من',
+    'date_to' => 'إلى',
+    'ip_address' => 'عنوان IP',
+    'user_agent' => 'معلومات المتصفح',
+
+    'notification_subject' => 'تمت مراجعة تعليقك',
+    'notification_status_line' => 'تعليقك على :post أصبح الآن :status.',
+    'notification_rejection_reason' => 'السبب: :reason',
+
+    'chart_by_status' => 'التعليقات حسب الحالة',
+    'chart_per_day' => 'التعليقات (آخر 14 يومًا)',
+    'chart_top_commented' => 'الأكثر تعليقًا',
+    'stat_total' => 'إجمالي التعليقات',
+    'stat_pending' => 'قيد الانتظار',
+    'stat_approved' => 'معتمد',
+    'stat_rejected' => 'مرفوض',
+    'stat_today' => 'اليوم',
+    'stat_this_month' => 'هذا الشهر',
+];

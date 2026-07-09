@@ -2,11 +2,11 @@
 
 namespace App\Notifications;
 
+use App\Mail\ProductOutOfStockMail;
 use App\Models\Product;
 use App\Models\ProductSize;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ProductOutOfStock extends Notification implements ShouldQueue
@@ -26,13 +26,9 @@ class ProductOutOfStock extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): ProductOutOfStockMail
     {
-        return (new MailMessage)
-            ->subject(__('Out of stock: :name', ['name' => $this->product->name_en]))
-            ->line(__('The following item just sold out:'))
-            ->line("{$this->product->name_en} — {$this->size->size}")
-            ->action(__('Manage Product'), route('admin.products.edit', $this->product));
+        return new ProductOutOfStockMail($this->product, $this->size, $notifiable);
     }
 
     /**

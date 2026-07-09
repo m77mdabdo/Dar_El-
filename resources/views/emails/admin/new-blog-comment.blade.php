@@ -1,0 +1,14 @@
+@extends('emails.layouts.master')
+
+@php
+    $icon = 'document';
+    $headerTagline = __('emails.admin_tagline');
+@endphp
+
+@section('content')
+    <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family:sans-serif;">
+        {{ __('emails.admin_new_blog_comment_intro', ['post' => $comment->blogPost->title_en]) }}
+    </p>
+
+    @include('emails.partials.button', ['href' => route('admin.blog-comments.show', $comment), 'label' => __('emails.admin_new_blog_comment_button')])
+@endsection

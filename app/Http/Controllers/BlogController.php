@@ -9,7 +9,8 @@ class BlogController extends Controller
 {
     public function index()
     {
-        $posts = BlogPost::where('is_published', true)
+        $posts = BlogPost::with('approvedComments')
+            ->where('is_published', true)
             ->latest('published_at')
             ->paginate(9);
 
@@ -22,6 +23,12 @@ class BlogController extends Controller
     {
         abort_unless($post->is_published, 404);
 
-        return view('blog.show', compact('post'));
+        $post->load('approvedComments.user');
+
+        $userComments = auth()->check()
+            ? $post->comments()->where('user_id', auth()->id())->latest()->get()
+            : collect();
+
+        return view('blog.show', compact('post', 'userComments'));
     }
 }

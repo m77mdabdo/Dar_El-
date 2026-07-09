@@ -17,4 +17,8 @@ return [
     'no_coupons' => 'No coupons yet.',
     'confirm_delete' => 'Delete this coupon?',
     'save_coupon' => 'Save Coupon',
+
+    'created' => 'Coupon created.',
+    'updated' => 'Coupon updated.',
+    'deleted' => 'Coupon deleted.',
 ];

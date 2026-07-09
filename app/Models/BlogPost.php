@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\ImageUploadService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BlogPost extends Model
 {
@@ -30,5 +31,20 @@ class BlogPost extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(BlogComment::class);
+    }
+
+    public function approvedComments(): HasMany
+    {
+        return $this->hasMany(BlogComment::class)->where('status', 'approved');
+    }
+
+    public function getCommentsCountAttribute(): int
+    {
+        return $this->approvedComments->count();
     }
 }

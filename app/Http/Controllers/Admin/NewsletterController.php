@@ -19,7 +19,7 @@ class NewsletterController extends Controller
     {
         return response()->streamDownload(function () {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Email', 'Subscribed At']);
+            fputcsv($handle, [__('general.email'), __('newsletter.subscribed_at')]);
 
             NewsletterSubscriber::orderBy('created_at')->chunk(200, function ($subscribers) use ($handle) {
                 foreach ($subscribers as $subscriber) {

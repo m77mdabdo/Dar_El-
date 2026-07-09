@@ -35,7 +35,7 @@ class CouponController extends Controller
 
         ActivityLog::record('created', $coupon, "Created coupon {$coupon->code}");
 
-        return redirect()->route('admin.coupons.index')->with('status', 'Coupon created.');
+        return redirect()->route('admin.coupons.index')->with('status', __('coupons.created'));
     }
 
     public function edit(Coupon $coupon)
@@ -53,7 +53,7 @@ class CouponController extends Controller
 
         ActivityLog::record('updated', $coupon, "Updated coupon {$coupon->code}");
 
-        return redirect()->route('admin.coupons.index')->with('status', 'Coupon updated.');
+        return redirect()->route('admin.coupons.index')->with('status', __('coupons.updated'));
     }
 
     public function destroy(Coupon $coupon): RedirectResponse
@@ -65,7 +65,7 @@ class CouponController extends Controller
 
         ActivityLog::record('deleted', $coupon, "Deleted coupon {$code}");
 
-        return redirect()->route('admin.coupons.index')->with('status', 'Coupon deleted.');
+        return redirect()->route('admin.coupons.index')->with('status', __('coupons.deleted'));
     }
 
     protected function validated(Request $request, ?Coupon $coupon = null): array

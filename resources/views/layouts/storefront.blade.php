@@ -59,6 +59,8 @@
                     <div x-show="open" @click.outside="open = false" x-cloak class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-44 bg-white border border-stone-200 rounded shadow-lg py-1 z-10 text-sm text-stone-700">
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('Profile') }}</a>
                         <a href="{{ route('account.orders.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('My Orders') }}</a>
+                        <a href="{{ route('account.reviews.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('reviews.title') }}</a>
+                        <a href="{{ route('account.blog-comments.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('blog_comments.your_comments') }}</a>
                         @if (auth()->user()->hasRole('admin'))
                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('Admin') }}</a>
                         @endif
@@ -86,6 +88,8 @@
         @auth
             <a href="{{ route('profile.edit') }}" @click="mobileNavOpen = false">{{ __('Profile') }}</a>
             <a href="{{ route('account.orders.index') }}" @click="mobileNavOpen = false">{{ __('My Orders') }}</a>
+            <a href="{{ route('account.reviews.index') }}" @click="mobileNavOpen = false">{{ __('reviews.title') }}</a>
+            <a href="{{ route('account.blog-comments.index') }}" @click="mobileNavOpen = false">{{ __('blog_comments.your_comments') }}</a>
             @if (auth()->user()->hasRole('admin'))
                 <a href="{{ route('admin.dashboard') }}" @click="mobileNavOpen = false">{{ __('Admin') }}</a>
             @endif

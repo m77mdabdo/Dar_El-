@@ -66,43 +66,56 @@
     <input type="text" name="badge" value="{{ old('badge', $product->badge ?? '') }}" placeholder="{{ __('products.badge_placeholder') }}" class="dj-admin-input">
 </div>
 
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-data="{ status: '{{ old('status', $product->status ?? 'published') }}' }">
+    <div>
+        <label class="dj-admin-label">{{ __('products.status') }}</label>
+        <select name="status" x-model="status" class="dj-admin-input">
+            <option value="draft">{{ __('products.status_draft') }}</option>
+            <option value="scheduled">{{ __('products.status_scheduled') }}</option>
+            <option value="published">{{ __('products.status_published') }}</option>
+            <option value="archived">{{ __('products.status_archived') }}</option>
+        </select>
+        @error('status') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+    <div x-show="status === 'scheduled'" x-cloak>
+        <label class="dj-admin-label">{{ __('products.scheduled_publish_at') }}</label>
+        <input type="datetime-local" name="scheduled_publish_at" value="{{ old('scheduled_publish_at', isset($product) ? $product->scheduled_publish_at?->format('Y-m-d\TH:i') : '') }}" class="dj-admin-input">
+        @error('scheduled_publish_at') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+</div>
+
 <div class="flex gap-6">
-    <label class="dj-admin-checkbox-row">
-        <input type="checkbox" name="is_active" value="1" {{ old('is_active', $product->is_active ?? true) ? 'checked' : '' }}>
-        {{ __('general.active') }}
-    </label>
     <label class="dj-admin-checkbox-row">
         <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $product->is_featured ?? false) ? 'checked' : '' }}>
         {{ __('products.featured') }}
     </label>
 </div>
 
-<div>
-    <label class="dj-admin-label">{{ __('products.sizes_stock') }}</label>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        @php
-            $existingSizes = isset($product) ? $product->sizes->pluck('stock', 'size') : collect();
-            $sizeOptions = $existingSizes->keys()->count() ? $existingSizes->keys() : collect(['S', 'M', 'L', 'XL']);
-        @endphp
-        @foreach ($sizeOptions as $size)
+@isset($product)
+    <div class="dj-admin-card p-4 mt-2">
+        <p class="font-semibold text-[var(--dj-maroon-dark)]">{{ __('product_options.smart_defaults_heading') }}</p>
+        <p class="dj-admin-hint mb-3">{{ __('product_options.smart_defaults_hint') }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-                <label class="dj-admin-label text-[11px]">{{ $size }}</label>
-                <input type="number" name="sizes[{{ $size }}]" value="{{ $existingSizes[$size] ?? 0 }}" min="0" class="dj-admin-input">
+                <label class="dj-admin-label">{{ __('product_options.sku_prefix') }}</label>
+                <input type="text" name="sku_prefix" value="{{ old('sku_prefix', $product->sku_prefix) }}" placeholder="{{ __('product_options.sku_prefix_placeholder') }}" class="dj-admin-input">
+                @error('sku_prefix') <p class="dj-admin-error">{{ $message }}</p> @enderror
             </div>
-        @endforeach
+            <div>
+                <label class="dj-admin-label">{{ __('product_options.default_stock') }}</label>
+                <input type="number" name="default_stock" value="{{ old('default_stock', $product->default_stock) }}" min="0" class="dj-admin-input">
+                @error('default_stock') <p class="dj-admin-error">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="dj-admin-label">{{ __('product_options.default_low_stock_threshold') }}</label>
+                <input type="number" name="default_low_stock_threshold" value="{{ old('default_low_stock_threshold', $product->default_low_stock_threshold) }}" min="0" placeholder="{{ \App\Models\Product::LOW_STOCK_THRESHOLD }}" class="dj-admin-input">
+                @error('default_low_stock_threshold') <p class="dj-admin-error">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="dj-admin-label">{{ __('product_options.weight') }}</label>
+                <input type="number" step="0.01" name="weight" value="{{ old('weight', $product->weight) }}" min="0" class="dj-admin-input">
+                @error('weight') <p class="dj-admin-error">{{ $message }}</p> @enderror
+            </div>
+        </div>
     </div>
-</div>
-
-<div>
-    <label class="dj-admin-label">{{ __('products.gallery_images') }}</label>
-    <input type="file" name="images[]" multiple accept="image/*" class="w-full text-sm">
-    @error('images') <p class="dj-admin-error">{{ $message }}</p> @enderror
-    @foreach ($errors->get('images.*') as $messages)
-        @foreach ($messages as $message)
-            <p class="dj-admin-error">{{ $message }}</p>
-        @endforeach
-    @endforeach
-    <p class="dj-admin-hint">{{ __('products.gallery_images_hint') }}</p>
-</div>
-
-<button type="submit" class="dj-admin-btn dj-admin-btn-primary">{{ __('products.save_product') }}</button>
+@endisset

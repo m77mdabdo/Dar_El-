@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\NewContactMessageMail;
 use App\Models\ContactMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,7 +22,12 @@ class NewContactMessage extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): NewContactMessageMail
+    {
+        return new NewContactMessageMail($this->message, $notifiable);
     }
 
     /**

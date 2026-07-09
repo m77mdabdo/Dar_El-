@@ -7,6 +7,10 @@
     <title>@yield('title', __('admin.dashboard.title')) — {{ __('admin.brand') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {{-- Loaded before admin.js so its alpine:init listener attaches before Alpine.start() fires. --}}
+    @if (request()->routeIs('admin.products.*'))
+        @vite(['resources/js/admin-products.js'])
+    @endif
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     <style>[x-cloak] { display: none !important; }</style>
 </head>
@@ -139,10 +143,10 @@
 
             <main class="p-3 sm:p-6 flex-1 min-w-0">
                 @if (session('status'))
-                    <div class="dj-admin-alert dj-admin-alert-success">{{ session('status') }}</div>
+                    <span class="hidden" data-flash-toast="success">{{ session('status') }}</span>
                 @endif
                 @if (session('error'))
-                    <div class="dj-admin-alert dj-admin-alert-error">{{ session('error') }}</div>
+                    <span class="hidden" data-flash-toast="error">{{ session('error') }}</span>
                 @endif
 
                 @yield('content')

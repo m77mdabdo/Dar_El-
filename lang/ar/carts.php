@@ -1,0 +1,73 @@
+<?php
+
+return [
+    'title' => 'السلال',
+    'abandoned_carts' => 'السلال المتروكة',
+    'active_carts' => 'السلال النشطة',
+    'converted_carts' => 'السلال المكتملة',
+    'cart_details' => 'تفاصيل السلة',
+    'no_carts_found' => 'لا توجد سلال.',
+
+    'customer' => 'العميل',
+    'cart_items' => 'عناصر السلة',
+    'cart_total' => 'إجمالي السلة',
+    'cart_subtotal' => 'المجموع الفرعي للسلة',
+    'estimated_total' => 'الإجمالي التقديري',
+    'last_updated' => 'آخر تحديث',
+    'abandoned_duration' => 'مدة الترك',
+    'reminder_count' => 'عدد التذكيرات',
+    'last_reminder' => 'آخر تذكير',
+    'reminder_history' => 'سجل التذكيرات',
+
+    'status_active' => 'نشطة',
+    'status_abandoned' => 'متروكة',
+    'status_converted' => 'مكتملة',
+    'status_expired' => 'منتهية',
+
+    'all_statuses' => 'كل الحالات',
+    'search_placeholder' => 'ابحث باسم العميل أو البريد أو الهاتف...',
+    'date_from' => 'من',
+    'date_to' => 'إلى',
+
+    'send_reminder' => 'إرسال تذكير',
+    'send_bulk_reminder' => 'إرسال تذكير جماعي',
+    'reminder_sent' => 'تم إرسال التذكير.',
+    'bulk_reminders_sent' => 'تم إرسال :count تذكير.',
+    'bulk_reminders_failed' => 'وتعذر إرسال :count تذكير.',
+    'reminder_failed' => 'تعذر إرسال التذكير. يرجى مراجعة سجلات الأخطاء.',
+    'no_customer_email' => 'لا يملك هذا العميل بريدًا إلكترونيًا لإرسال التذكير إليه.',
+    'cannot_remind' => 'هذه السلة فارغة أو تم إتمامها بالفعل.',
+    'view_customer' => 'عرض العميل',
+    'view_product' => 'عرض المنتج',
+    'view_order' => 'عرض الطلب',
+    'converted_to_order' => 'تم تحويلها إلى طلب',
+
+    'quantity' => 'الكمية',
+    'unit_price' => 'سعر الوحدة',
+    'total' => 'الإجمالي',
+    'stock_availability' => 'المخزون',
+    'size' => 'المقاس',
+    'variant' => 'المتغير',
+
+    'continue_checkout' => 'أكملي طلبك',
+    'your_cart_is_waiting' => 'سلتك بانتظارك',
+    'complete_your_order' => 'أكملي طلبك',
+
+    'stat_active' => 'السلال النشطة',
+    'stat_abandoned' => 'السلال المتروكة',
+    'stat_converted' => 'السلال المكتملة',
+    'stat_expired' => 'السلال المنتهية',
+    'stat_conversion_rate' => 'معدل تحويل السلال',
+    'stat_abandoned_value' => 'قيمة السلال المتروكة',
+    'stat_reminders_today' => 'التذكيرات المرسلة اليوم',
+
+    'chart_by_status' => 'السلال حسب الحالة',
+    'chart_abandoned_trend' => 'السلال المتروكة عبر الزمن',
+    'chart_conversion_trend' => 'اتجاه تحويل السلال',
+    'chart_top_products' => 'الأكثر وجودًا في السلال',
+
+    'channel_mail' => 'بريد إلكتروني',
+    'channel_database' => 'إشعار',
+    'reminder_status_sent' => 'تم الإرسال',
+    'reminder_status_failed' => 'فشل',
+];

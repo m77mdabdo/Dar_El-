@@ -7,6 +7,8 @@ return [
     'order_number' => 'Order #',
     'customer' => 'Customer',
     'total' => 'Total',
+    'item' => 'Item',
+    'qty' => 'Qty',
     'payment' => 'Payment',
     'no_orders' => 'No orders yet.',
     'view' => 'View',
@@ -30,4 +32,7 @@ return [
     'payment_status_paid' => 'Paid',
     'payment_status_failed' => 'Failed',
     'payment_status_refunded' => 'Refunded',
+
+    'status_updated' => 'Order status updated.',
+    'status_updated_with_restock' => 'Order status updated. Stock restored for :count item(s).',
 ];

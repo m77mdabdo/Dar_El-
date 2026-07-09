@@ -36,6 +36,13 @@
             ['label' => __('admin.dashboard.unread_notifications'), 'value' => number_format($notifUnreadCount ?? 0), 'href' => route('admin.notifications.index'), 'icon' => 'bell'],
             ['label' => __('admin.dashboard.low_stock_products'), 'value' => number_format($summary['low_stock_count']), 'href' => route('admin.products.index', ['stock_status' => 'low_stock']), 'warn' => $summary['low_stock_count'] > 0, 'icon' => 'warning'],
             ['label' => __('admin.dashboard.out_of_stock_products'), 'value' => number_format($summary['out_of_stock_count']), 'href' => route('admin.products.index', ['stock_status' => 'out_of_stock']), 'warn' => $summary['out_of_stock_count'] > 0, 'icon' => 'warning'],
+            ['label' => __('admin.dashboard.new_customers_today'), 'value' => number_format($summary['new_customers_today']), 'href' => route('admin.customers.index', ['new' => '1']), 'icon' => 'users'],
+            ['label' => __('admin.dashboard.active_carts'), 'value' => number_format($summary['active_carts_count']), 'href' => route('admin.carts.index', ['status' => 'active']), 'icon' => 'cart'],
+            ['label' => __('admin.dashboard.abandoned_carts'), 'value' => number_format($summary['abandoned_carts_count']), 'href' => route('admin.carts.index', ['status' => 'abandoned']), 'warn' => $summary['abandoned_carts_count'] > 0, 'icon' => 'cart'],
+            ['label' => __('admin.dashboard.converted_carts'), 'value' => number_format($summary['converted_carts_count']), 'href' => route('admin.carts.index', ['status' => 'converted']), 'icon' => 'cart'],
+            ['label' => __('admin.dashboard.cart_conversion_rate'), 'value' => $summary['cart_conversion_rate'].'%', 'icon' => 'cart'],
+            ['label' => __('admin.dashboard.abandoned_cart_value'), 'value' => number_format($summary['abandoned_cart_value']).' EGP', 'icon' => 'currency'],
+            ['label' => __('admin.dashboard.reminders_sent_today'), 'value' => number_format($summary['reminders_sent_today']), 'icon' => 'bell'],
         ];
     @endphp
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 mb-8">
@@ -110,6 +117,30 @@
             ],
             'options' => ['responsive' => true, 'maintainAspectRatio' => false, 'cutout' => '62%'],
         ];
+
+        $djNewCustomersChart = [
+            'type' => 'line',
+            'data' => ['labels' => $charts['new_customers_labels'], 'datasets' => [['label' => __('admin.dashboard.chart_new_customers'), 'data' => $charts['new_customers_series'], 'borderColor' => '#601526', 'backgroundColor' => 'rgba(96,21,38,0.08)', 'pointRadius' => 2, 'tension' => 0.35, 'fill' => true]]],
+            'options' => ['responsive' => true, 'maintainAspectRatio' => false, 'plugins' => ['legend' => ['display' => false]], 'scales' => ['y' => ['beginAtZero' => true, 'grid' => ['color' => 'rgba(60,11,23,.06)']], 'x' => ['grid' => ['display' => false]]]],
+        ];
+
+        $djCartActivityChart = [
+            'type' => 'line',
+            'data' => [
+                'labels' => $charts['abandoned_carts_labels'],
+                'datasets' => [
+                    ['label' => __('admin.dashboard.chart_abandoned_carts'), 'data' => $charts['abandoned_carts_series'], 'borderColor' => '#9C5064', 'backgroundColor' => 'rgba(156,80,100,0.1)', 'pointRadius' => 2, 'tension' => 0.35, 'fill' => true],
+                    ['label' => __('admin.dashboard.chart_cart_conversion'), 'data' => $charts['cart_conversion_series'], 'borderColor' => '#D4A574', 'backgroundColor' => 'rgba(212,165,116,0.12)', 'pointRadius' => 2, 'tension' => 0.35, 'fill' => true],
+                ],
+            ],
+            'options' => ['responsive' => true, 'maintainAspectRatio' => false, 'scales' => ['y' => ['beginAtZero' => true, 'grid' => ['color' => 'rgba(60,11,23,.06)']], 'x' => ['grid' => ['display' => false]]]],
+        ];
+
+        $djTopCartProductsChart = [
+            'type' => 'bar',
+            'data' => ['labels' => $charts['top_cart_products_labels'], 'datasets' => [['label' => __('admin.dashboard.chart_top_cart_products'), 'data' => $charts['top_cart_products_series'], 'backgroundColor' => '#7A2038', 'borderRadius' => 6, 'maxBarThickness' => 22]]],
+            'options' => ['indexAxis' => 'y', 'responsive' => true, 'maintainAspectRatio' => false, 'plugins' => ['legend' => ['display' => false]], 'scales' => ['x' => ['grid' => ['color' => 'rgba(60,11,23,.06)']], 'y' => ['grid' => ['display' => false]]]],
+        ];
     @endphp
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
         <div class="dj-admin-card p-4 lg:col-span-2">
@@ -156,6 +187,31 @@
             <h2 class="font-semibold mb-3 text-sm sm:text-base text-[var(--dj-maroon-dark)]">{{ __('admin.dashboard.chart_inventory') }}</h2>
             <div class="relative h-64 sm:h-72">
                 <canvas class="dj-admin-chart w-full h-full" data-config='@json($djInventoryChart)'></canvas>
+            </div>
+        </div>
+
+        <div class="dj-admin-card p-4">
+            <h2 class="font-semibold mb-3 text-sm sm:text-base text-[var(--dj-maroon-dark)]">{{ __('admin.dashboard.chart_new_customers') }}</h2>
+            <div class="relative h-64 sm:h-72">
+                <canvas class="dj-admin-chart w-full h-full" data-config='@json($djNewCustomersChart)'></canvas>
+            </div>
+        </div>
+
+        <div class="dj-admin-card p-4 lg:col-span-2">
+            <h2 class="font-semibold mb-3 text-sm sm:text-base text-[var(--dj-maroon-dark)]">{{ __('admin.dashboard.chart_abandoned_carts') }} / {{ __('admin.dashboard.chart_cart_conversion') }}</h2>
+            <div class="relative h-64 sm:h-72">
+                <canvas class="dj-admin-chart w-full h-full" data-config='@json($djCartActivityChart)'></canvas>
+            </div>
+        </div>
+
+        <div class="dj-admin-card p-4">
+            <h2 class="font-semibold mb-3 text-sm sm:text-base text-[var(--dj-maroon-dark)]">{{ __('admin.dashboard.chart_top_cart_products') }}</h2>
+            <div class="relative h-64 sm:h-72">
+                @if (count($charts['top_cart_products_labels']))
+                    <canvas class="dj-admin-chart w-full h-full" data-config='@json($djTopCartProductsChart)'></canvas>
+                @else
+                    <p class="text-sm text-[var(--dj-rose-dust)] text-center py-16">{{ __('admin.dashboard.no_data') }}</p>
+                @endif
             </div>
         </div>
     </div>

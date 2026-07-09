@@ -21,13 +21,15 @@ class SettingController extends Controller
         'shop_hero_image', 'blog_hero_image', 'contact_hero_image', 'checkout_hero_image',
     ];
 
+    protected const BOOLEAN_KEYS = ['login_alerts_enabled'];
+
     public function __construct(protected ImageUploadService $imageUploader)
     {
     }
 
     public function edit()
     {
-        $settings = Setting::whereIn('key', [...self::KEYS, ...self::IMAGE_KEYS])->pluck('value', 'key');
+        $settings = Setting::whereIn('key', [...self::KEYS, ...self::IMAGE_KEYS, ...self::BOOLEAN_KEYS])->pluck('value', 'key');
 
         return view('admin.settings.edit', compact('settings'));
     }
@@ -65,6 +67,10 @@ class SettingController extends Controller
             }
         }
 
+        foreach (self::BOOLEAN_KEYS as $key) {
+            Setting::set($key, $request->boolean($key) ? '1' : '0');
+        }
+
         ActivityLog::create([
             'user_id' => $request->user()->id,
             'action' => 'updated',
@@ -73,6 +79,6 @@ class SettingController extends Controller
             'description' => 'Updated store settings',
         ]);
 
-        return back()->with('status', 'Settings updated.');
+        return back()->with('status', __('settings.updated'));
     }
 }

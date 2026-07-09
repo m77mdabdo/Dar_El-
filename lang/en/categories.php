@@ -16,4 +16,8 @@ return [
     'image' => 'Image',
     'image_hint' => 'JPG, PNG, or WEBP. Max 4MB. Uploading a new image replaces the current one.',
     'save_category' => 'Save Category',
+
+    'created' => 'Category created.',
+    'updated' => 'Category updated.',
+    'deleted' => 'Category deleted.',
 ];

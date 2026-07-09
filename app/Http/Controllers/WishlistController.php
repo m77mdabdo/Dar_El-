@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Wishlist;
 use App\Services\CartService;
+use App\Services\CartTrackingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ use Illuminate\View\View;
 
 class WishlistController extends Controller
 {
-    public function __construct(protected CartService $cart) {}
+    public function __construct(protected CartService $cart, protected CartTrackingService $cartTracking) {}
 
     public function index(Request $request): View
     {
@@ -66,6 +67,8 @@ class WishlistController extends Controller
 
             return back()->with('error', $e->getMessage());
         }
+
+        $this->cartTracking->sync($request->user(), $this->cart);
 
         $request->user()->wishlists()->where('product_id', $product->id)->delete();
 

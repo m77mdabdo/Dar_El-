@@ -2,10 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Mail\OrderStatusMail;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class OrderStatusUpdated extends Notification implements ShouldQueue
@@ -33,13 +33,9 @@ class OrderStatusUpdated extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): OrderStatusMail
     {
-        return (new MailMessage)
-            ->subject("Your order {$this->order->order_number} has been updated")
-            ->line("Your order {$this->order->order_number} status is now: ".ucfirst($this->order->status).'.')
-            ->action('View Order', route('account.orders.show', $this->order))
-            ->line('Thank you for shopping with Dar El-Jamila!');
+        return new OrderStatusMail($this->order);
     }
 
     /**

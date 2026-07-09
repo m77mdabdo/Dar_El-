@@ -33,7 +33,7 @@ class ShopController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        $product->load(['images', 'sizes', 'category', 'approvedReviews']);
+        $product->load(['images', 'sizes', 'category', 'approvedReviews.images', 'approvedReviews.user']);
 
         $relatedProducts = Product::with(['images', 'sizes', 'approvedReviews'])
             ->where('is_active', true)
@@ -42,6 +42,10 @@ class ShopController extends Controller
             ->take(4)
             ->get();
 
-        return view('shop.show', compact('product', 'relatedProducts'));
+        $userReview = auth()->check()
+            ? $product->reviews()->where('user_id', auth()->id())->first()
+            : null;
+
+        return view('shop.show', compact('product', 'relatedProducts', 'userReview'));
     }
 }

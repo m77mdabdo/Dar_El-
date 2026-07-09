@@ -102,6 +102,70 @@ window.adminMarkAllNotificationsRead = async function (url) {
     }
 };
 
+/* ===== SHARED TOAST SYSTEM =====
+   Exposed on window so any admin bundle (e.g. admin-products.js, loaded
+   before this file) can call it from event handlers fired after the page
+   has fully loaded — by then window.djToast is guaranteed to exist. */
+function djToastStack() {
+    let stack = document.getElementById('dj-admin-toast-stack');
+
+    if (! stack) {
+        stack = document.createElement('div');
+        stack.id = 'dj-admin-toast-stack';
+        stack.className = 'dj-admin-toast-stack';
+        document.body.appendChild(stack);
+    }
+
+    return stack;
+}
+
+window.djToast = function (message, type = 'success') {
+    if (! message) return;
+
+    const toast = document.createElement('div');
+    toast.className = `dj-admin-toast dj-admin-toast-${type}`;
+    toast.textContent = message;
+    djToastStack().appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('dj-admin-toast-visible'));
+
+    setTimeout(() => {
+        toast.classList.remove('dj-admin-toast-visible');
+        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    }, 4000);
+};
+
+/**
+ * For JS-driven flows that reload the page on success (e.g. bulk actions),
+ * a toast shown right before reload would vanish instantly — this stashes
+ * it across the reload so it can be shown once the fresh page loads.
+ */
+window.djQueueToast = function (message, type = 'success') {
+    try {
+        sessionStorage.setItem('djPendingToast', JSON.stringify({ message, type }));
+    } catch (e) {
+        // Storage unavailable (private browsing, quota, etc.) — skip silently.
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     initAdminCharts();
+
+    // Converts the server-flashed status/error session message into a
+    // floating toast instead of a permanent inline banner.
+    document.querySelectorAll('[data-flash-toast]').forEach((el) => {
+        window.djToast(el.textContent.trim(), el.dataset.flashToast);
+        el.remove();
+    });
+
+    try {
+        const pending = sessionStorage.getItem('djPendingToast');
+        if (pending) {
+            sessionStorage.removeItem('djPendingToast');
+            const { message, type } = JSON.parse(pending);
+            window.djToast(message, type);
+        }
+    } catch (e) {
+        // Ignore malformed/unavailable storage.
+    }
 });

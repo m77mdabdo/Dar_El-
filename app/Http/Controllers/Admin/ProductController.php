@@ -8,15 +8,24 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Services\ImageUploadService;
+use App\Services\ProductDeleter;
 use App\Services\StockAlertService;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ImageUploadService $imageUploader, protected StockAlertService $stockAlerts)
-    {
+    public function __construct(
+        protected ImageUploadService $imageUploader,
+        protected StockAlertService $stockAlerts,
+        protected ProductDeleter $productDeleter,
+    ) {
     }
 
     public function index(Request $request)
@@ -25,7 +34,8 @@ class ProductController extends Controller
 
         $products = Product::with(['category', 'sizes'])
             ->withSum('sizes as total_stock', 'stock')
-            ->when($request->search, fn ($q) => $q->where('name_en', 'like', "%{$request->search}%"))
+            ->search($request->search)
+            ->ofStatus($request->status)
             ->filterByStockStatus($request->stock_status)
             ->latest()
             ->paginate(15)
@@ -47,9 +57,12 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        $validated = collect($this->validated($request))->except(['images', 'image_url'])->all();
+        $all = $this->validated($request);
+        $status = $all['status'];
+        $validated = collect($all)->except(['images', 'image_url', 'status'])->all();
 
         $product = Product::create($validated + ['slug' => Str::slug($validated['name_en'])]);
+        $product->applyStatus($status);
 
         if ($request->hasFile('image_url')) {
             $product->update(['image_url' => $this->imageUploader->store($request->file('image_url'), "products/{$product->id}")]);
@@ -60,37 +73,84 @@ class ProductController extends Controller
 
         ActivityLog::record('created', $product, "Created product {$product->name_en}");
 
-        return redirect()->route('admin.products.index')->with('status', 'Product created.');
+        // Drop straight into Guided Setup so a brand-new draft walks through
+        // Options -> Variants -> Images -> SEO -> Publish in order, instead
+        // of landing back on the list with everything still to configure.
+        return redirect()->route('admin.products.edit', ['product' => $product, 'wizard' => 1])
+            ->with('status', __('products.created'));
     }
 
-    public function edit(Product $product)
+    public function edit(Request $request, Product $product)
     {
         $this->authorize('update', $product);
 
         $categories = Category::orderBy('name_en')->get();
-        $product->load('sizes', 'images');
+        $product->load('sizes', 'images', 'options.values.images', 'variants.values.option');
+        $wizard = $request->boolean('wizard');
 
-        return view('admin.products.edit', compact('product', 'categories'));
+        return view('admin.products.edit', compact('product', 'categories', 'wizard'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse
     {
         $this->authorize('update', $product);
 
-        $validated = collect($this->validated($request, $product))->except(['images', 'image_url'])->all();
+        $all = $this->validated($request, $product);
+        $status = $all['status'];
+        $validated = collect($all)->except(['images', 'image_url', 'status'])->all();
 
         if ($request->hasFile('image_url')) {
             $validated['image_url'] = $this->imageUploader->replace($product->image_url, $request->file('image_url'), "products/{$product->id}");
         }
 
         $product->update($validated + ['slug' => Str::slug($validated['name_en'])]);
+        $product->applyStatus($status);
 
         $this->syncSizes($product, $request);
         $this->uploadImages($product, $request);
 
         ActivityLog::record('updated', $product, "Updated product {$product->name_en}");
 
-        return redirect()->route('admin.products.index')->with('status', 'Product updated.');
+        return redirect()->route('admin.products.index')->with('status', __('products.updated'));
+    }
+
+    /**
+     * Partial-payload save for the autosave JS: only the submitted fields
+     * are validated and persisted. Validates manually (rather than
+     * $request->validate()) because this app's exception handler only
+     * auto-renders ValidationException as JSON for api/* routes (see
+     * bootstrap/app.php's shouldRenderJsonWhen) — this admin/* endpoint
+     * needs to return JSON itself either way.
+     */
+    public function autosave(Request $request, Product $product): JsonResponse
+    {
+        $this->authorize('update', $product);
+
+        $rules = collect($this->fieldRules())->only(array_keys($request->all()))->all();
+
+        if (array_key_exists('is_featured', $rules)) {
+            $request->merge(['is_featured' => $request->boolean('is_featured')]);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            throw new HttpResponseException(response()->json(['errors' => $validator->errors()], 422));
+        }
+
+        $validated = $validator->validated();
+        $status = $validated['status'] ?? null;
+        unset($validated['status']);
+
+        if ($validated !== []) {
+            $product->update($validated);
+        }
+
+        if ($status !== null) {
+            $product->applyStatus($status);
+        }
+
+        return response()->json(['status' => 'ok', 'updated_at' => $product->fresh()->updated_at->toIso8601String()]);
     }
 
     public function destroy(Product $product): RedirectResponse
@@ -99,14 +159,11 @@ class ProductController extends Controller
 
         $name = $product->name_en;
 
-        // Delete files explicitly: the FK cascade removes the rows at the DB level
-        // without firing Eloquent's deleting event, so images would otherwise orphan.
-        $product->images->each->delete();
-        $product->delete();
+        $this->productDeleter->delete($product);
 
         ActivityLog::record('deleted', $product, "Deleted product {$name}");
 
-        return redirect()->route('admin.products.index')->with('status', 'Product deleted.');
+        return redirect()->route('admin.products.index')->with('status', __('products.deleted'));
     }
 
     public function destroyImage(Product $product, ProductImage $image): RedirectResponse
@@ -117,7 +174,7 @@ class ProductController extends Controller
 
         $image->delete();
 
-        return back()->with('status', 'Image removed.');
+        return back()->with('status', __('products.image_removed'));
     }
 
     public function updateImage(Request $request, Product $product, ProductImage $image): RedirectResponse
@@ -130,17 +187,62 @@ class ProductController extends Controller
 
         $image->update($validated);
 
-        return back()->with('status', 'Image order updated.');
+        return back()->with('status', __('products.image_order_updated'));
     }
 
-    protected function validated(Request $request, ?Product $product = null): array
+    /**
+     * Drag-reorder for the gallery: accepts the full ordered list of image
+     * ids and assigns sort_order 0..n-1 in one transaction, replacing the
+     * old one-PATCH-per-image number-box workflow (updateImage() above
+     * stays available for any non-JS fallback).
+     */
+    public function reorderImages(Request $request, Product $product): JsonResponse
     {
-        $request->merge([
-            'is_active' => $request->boolean('is_active'),
-            'is_featured' => $request->boolean('is_featured'),
+        $this->authorize('update', $product);
+
+        $validator = Validator::make($request->all(), [
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', Rule::exists('product_images', 'id')->where('product_id', $product->id)],
         ]);
 
-        return $request->validate([
+        if ($validator->fails()) {
+            throw new HttpResponseException(response()->json(['errors' => $validator->errors()], 422));
+        }
+
+        DB::transaction(function () use ($validator, $product) {
+            foreach ($validator->validated()['ids'] as $order => $id) {
+                ProductImage::where('id', $id)->where('product_id', $product->id)->update(['sort_order' => $order]);
+            }
+        });
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * One-click "set as cover": points the dedicated image_url field at this
+     * gallery image's file (copied, not moved, so removing it from the
+     * gallery later doesn't also delete the cover).
+     */
+    public function setCoverImage(Product $product, ProductImage $image): RedirectResponse
+    {
+        $this->authorize('update', $product);
+
+        abort_unless($image->product_id === $product->id, 404);
+
+        $product->update(['image_url' => $this->imageUploader->copy($image->path, "products/{$product->id}")]);
+
+        return back()->with('status', __('products.cover_updated'));
+    }
+
+    /**
+     * Shared field rules for both the full form save and the partial
+     * autosave endpoint. Image fields are excluded from autosave (they
+     * never arrive as JSON), so autosave filters this down to whichever
+     * keys are actually present in its payload.
+     */
+    protected function fieldRules(): array
+    {
+        return [
             'category_id' => ['required', 'exists:categories,id'],
             'name_ar' => ['required', 'string', 'max:255'],
             'name_en' => ['required', 'string', 'max:255'],
@@ -150,8 +252,27 @@ class ProductController extends Controller
             'compare_at_price' => ['nullable', 'integer', 'min:0'],
             'sku' => ['nullable', 'string', 'max:255'],
             'badge' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
+            'status' => ['required', 'in:draft,scheduled,published,archived'],
+            'scheduled_publish_at' => ['nullable', 'date', 'required_if:status,scheduled'],
+            'meta_title_ar' => ['nullable', 'string', 'max:255'],
+            'meta_title_en' => ['nullable', 'string', 'max:255'],
+            'meta_description_ar' => ['nullable', 'string', 'max:500'],
+            'meta_description_en' => ['nullable', 'string', 'max:500'],
+            'sku_prefix' => ['nullable', 'string', 'max:50'],
+            'default_stock' => ['nullable', 'integer', 'min:0'],
+            'default_low_stock_threshold' => ['nullable', 'integer', 'min:0'],
+            'weight' => ['nullable', 'numeric', 'min:0'],
+        ];
+    }
+
+    protected function validated(Request $request, ?Product $product = null): array
+    {
+        $request->merge([
+            'is_featured' => $request->boolean('is_featured'),
+        ]);
+
+        return $request->validate($this->fieldRules() + [
             'image_url' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],

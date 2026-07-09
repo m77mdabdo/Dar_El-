@@ -8,9 +8,13 @@ return [
     'default_shipping_fee' => 'Default Shipping Fee (EGP)',
     'facebook_url' => 'Facebook URL',
     'instagram_url' => 'Instagram URL',
+    'security' => 'Security',
+    'login_alerts_enabled' => 'Send a login alert email when a customer signs in',
+    'login_alerts_enabled_hint' => 'Notifies the account holder by email every time their account is logged into, with the time, IP address, and device.',
     'site_images' => 'Site Images',
     'images_hint' => 'JPG, PNG, or WEBP. Max 4MB each. Uploading a new image replaces the current one.',
     'save_settings' => 'Save Settings',
+    'updated' => 'Settings updated.',
 
     'image_home_hero_image' => 'Homepage Hero Background',
     'image_shop_hero_image' => 'Shop Page Hero',
