@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(crontab -l)",
+      "Bash(/Applications/XAMPP/xamppfiles/bin/mysql -uroot -h127.0.0.1 -D dar-el-jamila -e \"SELECT id, queue, attempts, LEFT\\(payload,120\\) as payload_start, LEFT\\(exception,300\\) as exc FROM failed_jobs ORDER BY id DESC LIMIT 10;\")",
+      "Bash(/Applications/XAMPP/xamppfiles/bin/mysql -uroot -h127.0.0.1 -D dar-el-jamila -e \"SELECT id, queue, attempts, available_at, created_at FROM jobs ORDER BY id DESC LIMIT 10;\")",
+      "Bash(/Applications/XAMPP/xamppfiles/bin/mysql -uroot -h127.0.0.1 -D dar-el-jamila -e \"DESCRIBE failed_jobs;\")",
+      "Bash(/Applications/XAMPP/xamppfiles/bin/mysql -uroot -h127.0.0.1 -D dar-el-jamila -e \"SELECT id, connection, queue, failed_at, LEFT\\(exception,500\\) as exc FROM failed_jobs ORDER BY id DESC LIMIT 10;\")",
+      "Bash(ps -o pid,lstart,etime,command -p 76442)",
+      "Bash(kill 76442)",
+      "Bash(disown)",
+      "Bash(curl -s -c /private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad/checkout-cookies.txt -b /private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad/checkout-cookies.txt -L http://127.0.0.1:8000/checkout -D /private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad/checkout-get-headers.txt -o /private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad/checkout-get.html)",
+      "Bash(qlmanage -t -s 1400 -o . order27-invoice.pdf)",
+      "Bash(qlmanage -t -s 1400 -o . order27-email.html)",
+      "Bash(SCRATCH=/private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad *)",
+      "Bash(npm --version)",
+      "Read(//Applications/Google Chrome.app/**)",
+      "Read(//Applications/**)",
+      "Bash(mdfind \"kMDItemCFBundleIdentifier == 'com.google.Chrome'\")",
+      "Bash(PUPPETEER_SKIP_DOWNLOAD=true npm install puppeteer --save-dev)",
+      "Bash(qlmanage -t -s 1400 -o . invoice-preview.pdf)",
+      "Bash(sips -c 120 400 --cropOffset 300 40 invoice-preview.pdf.png --out header-crop.png)",
+      "Bash(sips -z 480 1600 header-crop.png --out header-crop-zoom.png)",
+      "Bash(sips -c 200 950 --cropOffset 440 30 invoice-preview.pdf.png --out cards-crop.png)",
+      "Bash(sips -z 400 1900 cards-crop.png --out cards-crop-zoom.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad/invoice-preview.pdf.png)",
+      "Bash(sips -z 2000 1414 invoice-preview.pdf.png --out invoice-preview-big.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad/invoice-preview-big.png)",
+      "Bash(sips -c 400 1400 --cropOffset -675 0 invoice-preview-big.png --out header-check.png)",
+      "Bash(qlmanage -t -s 2800 -o . invoice-preview.pdf)",
+      "Bash(python3 -c \"import PIL; print\\('has PIL'\\)\")",
+      "Bash(sips -c 900 1981 --cropOffset -950 0 invoice-preview.pdf.png --out header-check2.png)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -m pip install --quiet Pillow)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/claude-501/-Applications-XAMPP-xamppfiles-htdocs-dar-el-jamila/4b3c1490-4543-4e8f-b3db-9cece7926656/scratchpad"
+    ]
+  }
+}

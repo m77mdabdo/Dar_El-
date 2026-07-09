@@ -1,206 +1,377 @@
 <!DOCTYPE html>
-<html lang="{{ $locale }}">
+<html lang="{{ $locale }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
 <head>
-    <meta charset="utf-8">
-    <title>{{ __('invoice.invoice') }} {{ $invoiceNumber }}</title>
-    <style>
-        @font-face {
-            font-family: 'Cairo';
-            font-weight: normal;
-            src: url('{{ resource_path('fonts/cairo/Cairo-Regular.ttf') }}') format('truetype');
-        }
-        @font-face {
-            font-family: 'Cairo';
-            font-weight: bold;
-            src: url('{{ resource_path('fonts/cairo/Cairo-Bold.ttf') }}') format('truetype');
-        }
-        @font-face {
-            font-family: 'Cairo';
-            font-weight: 600;
-            src: url('{{ resource_path('fonts/cairo/Cairo-SemiBold.ttf') }}') format('truetype');
-        }
+<meta charset="utf-8">
+<title>{{ __('invoice.invoice') }} {{ $invoiceNumber }}</title>
+<style>
+    @php
+        $djCairoRegular = base64_encode(file_get_contents(resource_path('fonts/cairo/Cairo-Regular.ttf')));
+        $djCairoSemiBold = base64_encode(file_get_contents(resource_path('fonts/cairo/Cairo-SemiBold.ttf')));
+        $djCairoBold = base64_encode(file_get_contents(resource_path('fonts/cairo/Cairo-Bold.ttf')));
+    @endphp
+    @font-face {
+        font-family: 'Cairo';
+        font-weight: 400;
+        font-style: normal;
+        src: url(data:font/truetype;charset=utf-8;base64,{{ $djCairoRegular }}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Cairo';
+        font-weight: 600;
+        font-style: normal;
+        src: url(data:font/truetype;charset=utf-8;base64,{{ $djCairoSemiBold }}) format('truetype');
+    }
+    @font-face {
+        font-family: 'Cairo';
+        font-weight: 700;
+        font-style: normal;
+        src: url(data:font/truetype;charset=utf-8;base64,{{ $djCairoBold }}) format('truetype');
+    }
 
-        * { margin: 0; padding: 0; }
-        p { margin: 0 0 4px; }
+    :root {
+        --dj-primary: #5B1024;
+        --dj-primary-dark: #3C0B17;
+        --dj-secondary: #F7F0E7;
+        --dj-gold: #E8C39A;
+        --dj-ink: #2A1015;
+        --dj-muted: #9C5064;
+        --dj-border: #EAD9C4;
+    }
 
-        body {
-            font-family: 'Cairo', 'DejaVu Sans', sans-serif;
-            font-size: 12.5px;
-            color: #2A1015;
-            direction: {{ $isRtl ? 'rtl' : 'ltr' }};
-            unicode-bidi: embed;
-        }
-        table { width: 100%; border-collapse: collapse; }
-        .text-start { text-align: {{ $isRtl ? 'right' : 'left' }}; }
-        .text-end { text-align: {{ $isRtl ? 'left' : 'right' }}; }
-        .muted { color: #9C5064; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ----- Header ----- */
-        .brand-bar { background: #3C0B17; padding: 22px 28px; }
-        .brand-name { color: #E8C39A; font-size: 22px; font-weight: bold; margin: 0; }
-        .brand-tagline { color: #F7EFE4; font-size: 11px; margin: 3px 0 0; opacity: .85; }
-        .invoice-title { color: #F7EFE4; font-size: 18px; font-weight: bold; margin: 0; }
-        .invoice-meta { color: #E8C39A; font-size: 11.5px; margin: 3px 0 0; }
+    @page { size: A4; margin: 0; }
 
-        .page { padding: 24px 28px; }
+    html, body {
+        font-family: 'Cairo', 'Segoe UI', Arial, sans-serif;
+        font-size: 13px;
+        color: var(--dj-ink);
+        background: #ffffff;
+        direction: {{ $isRtl ? 'rtl' : 'ltr' }};
+        unicode-bidi: embed;
+        -webkit-font-smoothing: antialiased;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
 
-        /* ----- Address blocks ----- */
-        .address-box {
-            background: #F7EFE4;
-            border: 1px solid #EFE2CE;
-            border-radius: 6px;
-            padding: 12px 14px;
-            vertical-align: top;
-        }
-        .address-label {
-            color: #601526;
-            font-size: 10.5px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-            margin: 0 0 6px;
-        }
-        .address-line { font-size: 12px; color: #2A1015; line-height: 1.6; }
+    .text-start { text-align: {{ $isRtl ? 'right' : 'left' }}; }
+    .text-end { text-align: {{ $isRtl ? 'left' : 'right' }}; }
+    .muted { color: var(--dj-muted); }
 
-        /* ----- Items table ----- */
-        .items-table { margin-top: 22px; }
-        .items-table thead th {
-            background: #601526; color: #F7EFE4; font-size: 10.5px; text-transform: uppercase;
-            letter-spacing: .3px; padding: 9px 10px; font-weight: bold;
-        }
-        .items-table tbody td {
-            padding: 9px 10px; border-bottom: 1px solid #EFE2CE; font-size: 12px; vertical-align: top;
-        }
-        .item-name { font-weight: bold; color: #2A1015; }
-        .item-variant { color: #9C5064; font-size: 10.5px; margin-top: 2px; }
+    .page { padding: 26mm 15mm 18mm; }
 
-        /* ----- Totals ----- */
-        .totals-table { width: 260px; margin-top: 14px; }
-        .totals-table.pull-end { margin-{{ $isRtl ? 'right' : 'left' }}: auto; }
-        .totals-table td { padding: 5px 10px; font-size: 12px; }
-        .totals-table .grand-total td {
-            border-top: 2px solid #601526; font-weight: bold; font-size: 15px; color: #601526; padding-top: 10px;
-        }
+    /*
+     * No box-shadow anywhere in this file, deliberately: Chrome's
+     * page.pdf() print pipeline (used by Browsershot) renders
+     * box-shadow + border-radius combinations as a broken, hard-edged
+     * rectangular smear instead of a soft blur — confirmed by
+     * screenshotting the exact same markup on-screen (renders perfectly)
+     * vs printing it to PDF (visibly broken). Depth is conveyed with
+     * borders + subtle background tints instead, which is closer to
+     * Stripe's actual flat invoice style anyway.
+     */
 
-        /* ----- Meta table (payment/status/notes) ----- */
-        .meta-table { margin-top: 22px; }
-        .meta-table td { padding: 5px 0; font-size: 12px; vertical-align: top; }
-        .meta-label { color: #9C5064; width: 150px; }
-        .status-badge {
-            display: inline-block; background: #E8C39A; color: #601526; font-size: 10.5px;
-            font-weight: bold; padding: 3px 10px; border-radius: 10px;
-        }
+    /* ----- Header ----- */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: linear-gradient(135deg, var(--dj-primary) 0%, var(--dj-primary-dark) 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 28px 32px;
+    }
+    .brand-mark { font-size: 26px; font-weight: 700; letter-spacing: .5px; color: var(--dj-gold); }
+    .brand-tagline { font-size: 11px; color: rgba(247,240,231,0.8); margin-top: 6px; letter-spacing: .3px; }
+    .header-right { text-align: {{ $isRtl ? 'left' : 'right' }}; }
+    .invoice-title { font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
+    .invoice-number { font-size: 13px; color: var(--dj-gold); font-weight: 600; margin-top: 6px; }
+    .invoice-date { font-size: 11.5px; color: rgba(247,240,231,0.75); margin-top: 4px; }
 
-        /* ----- Footer ----- */
-        .footer {
-            margin-top: 30px; padding-top: 14px; border-top: 1px solid #EFE2CE;
-            text-align: center; color: #9C5064; font-size: 10.5px; line-height: 1.7;
-        }
-    </style>
+    /* ----- Status + order number strip ----- */
+    .strip {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 18px;
+        padding: 14px 20px;
+        background: var(--dj-secondary);
+        border-radius: 12px;
+    }
+    .strip-item { display: flex; flex-direction: column; gap: 3px; }
+    .strip-label { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: var(--dj-muted); font-weight: 600; }
+    .strip-value { font-size: 13px; font-weight: 700; color: var(--dj-primary); }
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        background: var(--dj-primary);
+        color: #fff;
+    }
+
+    /* ----- Address cards ----- */
+    .cards-row { display: flex; gap: 16px; margin-top: 22px; }
+    .card {
+        flex: 1;
+        background: #fff;
+        border: 1px solid var(--dj-border);
+        border-radius: 14px;
+        padding: 18px 20px;
+    }
+    .card-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: var(--dj-primary);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .card-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dj-gold); display: inline-block; }
+    .card-line { font-size: 12.5px; line-height: 1.75; color: var(--dj-ink); }
+    .card-line.strong { font-weight: 700; }
+    .card-line.muted { color: var(--dj-muted); font-size: 11.5px; }
+
+    /* ----- Product table ----- */
+    .section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: var(--dj-primary);
+        margin: 26px 0 10px;
+    }
+    .items {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--dj-border);
+    }
+    .items thead th {
+        background: var(--dj-primary);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        padding: 12px 14px;
+    }
+    .items tbody td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--dj-border);
+        font-size: 12.5px;
+        vertical-align: middle;
+        background: #fff;
+    }
+    .items tbody tr:last-child td { border-bottom: none; }
+    .items tbody tr:nth-child(even) td { background: #FCFAF6; }
+    .item-thumb {
+        width: 42px; height: 42px; border-radius: 8px; object-fit: cover;
+        border: 1px solid var(--dj-border); vertical-align: middle;
+    }
+    .item-name { font-weight: 700; color: var(--dj-ink); font-size: 12.5px; }
+    .item-meta { color: var(--dj-muted); font-size: 10.5px; margin-top: 2px; }
+
+    /* ----- Totals ----- */
+    .totals-wrap { display: flex; justify-content: {{ $isRtl ? 'flex-start' : 'flex-end' }}; margin-top: 18px; }
+    .totals-card {
+        width: 280px;
+        background: var(--dj-secondary);
+        border-radius: 14px;
+        padding: 18px 20px;
+    }
+    .totals-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12.5px; }
+    .totals-row .label { color: var(--dj-muted); }
+    .totals-row .value { color: var(--dj-ink); font-weight: 600; }
+    .totals-divider { height: 1px; background: var(--dj-border); margin: 8px 0; }
+    .grand-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+    .grand-total-label { font-size: 13px; font-weight: 700; color: var(--dj-primary); }
+    .grand-total-value { font-size: 19px; font-weight: 700; color: var(--dj-primary); }
+
+    /* ----- Meta grid (payment/status) ----- */
+    .meta-grid { display: flex; gap: 16px; margin-top: 18px; }
+    .meta-box {
+        flex: 1;
+        background: #fff;
+        border: 1px solid var(--dj-border);
+        border-radius: 14px;
+        padding: 14px 18px;
+    }
+    .meta-box .label { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--dj-muted); font-weight: 700; }
+    .meta-box .value { font-size: 13px; font-weight: 700; color: var(--dj-ink); margin-top: 4px; }
+
+    .notes-box {
+        margin-top: 16px;
+        background: var(--dj-secondary);
+        border-{{ $isRtl ? 'right' : 'left' }}: 3px solid var(--dj-primary);
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 12px;
+        color: var(--dj-ink);
+        line-height: 1.7;
+    }
+
+    /* ----- Footer ----- */
+    .footer {
+        margin-top: 34px;
+        padding-top: 18px;
+        border-top: 1px solid var(--dj-border);
+        text-align: center;
+    }
+    .footer-brand { font-size: 13px; font-weight: 700; color: var(--dj-primary); }
+    .footer-line { font-size: 10.5px; color: var(--dj-muted); margin-top: 5px; line-height: 1.7; }
+</style>
 </head>
 <body>
-    <div class="brand-bar">
-        <p class="brand-name">{{ __('Dar El-Jamila') }}</p>
-        <p class="brand-tagline">{{ __('invoice.tagline') }}</p>
+<div class="page">
 
-        <div style="height:14px;"></div>
-
-        <p class="invoice-title">{{ __('invoice.invoice') }} — {{ $invoiceNumber }}</p>
-        <p class="invoice-meta">{{ __('invoice.order_number') }}: {{ $order->order_number }}</p>
-        <p class="invoice-meta">{{ __('invoice.date') }}: {{ $order->created_at->translatedFormat('F j, Y') }}</p>
-    </div>
-
-    <div class="page">
-        <table>
-            <tr>
-                <td style="width:50%; padding-{{ $isRtl ? 'left' : 'right' }}:8px;" class="address-box">
-                    <p class="address-label">{{ __('invoice.bill_to') }}</p>
-                    <p class="address-line"><strong>{{ $order->customer_name }}</strong></p>
-                    <p class="address-line">{{ $order->customer_email }}</p>
-                    <p class="address-line">{{ $order->customer_phone }}</p>
-                </td>
-                <td style="width:50%; padding-{{ $isRtl ? 'right' : 'left' }}:8px;" class="address-box">
-                    <p class="address-label">{{ __('invoice.ship_to') }}</p>
-                    <p class="address-line">{{ $order->address }}</p>
-                    <p class="address-line">{{ $order->city }}, {{ $order->governorate }}</p>
-                </td>
-            </tr>
-        </table>
-
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th class="text-start">{{ __('invoice.item') }}</th>
-                    <th class="text-start">{{ __('invoice.sku') }}</th>
-                    <th class="text-start">{{ __('invoice.size') }}</th>
-                    <th class="text-end">{{ __('invoice.quantity') }}</th>
-                    <th class="text-end">{{ __('invoice.price') }}</th>
-                    <th class="text-end">{{ __('invoice.total') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($order->items as $item)
-                    @php
-                        $djItemName = $isRtl ? ($item->product?->name_ar ?: $item->product_name) : ($item->product?->name_en ?: $item->product_name);
-                    @endphp
-                    <tr>
-                        <td class="text-start">
-                            <div class="item-name">{{ $djItemName }}</div>
-                        </td>
-                        <td class="text-start">{{ $item->product?->sku ?? '-' }}</td>
-                        <td class="text-start">{{ $item->size ?? '-' }}</td>
-                        <td class="text-end">{{ $item->quantity }}</td>
-                        <td class="text-end">{{ number_format($item->price) }} EGP</td>
-                        <td class="text-end">{{ number_format($item->price * $item->quantity) }} EGP</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <table class="totals-table pull-end">
-            <tr>
-                <td class="text-start muted">{{ __('invoice.subtotal') }}</td>
-                <td class="text-end">{{ number_format($order->subtotal) }} EGP</td>
-            </tr>
-            @if ($order->discount_amount > 0)
-                <tr>
-                    <td class="text-start muted">{{ __('invoice.discount') }}@if($order->coupon_code) ({{ $order->coupon_code }})@endif</td>
-                    <td class="text-end">-{{ number_format($order->discount_amount) }} EGP</td>
-                </tr>
-            @endif
-            <tr>
-                <td class="text-start muted">{{ __('invoice.shipping') }}</td>
-                <td class="text-end">{{ number_format($order->shipping_fee) }} EGP</td>
-            </tr>
-            <tr class="grand-total">
-                <td class="text-start">{{ __('invoice.grand_total') }}</td>
-                <td class="text-end">{{ number_format($order->total) }} EGP</td>
-            </tr>
-        </table>
-
-        <table class="meta-table">
-            <tr>
-                <td class="meta-label">{{ __('invoice.payment_method') }}</td>
-                <td>{{ $order->payment_method === 'cod' ? __('invoice.payment_method_cod') : $order->payment_method }}</td>
-            </tr>
-            <tr>
-                <td class="meta-label">{{ __('invoice.order_status') }}</td>
-                <td><span class="status-badge">{{ __('orders.status_'.$order->status) }}</span></td>
-            </tr>
-            @if ($order->notes)
-                <tr>
-                    <td class="meta-label">{{ __('invoice.notes') }}</td>
-                    <td>{{ $order->notes }}</td>
-                </tr>
-            @endif
-        </table>
-
-        <div class="footer">
-            <p>{{ __('invoice.thank_you') }}</p>
-            @if ($djSupportEmail ?? null)
-                <p>{{ __('invoice.contact_support', ['email' => $djSupportEmail]) }}</p>
-            @endif
+    <div class="header">
+        <div>
+            <div class="brand-mark">{{ __('Dar El-Jamila') }}</div>
+            <div class="brand-tagline">{{ __('invoice.tagline') }}</div>
+        </div>
+        <div class="header-right">
+            <div class="invoice-title">{{ __('invoice.invoice') }}</div>
+            <div class="invoice-number">{{ $invoiceNumber }}</div>
+            <div class="invoice-date">{{ $order->created_at->translatedFormat('F j, Y') }}</div>
         </div>
     </div>
+
+    <div class="strip">
+        <div class="strip-item">
+            <span class="strip-label">{{ __('invoice.order_number') }}</span>
+            <span class="strip-value">{{ $order->order_number }}</span>
+        </div>
+        <div class="strip-item" style="text-align:center;">
+            <span class="strip-label">{{ __('invoice.order_status') }}</span>
+            <span class="status-badge">{{ __('orders.status_'.$order->status) }}</span>
+        </div>
+        <div class="strip-item" style="text-align:{{ $isRtl ? 'left' : 'right' }};">
+            <span class="strip-label">{{ __('invoice.date') }}</span>
+            <span class="strip-value">{{ $order->created_at->translatedFormat('F j, Y') }}</span>
+        </div>
+    </div>
+
+    <div class="cards-row">
+        <div class="card">
+            <div class="card-label"><span class="dot"></span>{{ __('invoice.bill_to') }}</div>
+            <div class="card-line strong">{{ $order->customer_name }}</div>
+            <div class="card-line muted">{{ $order->customer_email }}</div>
+            <div class="card-line muted">{{ $order->customer_phone }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label"><span class="dot"></span>{{ __('invoice.ship_to') }}</div>
+            <div class="card-line strong">{{ $order->customer_name }}</div>
+            <div class="card-line">{{ $order->address }}</div>
+            <div class="card-line muted">{{ $order->city }}, {{ $order->governorate }}</div>
+        </div>
+    </div>
+
+    <div class="section-title">{{ __('invoice.item') }}</div>
+    <table class="items">
+        <thead>
+            <tr>
+                <th class="text-start" style="width:44%;">{{ __('invoice.item') }}</th>
+                <th class="text-start">{{ __('invoice.sku') }}</th>
+                <th class="text-start">{{ __('invoice.size') }}</th>
+                <th class="text-end">{{ __('invoice.quantity') }}</th>
+                <th class="text-end">{{ __('invoice.price') }}</th>
+                <th class="text-end">{{ __('invoice.total') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($order->items as $item)
+                @php
+                    $djItemName = $isRtl ? ($item->product?->name_ar ?: $item->product_name) : ($item->product?->name_en ?: $item->product_name);
+                    $djItemImage = $item->product?->cover_image_src;
+                @endphp
+                <tr>
+                    <td class="text-start">
+                        <table style="width:100%; border-collapse:collapse;"><tr>
+                            <td style="width:50px; padding:0;">
+                                @if ($djItemImage)
+                                    <img src="{{ $djItemImage }}" class="item-thumb" alt="">
+                                @else
+                                    <div class="item-thumb" style="background:#F1E4D3;"></div>
+                                @endif
+                            </td>
+                            <td style="padding:0 0 0 10px;">
+                                <div class="item-name">{{ $djItemName }}</div>
+                            </td>
+                        </tr></table>
+                    </td>
+                    <td class="text-start">{{ $item->product?->sku ?? '—' }}</td>
+                    <td class="text-start">{{ $item->size ?? '—' }}</td>
+                    <td class="text-end">{{ $item->quantity }}</td>
+                    <td class="text-end">{{ number_format($item->price) }} EGP</td>
+                    <td class="text-end" style="font-weight:700;">{{ number_format($item->price * $item->quantity) }} EGP</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="totals-wrap">
+        <div class="totals-card">
+            <div class="totals-row">
+                <span class="label">{{ __('invoice.subtotal') }}</span>
+                <span class="value">{{ number_format($order->subtotal) }} EGP</span>
+            </div>
+            @if ($order->discount_amount > 0)
+                <div class="totals-row">
+                    <span class="label">{{ __('invoice.discount') }}@if($order->coupon_code) ({{ $order->coupon_code }})@endif</span>
+                    <span class="value">-{{ number_format($order->discount_amount) }} EGP</span>
+                </div>
+            @endif
+            <div class="totals-row">
+                <span class="label">{{ __('invoice.shipping') }}</span>
+                <span class="value">{{ number_format($order->shipping_fee) }} EGP</span>
+            </div>
+            <div class="totals-divider"></div>
+            <div class="grand-total-row">
+                <span class="grand-total-label">{{ __('invoice.grand_total') }}</span>
+                <span class="grand-total-value">{{ number_format($order->total) }} EGP</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="meta-grid">
+        <div class="meta-box">
+            <div class="label">{{ __('invoice.payment_method') }}</div>
+            <div class="value">{{ $order->payment_method === 'cod' ? __('invoice.payment_method_cod') : $order->payment_method }}</div>
+        </div>
+        @if ($order->shippingMethod)
+            <div class="meta-box">
+                <div class="label">{{ __('invoice.shipping') }}</div>
+                <div class="value">{{ $isRtl ? $order->shippingMethod->name_ar : $order->shippingMethod->name_en }}</div>
+            </div>
+        @endif
+    </div>
+
+    @if ($order->notes)
+        <div class="notes-box">
+            <strong>{{ __('invoice.notes') }}:</strong> {{ $order->notes }}
+        </div>
+    @endif
+
+    <div class="footer">
+        <div class="footer-brand">{{ __('Dar El-Jamila') }}</div>
+        <div class="footer-line">{{ __('invoice.thank_you') }}</div>
+        @if ($djSupportEmail ?? null)
+            <div class="footer-line">{{ __('invoice.contact_support', ['email' => $djSupportEmail]) }}</div>
+        @endif
+        @if ($djWhatsapp ?? null)
+            <div class="footer-line" dir="ltr">{{ $djWhatsapp }}</div>
+        @endif
+        <div class="footer-line">&copy; {{ now()->year }} {{ __('Dar El-Jamila') }}</div>
+    </div>
+
+</div>
 </body>
 </html>

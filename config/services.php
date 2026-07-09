@@ -57,4 +57,24 @@ return [
         'redirect' => env('GOOGLE_CALLBACK_URL'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Browsershot (headless Chrome PDF rendering)
+    |--------------------------------------------------------------------------
+    |
+    | Used by InvoicePdfRenderer for pixel-perfect, full-CSS invoice PDFs.
+    | All three are optional — leave unset in production after a plain
+    | `npm install puppeteer` there, which downloads its own bundled,
+    | version-pinned Chromium and needs no path configuration at all. Only
+    | set these if pointing at an existing system Chrome/Chromium install
+    | (e.g. for local development, to skip the ~300MB Puppeteer download).
+    |
+    */
+
+    'browsershot' => [
+        'chrome_path' => env('BROWSERSHOT_CHROME_PATH'),
+        'node_binary' => env('BROWSERSHOT_NODE_BINARY'),
+        'npm_binary' => env('BROWSERSHOT_NPM_BINARY'),
+    ],
+
 ];
