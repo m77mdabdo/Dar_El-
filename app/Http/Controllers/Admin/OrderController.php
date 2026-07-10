@@ -19,6 +19,8 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Order::class);
+
         $orders = Order::with('payment')
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->when($request->payment_status, fn ($q) => $q->whereHas('payment', fn ($p) => $p->where('status', $request->payment_status)))
@@ -31,6 +33,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        $this->authorize('view', $order);
+
         $order->load(['items', 'statusHistories.changedBy', 'payment', 'shippingMethod', 'user']);
 
         return view('admin.orders.show', compact('order'));
@@ -38,6 +42,8 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
+        $this->authorize('updateStatus', $order);
+
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:pending,processing,shipped,delivered,cancelled'],
             'note' => ['nullable', 'string'],

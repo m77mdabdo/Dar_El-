@@ -99,6 +99,13 @@ return [
 
     // Admin notifications
     'admin_tagline' => 'Admin Notification',
+    'admin_user_welcome_subject' => 'Your Dar El-Jamila staff account has been created',
+    'admin_user_welcome_greeting' => 'Welcome, :name',
+    'admin_user_welcome_intro' => 'A :role account has been created for you on the Dar El-Jamila admin dashboard.',
+    'admin_user_welcome_credentials_title' => 'Your Login Details',
+    'admin_user_welcome_password' => 'Temporary Password',
+    'admin_user_welcome_note' => 'For your security, please log in and change this password as soon as possible.',
+    'admin_user_welcome_button' => 'Log In Now',
     'admin_new_order_subject' => 'New order received: :number',
     'admin_new_order_intro' => 'A new order has been placed.',
     'admin_new_order_customer' => 'Customer',

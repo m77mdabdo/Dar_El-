@@ -25,4 +25,5 @@ return [
     'back' => 'رجوع',
     'update' => 'تحديث',
     'now' => 'الآن',
+    'description' => 'الوصف',
 ];

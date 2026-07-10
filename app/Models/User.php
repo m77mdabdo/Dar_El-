@@ -69,12 +69,64 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Identifies the one account (configured in
+     * config/primary_super_admin.php) that must always exist as an
+     * unrestricted Super Admin. UserController/UpdateUserRequest use this
+     * to refuse role changes, permission removal, deletion, and disabling
+     * of this specific account, regardless of who's attempting it.
+     */
+    public function isPrimarySuperAdmin(): bool
+    {
+        $email = config('primary_super_admin.email');
+
+        return $email && strcasecmp($this->email, $email) === 0;
+    }
+
+    /**
      * Where a user lands after login/registration/OTP verification when
      * there's no intended URL to return to (e.g. a guest checkout redirect).
      */
     public function postLoginRedirectRoute(): string
     {
-        return $this->hasRole('admin') ? route('admin.dashboard') : route('home');
+        return $this->hasAnyRole(['admin', 'super_admin', 'employee']) ? route('admin.dashboard') : route('home');
+    }
+
+    /**
+     * The single source of truth for "can this user do X in the admin
+     * panel". `super_admin` always passes, regardless of whether
+     * permissions happen to be seeded in a given environment — this
+     * mirrors the `before() { return $user->hasRole('admin') ? true : null; }`
+     * shortcut already used by every Policy in this app, just extended to
+     * also cover routes/sidebar and the `super_admin` role.
+     *
+     * `admin` gets the same blanket bypass for every *operational*
+     * permission, but deliberately NOT for `users.*`/`roles.*`/
+     * `permissions.*` — those three groups are Super-Admin-exclusive by
+     * explicit requirement ("Admin should not see the Roles & Permissions
+     * page or Admin Users management page"), so admin falls through to the
+     * real permission check for those slugs specifically (and
+     * PermissionSeeder never grants them to the admin role, so that check
+     * correctly returns false).
+     *
+     * Everyone else (in practice, `employee`) needs the specific
+     * permission actually granted. Deliberately uses getAllPermissions()
+     * rather than hasPermissionTo(), which throws PermissionDoesNotExist
+     * on an unseeded/typo'd slug — that would turn a permission typo into
+     * a 500 for every employee. This degrades safely to "denied" instead.
+     */
+    public function hasAdminAccess(string $permission): bool
+    {
+        if ($this->hasRole('super_admin')) {
+            return true;
+        }
+
+        $isSuperAdminOnlyPermission = Str::startsWith($permission, ['users.', 'roles.', 'permissions.']);
+
+        if ($this->hasRole('admin') && ! $isSuperAdminOnlyPermission) {
+            return true;
+        }
+
+        return $this->getAllPermissions()->contains('name', $permission);
     }
 
     /**
@@ -101,7 +153,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $intended = session('url.intended');
 
-        if ($intended && ! $this->hasRole('admin')) {
+        if ($intended && ! $this->hasAnyRole(['admin', 'super_admin', 'employee'])) {
             $path = parse_url($intended, PHP_URL_PATH) ?? '';
 
             if ($path === '/admin' || Str::startsWith($path, '/admin/')) {
@@ -154,16 +206,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * All admin-role users, used as the recipient list for admin-facing
-     * notifications (new order, low stock, new customer, etc). Unlike
-     * Spatie's role() scope, this never throws if the 'admin' role hasn't
-     * been created yet (e.g. a fresh install/test) — it just returns none.
+     * All admin/super-admin users, used as the recipient list for
+     * admin-facing notifications (new order, low stock, new customer,
+     * etc). Deliberately excludes `employee` — their narrower, per-account
+     * scope means blanket operational notifications aren't a safe
+     * default. Unlike Spatie's role() scope, this never throws if the
+     * roles haven't been created yet (e.g. a fresh install/test) — it
+     * just returns none.
      *
      * @return \Illuminate\Database\Eloquent\Collection<int, User>
      */
     public static function admins(): \Illuminate\Database\Eloquent\Collection
     {
-        return static::whereHas('roles', fn ($q) => $q->where('name', 'admin'))->get();
+        return static::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'super_admin']))->get();
     }
 
     /**
