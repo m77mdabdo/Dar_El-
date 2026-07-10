@@ -36,7 +36,7 @@ class ProductVariantBulkActionController extends Controller
      */
     public function handle(Request $request, Product $product): JsonResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
 
         $validator = Validator::make($request->all(), [
             'action' => ['required', Rule::in([

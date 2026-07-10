@@ -99,6 +99,13 @@ return [
 
     // Admin notifications
     'admin_tagline' => 'إشعار إداري',
+    'admin_user_welcome_subject' => 'تم إنشاء حسابك في دار الجميلة',
+    'admin_user_welcome_greeting' => 'أهلًا بكِ، :name',
+    'admin_user_welcome_intro' => 'تم إنشاء حساب :role لكِ على لوحة تحكم دار الجميلة.',
+    'admin_user_welcome_credentials_title' => 'بيانات تسجيل الدخول',
+    'admin_user_welcome_password' => 'كلمة المرور المؤقتة',
+    'admin_user_welcome_note' => 'لأمان حسابك، يُرجى تسجيل الدخول وتغيير كلمة المرور في أقرب وقت ممكن.',
+    'admin_user_welcome_button' => 'تسجيل الدخول الآن',
     'admin_new_order_subject' => 'طلب جديد تم استلامه: :number',
     'admin_new_order_intro' => 'تم استلام طلب جديد.',
     'admin_new_order_customer' => 'العميل',

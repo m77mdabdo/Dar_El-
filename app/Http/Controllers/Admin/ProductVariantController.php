@@ -24,7 +24,7 @@ class ProductVariantController extends Controller
 
     public function generate(Product $product): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
 
         $options = $product->options()->with(['values' => fn ($q) => $q->where('is_active', true)])->get();
 
@@ -97,7 +97,7 @@ class ProductVariantController extends Controller
 
     public function update(Request $request, Product $product, ProductVariant $variant): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($variant->product_id === $product->id, 404);
 
         $validated = $this->validated($request, $variant);
@@ -115,7 +115,7 @@ class ProductVariantController extends Controller
 
     public function bulkUpdate(Request $request, Product $product): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
 
         $rows = $request->validate([
             'variants' => ['required', 'array'],
@@ -154,7 +154,7 @@ class ProductVariantController extends Controller
 
     public function destroy(Product $product, ProductVariant $variant): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($variant->product_id === $product->id, 404);
 
         $variant->delete();

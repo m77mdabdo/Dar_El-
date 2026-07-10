@@ -9,17 +9,17 @@ class BlogCommentPolicy
 {
     public function before(User $user, string $ability): ?bool
     {
-        return $user->hasRole('admin') ? true : null;
+        return $user->hasAnyRole(['admin', 'super_admin']) ? true : null;
     }
 
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasAdminAccess('comments.view');
     }
 
     public function view(User $user, BlogComment $comment): bool
     {
-        return $user->id === $comment->user_id;
+        return $user->id === $comment->user_id || $user->hasAdminAccess('comments.view');
     }
 
     public function update(User $user, BlogComment $comment): bool
@@ -29,6 +29,16 @@ class BlogCommentPolicy
 
     public function delete(User $user, BlogComment $comment): bool
     {
-        return $user->id === $comment->user_id;
+        return $user->id === $comment->user_id || $user->hasAdminAccess('comments.delete');
+    }
+
+    public function approve(User $user, BlogComment $comment): bool
+    {
+        return $user->hasAdminAccess('comments.approve');
+    }
+
+    public function reject(User $user, BlogComment $comment): bool
+    {
+        return $user->hasAdminAccess('comments.reject');
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\EmailPreviewController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductBulkActionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductOptionController;
@@ -21,7 +22,9 @@ use App\Http\Controllers\Admin\ProductVariantBulkActionController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin'])->group(function () {
@@ -75,11 +78,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
         Route::delete('{customer}', [CustomerController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('carts')->name('carts.')->group(function () {
+    Route::prefix('carts')->name('carts.')->middleware('admin.permission:carts.view')->group(function () {
         Route::get('/', [AdminCartController::class, 'index'])->name('index');
-        Route::post('send-bulk-reminders', [AdminCartController::class, 'bulkReminder'])->name('bulkReminder');
+        Route::post('send-bulk-reminders', [AdminCartController::class, 'bulkReminder'])->name('bulkReminder')->middleware('admin.permission:carts.send_reminder');
         Route::get('{cart}', [AdminCartController::class, 'show'])->name('show');
-        Route::post('{cart}/send-reminder', [AdminCartController::class, 'sendReminder'])->name('sendReminder');
+        Route::post('{cart}/send-reminder', [AdminCartController::class, 'sendReminder'])->name('sendReminder')->middleware('admin.permission:carts.send_reminder');
     });
 
     Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -96,22 +99,33 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::patch('blog-comments/{comment}/reject', [BlogCommentController::class, 'reject'])->name('blog-comments.reject');
     Route::delete('blog-comments/{comment}', [BlogCommentController::class, 'destroy'])->name('blog-comments.destroy');
 
-    Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
-    Route::patch('contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markRead'])->name('contact-messages.read');
+    Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index')->middleware('admin.permission:messages.view');
+    Route::patch('contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markRead'])->name('contact-messages.read')->middleware('admin.permission:messages.reply');
 
-    Route::get('newsletter', [NewsletterController::class, 'index'])->name('newsletter.index');
-    Route::get('newsletter/export', [NewsletterController::class, 'export'])->name('newsletter.export');
+    Route::get('newsletter', [NewsletterController::class, 'index'])->name('newsletter.index')->middleware('admin.permission:newsletter.view');
+    Route::get('newsletter/export', [NewsletterController::class, 'export'])->name('newsletter.export')->middleware('admin.permission:newsletter.view');
 
-    Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
-    Route::patch('settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit')->middleware('admin.permission:settings.view');
+    Route::patch('settings', [SettingController::class, 'update'])->name('settings.update')->middleware('admin.permission:settings.edit');
 
-    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
-    Route::patch('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware('admin.permission:notifications.view');
+    Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read')->middleware('admin.permission:notifications.view');
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all')->middleware('admin.permission:notifications.view');
 
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     Route::get('email-preview/{type}', [EmailPreviewController::class, 'show'])->name('email-preview.show');
+
+    Route::middleware('super_admin')->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
+        Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+        Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::post('users/{user}/force-logout', [UserController::class, 'forceLogout'])->name('users.force-logout');
+
+        Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('roles/{role}', [RoleController::class, 'show'])->name('roles.show');
+        Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    });
 });

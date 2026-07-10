@@ -16,6 +16,8 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless($request->user()->hasAdminAccess('customers.view'), 403);
+
         $customers = User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))
             ->withCount('orders', 'wishlists')
             ->withSum(['orders as total_spent' => fn ($q) => $q->where('status', '!=', 'cancelled')], 'total')
@@ -44,6 +46,7 @@ class CustomerController extends Controller
 
     public function show(User $customer)
     {
+        abort_unless(auth()->user()->hasAdminAccess('customers.view'), 403);
         abort_unless($customer->hasRole('customer'), 404);
 
         $customer->load(['customerNotes' => fn ($q) => $q->with('admin')->latest()]);
@@ -73,6 +76,7 @@ class CustomerController extends Controller
 
     public function orders(User $customer)
     {
+        abort_unless(auth()->user()->hasAdminAccess('customers.view'), 403);
         abort_unless($customer->hasRole('customer'), 404);
 
         $orders = $customer->orders()->latest()->paginate(20);
@@ -82,6 +86,7 @@ class CustomerController extends Controller
 
     public function carts(User $customer)
     {
+        abort_unless(auth()->user()->hasAdminAccess('customers.carts_view'), 403);
         abort_unless($customer->hasRole('customer'), 404);
 
         $carts = $customer->carts()->with('items')->latest()->paginate(20);
@@ -91,6 +96,7 @@ class CustomerController extends Controller
 
     public function wishlist(User $customer)
     {
+        abort_unless(auth()->user()->hasAdminAccess('customers.wishlist_view'), 403);
         abort_unless($customer->hasRole('customer'), 404);
 
         $wishlist = $customer->wishlists()->with('product.sizes')->latest()->paginate(20);
@@ -100,6 +106,8 @@ class CustomerController extends Controller
 
     public function addNote(Request $request, User $customer): RedirectResponse
     {
+        abort_unless($request->user()->hasAdminAccess('customers.notes'), 403);
+
         $validated = $request->validate([
             'note' => ['required', 'string', 'max:2000'],
         ]);
@@ -115,7 +123,8 @@ class CustomerController extends Controller
 
     public function toggleDisabled(Request $request, User $customer): RedirectResponse
     {
-        abort_if($customer->id === $request->user()->id || $customer->hasRole('admin'), 403);
+        abort_unless($request->user()->hasAdminAccess('customers.disable'), 403);
+        abort_if($customer->id === $request->user()->id || $customer->hasAnyRole(['admin', 'super_admin']), 403);
 
         $customer->forceFill(['disabled_at' => $customer->isDisabled() ? null : now()])->save();
 
@@ -126,6 +135,8 @@ class CustomerController extends Controller
 
     public function sendReminder(User $customer): RedirectResponse
     {
+        abort_unless(auth()->user()->hasAdminAccess('customers.send_reminder'), 403);
+
         Log::info('Admin requested cart reminder', ['customer_id' => $customer->id, 'customer_email' => $customer->email]);
 
         $cart = $customer->carts()->open()->where('items_count', '>', 0)->latest()->first();
@@ -167,7 +178,8 @@ class CustomerController extends Controller
 
     public function destroy(User $customer): RedirectResponse
     {
-        abort_if($customer->hasRole('admin'), 403);
+        abort_unless(auth()->user()->hasAdminAccess('customers.delete'), 403);
+        abort_if($customer->hasAnyRole(['admin', 'super_admin']), 403);
 
         if ($customer->orders()->count() > 0) {
             return back()->with('error', __('customers.cannot_delete_has_orders'));

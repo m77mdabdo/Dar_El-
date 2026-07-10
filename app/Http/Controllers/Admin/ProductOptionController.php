@@ -12,7 +12,7 @@ class ProductOptionController extends Controller
 {
     public function store(Request $request, Product $product): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
 
         $validated = $request->validate([
             'name_ar' => ['required', 'string', 'max:255'],
@@ -27,7 +27,7 @@ class ProductOptionController extends Controller
 
     public function update(Request $request, Product $product, ProductOption $option): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($option->product_id === $product->id, 404);
 
         $validated = $request->validate([
@@ -43,7 +43,7 @@ class ProductOptionController extends Controller
 
     public function destroy(Product $product, ProductOption $option): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($option->product_id === $product->id, 404);
 
         // A variant is only meaningful as a combination of option values, so any

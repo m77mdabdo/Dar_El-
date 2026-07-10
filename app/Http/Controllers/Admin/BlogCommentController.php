@@ -49,6 +49,8 @@ class BlogCommentController extends Controller
 
     public function approve(BlogComment $comment): RedirectResponse
     {
+        $this->authorize('approve', $comment);
+
         $comment->update([
             'status' => 'approved',
             'approved_at' => now(),
@@ -67,6 +69,8 @@ class BlogCommentController extends Controller
 
     public function reject(Request $request, BlogComment $comment): RedirectResponse
     {
+        $this->authorize('reject', $comment);
+
         $validated = $request->validate([
             'reason' => ['nullable', 'string', 'max:500'],
         ]);

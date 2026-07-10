@@ -61,7 +61,7 @@
                         <a href="{{ route('account.orders.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('My Orders') }}</a>
                         <a href="{{ route('account.reviews.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('reviews.title') }}</a>
                         <a href="{{ route('account.blog-comments.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('blog_comments.your_comments') }}</a>
-                        @if (auth()->user()->hasRole('admin'))
+                        @if (auth()->user()->hasAnyRole(['admin', 'super_admin', 'employee']))
                             <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('Admin') }}</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
@@ -90,7 +90,7 @@
             <a href="{{ route('account.orders.index') }}" @click="mobileNavOpen = false">{{ __('My Orders') }}</a>
             <a href="{{ route('account.reviews.index') }}" @click="mobileNavOpen = false">{{ __('reviews.title') }}</a>
             <a href="{{ route('account.blog-comments.index') }}" @click="mobileNavOpen = false">{{ __('blog_comments.your_comments') }}</a>
-            @if (auth()->user()->hasRole('admin'))
+            @if (auth()->user()->hasAnyRole(['admin', 'super_admin', 'employee']))
                 <a href="{{ route('admin.dashboard') }}" @click="mobileNavOpen = false">{{ __('Admin') }}</a>
             @endif
             <form method="POST" action="{{ route('logout') }}">

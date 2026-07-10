@@ -168,7 +168,7 @@ class ProductController extends Controller
 
     public function destroyImage(Product $product, ProductImage $image): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageImages', $product);
 
         abort_unless($image->product_id === $product->id, 404);
 
@@ -179,7 +179,7 @@ class ProductController extends Controller
 
     public function updateImage(Request $request, Product $product, ProductImage $image): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageImages', $product);
 
         abort_unless($image->product_id === $product->id, 404);
 
@@ -198,7 +198,7 @@ class ProductController extends Controller
      */
     public function reorderImages(Request $request, Product $product): JsonResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageImages', $product);
 
         $validator = Validator::make($request->all(), [
             'ids' => ['required', 'array'],
@@ -225,7 +225,7 @@ class ProductController extends Controller
      */
     public function setCoverImage(Product $product, ProductImage $image): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageImages', $product);
 
         abort_unless($image->product_id === $product->id, 404);
 

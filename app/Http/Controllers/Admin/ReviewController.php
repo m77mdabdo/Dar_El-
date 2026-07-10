@@ -52,6 +52,8 @@ class ReviewController extends Controller
 
     public function approve(Review $review): RedirectResponse
     {
+        $this->authorize('approve', $review);
+
         $review->update([
             'status' => 'approved',
             'approved_at' => now(),
@@ -70,6 +72,8 @@ class ReviewController extends Controller
 
     public function reject(Request $request, Review $review): RedirectResponse
     {
+        $this->authorize('reject', $review);
+
         $validated = $request->validate([
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
@@ -92,6 +96,8 @@ class ReviewController extends Controller
 
     public function feature(Review $review): RedirectResponse
     {
+        $this->authorize('feature', $review);
+
         $review->update(['is_featured' => true]);
 
         ActivityLog::record('updated', $review, "Featured review #{$review->id}");
@@ -101,6 +107,8 @@ class ReviewController extends Controller
 
     public function unfeature(Review $review): RedirectResponse
     {
+        $this->authorize('unfeature', $review);
+
         $review->update(['is_featured' => false]);
 
         ActivityLog::record('updated', $review, "Unfeatured review #{$review->id}");

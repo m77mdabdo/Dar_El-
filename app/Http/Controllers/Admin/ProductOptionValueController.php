@@ -19,7 +19,7 @@ class ProductOptionValueController extends Controller
 
     public function store(Request $request, Product $product, ProductOption $option): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($option->product_id === $product->id, 404);
 
         $validated = $this->validated($request);
@@ -35,7 +35,7 @@ class ProductOptionValueController extends Controller
 
     public function update(Request $request, Product $product, ProductOption $option, ProductOptionValue $value): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($option->product_id === $product->id && $value->product_option_id === $option->id, 404);
 
         $validated = $this->validated($request);
@@ -53,7 +53,7 @@ class ProductOptionValueController extends Controller
 
     public function destroy(Product $product, ProductOption $option, ProductOptionValue $value): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($option->product_id === $product->id && $value->product_option_id === $option->id, 404);
 
         // Same reasoning as ProductOptionController::destroy(): a variant tied to
@@ -70,7 +70,7 @@ class ProductOptionValueController extends Controller
 
     public function storeImages(Request $request, Product $product, ProductOption $option, ProductOptionValue $value): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless($option->product_id === $product->id && $value->product_option_id === $option->id, 404);
 
         $request->validate([
@@ -96,7 +96,7 @@ class ProductOptionValueController extends Controller
 
     public function destroyImage(Product $product, ProductOption $option, ProductOptionValue $value, ProductOptionValueImage $image): RedirectResponse
     {
-        $this->authorize('update', $product);
+        $this->authorize('manageVariants', $product);
         abort_unless(
             $option->product_id === $product->id
             && $value->product_option_id === $option->id

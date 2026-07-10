@@ -25,4 +25,5 @@ return [
     'back' => 'Back',
     'update' => 'Update',
     'now' => 'Now',
+    'description' => 'Description',
 ];
