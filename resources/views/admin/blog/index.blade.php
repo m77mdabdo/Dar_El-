@@ -30,9 +30,9 @@
                                 <img src="{{ asset('storage/'.$post->cover_image) }}" class="w-12 h-12 object-cover rounded-lg border border-[var(--dj-cream-2)]">
                             @endif
                         </td>
-                        <td class="font-medium text-[var(--dj-ink)]">{{ $post->title_en }}</td>
+                        <td class="font-medium text-[var(--dj-ink)]">{{ trans_field($post, 'title') }}</td>
                         <td><span class="dj-admin-badge {{ $post->is_published ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">{{ $post->is_published ? __('general.published') : __('general.draft') }}</span></td>
-                        <td>{{ $post->published_at?->format('M j, Y') ?? '-' }}</td>
+                        <td>{{ $post->published_at?->translatedFormat('M j, Y') ?? '-' }}</td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">
                             <a href="{{ route('admin.blog.edit', $post) }}" class="dj-admin-link">{{ __('general.edit') }}</a>
                             <form method="POST" action="{{ route('admin.blog.destroy', $post) }}" class="inline" onsubmit="return confirm('{{ __('blog.confirm_delete') }}')">

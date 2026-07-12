@@ -52,6 +52,15 @@
         @endforelse
     </div>
 
+    @if ($trendingProducts->isNotEmpty())
+        <div class="dj-section-title"><h2>{{ __('Trending Now') }}</h2><p>{{ __('What customers are buying most this month') }}</p></div>
+        <div class="dj-grid">
+            @foreach ($trendingProducts as $product)
+                @include('shop.partials.product-card', ['product' => $product])
+            @endforeach
+        </div>
+    @endif
+
     <div class="dj-section-title"><h2>{{ __('Shop by Category') }}</h2><p>{{ __("Find exactly what you're looking for, fast") }}</p></div>
     <div class="dj-cat-showcase">
         @foreach ($categories as $category)
@@ -64,6 +73,38 @@
             </a>
         @endforeach
     </div>
+
+    @if ($collections->isNotEmpty())
+        <div class="dj-section-title"><h2>{{ __('Shop by Collection') }}</h2><p>{{ __('Curated edits for every mood and moment') }}</p></div>
+        <div class="dj-cat-showcase">
+            @foreach ($collections as $collection)
+                <a href="{{ route('shop.index', ['collection' => $collection->slug]) }}" class="dj-cat-tile dj-reveal">
+                    <div class="dj-photo-wrap dj-tint-maroon" style="position:absolute; inset:0;">
+                        <img src="{{ $collection->image_url }}" alt="{{ trans_field($collection, 'name') }}">
+                    </div>
+                    <span class="dj-arrow">{{ app()->getLocale() === 'ar' ? '←' : '→' }}</span>
+                    <div class="dj-cap"><h3>{{ trans_field($collection, 'name') }}</h3></div>
+                </a>
+            @endforeach
+        </div>
+    @endif
+
+    @if ($offerBanners->isNotEmpty())
+        <div class="dj-section-title"><h2>{{ __('Special Offers') }}</h2><p>{{ __('Limited-time savings across the collection') }}</p></div>
+        <div class="dj-editorial">
+            @foreach ($offerBanners as $banner)
+                <a href="{{ $banner->link_url ?? route('shop.index') }}" class="dj-ed-tile dj-photo-wrap dj-tint-maroon dj-reveal">
+                    <img src="{{ $banner->image_url }}" alt="{{ trans_field($banner, 'title') }}">
+                    <div class="dj-ed-caption">
+                        <h4>{{ trans_field($banner, 'title') }}</h4>
+                        @if (trans_field($banner, 'subtitle'))
+                            <p>{{ trans_field($banner, 'subtitle') }}</p>
+                        @endif
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    @endif
 
     <section class="dj-trust-strip">
         <div class="dj-trust-item dj-reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z"/></svg><span>{{ __('Safe & Trusted Ordering') }}</span></div>

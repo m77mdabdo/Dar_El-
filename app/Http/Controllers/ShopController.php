@@ -14,6 +14,7 @@ class ShopController extends Controller
         $products = Product::with(['images', 'category', 'sizes', 'approvedReviews'])
             ->where('is_active', true)
             ->when($request->category, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $request->category)))
+            ->when($request->collection, fn ($q) => $q->whereHas('collections', fn ($c) => $c->where('slug', $request->collection)))
             ->when($request->min_price, fn ($q) => $q->where('price', '>=', (int) $request->min_price))
             ->when($request->max_price, fn ($q) => $q->where('price', '<=', (int) $request->max_price))
             ->when($request->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
@@ -33,7 +34,7 @@ class ShopController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        $product->load(['images', 'sizes', 'category', 'approvedReviews.images', 'approvedReviews.user']);
+        $product->load(['images', 'sizes', 'category', 'brand', 'approvedReviews.images', 'approvedReviews.user']);
 
         $relatedProducts = Product::with(['images', 'sizes', 'approvedReviews'])
             ->where('is_active', true)
@@ -42,10 +43,20 @@ class ShopController extends Controller
             ->take(4)
             ->get();
 
+        $recommendedProducts = $product->brand_id
+            ? Product::with(['images', 'sizes', 'approvedReviews'])
+                ->where('is_active', true)
+                ->where('brand_id', $product->brand_id)
+                ->where('id', '!=', $product->id)
+                ->inRandomOrder()
+                ->take(4)
+                ->get()
+            : collect();
+
         $userReview = auth()->check()
             ? $product->reviews()->where('user_id', auth()->id())->first()
             : null;
 
-        return view('shop.show', compact('product', 'relatedProducts', 'userReview'));
+        return view('shop.show', compact('product', 'relatedProducts', 'recommendedProducts', 'userReview'));
     }
 }

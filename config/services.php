@@ -77,4 +77,19 @@ return [
         'npm_binary' => env('BROWSERSHOT_NPM_BINARY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pexels (demo catalog photos)
+    |--------------------------------------------------------------------------
+    |
+    | Only used by `php artisan demo:import` to download real, royalty-free
+    | stock photos for the demo catalog seeder. Get a free key at
+    | https://www.pexels.com/api/.
+    |
+    */
+
+    'pexels' => [
+        'key' => env('PEXELS_API_KEY'),
+    ],
+
 ];

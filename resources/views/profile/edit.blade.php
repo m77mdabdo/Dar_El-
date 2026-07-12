@@ -21,7 +21,7 @@
                     <div class="py-3 flex items-center justify-between text-sm">
                         <div>
                             <a href="{{ route('account.orders.show', $order) }}" class="font-medium hover:text-rose-700">{{ $order->order_number }}</a>
-                            <p class="text-stone-500">{{ $order->created_at->format('F j, Y') }} &middot; {{ ucfirst($order->status) }}</p>
+                            <p class="text-stone-500">{{ $order->created_at->translatedFormat('F j, Y') }} &middot; {{ ucfirst($order->status) }}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-medium">{{ number_format($order->total) }} EGP</p>

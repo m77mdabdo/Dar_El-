@@ -46,7 +46,7 @@
         <select name="product_id" onchange="this.form.submit()" class="dj-admin-input w-auto">
             <option value="">{{ __('reviews.all_products') }}</option>
             @foreach ($products as $product)
-                <option value="{{ $product->id }}" {{ (string) request('product_id') === (string) $product->id ? 'selected' : '' }}>{{ $product->name_en }}</option>
+                <option value="{{ $product->id }}" {{ (string) request('product_id') === (string) $product->id ? 'selected' : '' }}>{{ trans_field($product, 'name') }}</option>
             @endforeach
         </select>
 
@@ -95,11 +95,11 @@
                                 <span class="dj-admin-badge dj-admin-badge-info">{{ __('reviews.featured') }}</span>
                             @endif
                         </td>
-                        <td>{{ $review->product->name_en }}</td>
+                        <td>{{ trans_field($review->product, 'name') }}</td>
                         <td class="text-[var(--dj-gold-bright)]">{{ str_repeat('★', $review->rating) }}<span class="text-[var(--dj-cream-2)]">{{ str_repeat('★', 5 - $review->rating) }}</span></td>
                         <td>{{ str($review->comment)->limit(60) }}</td>
                         <td><span class="dj-admin-badge {{ $djReviewBadge }}">{{ __('reviews.status_'.$review->status) }}</span></td>
-                        <td>{{ $review->created_at->format('M j, Y') }}</td>
+                        <td>{{ $review->created_at->translatedFormat('M j, Y') }}</td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">
                             <a href="{{ route('admin.reviews.show', $review) }}" class="dj-admin-link">{{ __('general.view') }}</a>
 
@@ -171,7 +171,7 @@
         $djTopReviewedChart = [
             'type' => 'bar',
             'data' => [
-                'labels' => $charts['topReviewed']->map(fn ($r) => $r->product->name_en)->all(),
+                'labels' => $charts['topReviewed']->map(fn ($r) => trans_field($r->product, 'name'))->all(),
                 'datasets' => [['label' => __('reviews.chart_top_reviewed'), 'data' => $charts['topReviewed']->pluck('count')->all(), 'backgroundColor' => '#9C5064', 'borderRadius' => 6, 'maxBarThickness' => 22]],
             ],
             'options' => ['indexAxis' => 'y', 'responsive' => true, 'maintainAspectRatio' => false, 'plugins' => ['legend' => ['display' => false]], 'scales' => ['x' => ['grid' => ['color' => 'rgba(60,11,23,.06)']], 'y' => ['grid' => ['display' => false]]]],
@@ -205,7 +205,7 @@
             <ol class="space-y-2 text-sm">
                 @forelse ($charts['highestRated'] as $row)
                     <li class="flex justify-between border-b border-[var(--dj-cream-2)] pb-2">
-                        <span>{{ $row->product->name_en }}</span>
+                        <span>{{ trans_field($row->product, 'name') }}</span>
                         <span class="text-[var(--dj-gold-bright)]">{{ round($row->avg_rating, 1) }} ★</span>
                     </li>
                 @empty
@@ -218,7 +218,7 @@
             <ol class="space-y-2 text-sm">
                 @forelse ($charts['lowestRated'] as $row)
                     <li class="flex justify-between border-b border-[var(--dj-cream-2)] pb-2">
-                        <span>{{ $row->product->name_en }}</span>
+                        <span>{{ trans_field($row->product, 'name') }}</span>
                         <span class="text-[var(--dj-gold-bright)]">{{ round($row->avg_rating, 1) }} ★</span>
                     </li>
                 @empty

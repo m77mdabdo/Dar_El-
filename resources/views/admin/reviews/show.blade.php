@@ -37,7 +37,7 @@
 
             <div>
                 <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ __('reviews.product') }}</p>
-                <a href="{{ route('admin.products.edit', $review->product) }}" class="dj-admin-link font-medium">{{ $review->product->name_en }}</a>
+                <a href="{{ route('admin.products.edit', $review->product) }}" class="dj-admin-link font-medium">{{ trans_field($review->product, 'name') }}</a>
             </div>
 
             <div>
@@ -73,13 +73,13 @@
             </div>
 
             @if ($review->status === 'approved' && $review->approvedBy)
-                <p class="text-xs text-[var(--dj-rose-dust)]">{{ $review->approved_at->format('M j, Y H:i') }} &middot; {{ $review->approvedBy->name }}</p>
+                <p class="text-xs text-[var(--dj-rose-dust)]">{{ $review->approved_at->translatedFormat('M j, Y H:i') }} &middot; {{ $review->approvedBy->name }}</p>
             @endif
 
             @if ($review->status === 'rejected')
                 <div class="border-t border-[var(--dj-cream-2)] pt-3">
                     @if ($review->rejectedBy)
-                        <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ $review->rejected_at->format('M j, Y H:i') }} &middot; {{ $review->rejectedBy->name }}</p>
+                        <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ $review->rejected_at->translatedFormat('M j, Y H:i') }} &middot; {{ $review->rejectedBy->name }}</p>
                     @endif
                     @if ($review->rejection_reason)
                         <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ __('reviews.rejection_reason_label') }}</p>

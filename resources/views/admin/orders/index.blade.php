@@ -47,7 +47,7 @@
                         <td class="font-medium">{{ number_format($order->total) }} EGP</td>
                         <td><span class="dj-admin-badge {{ $djOrderBadge }}">{{ __('orders.status_'.$order->status) }}</span></td>
                         <td>{{ $order->payment ? __('orders.payment_status_'.$order->payment->status) : '-' }}</td>
-                        <td>{{ $order->created_at->format('M j, Y') }}</td>
+                        <td>{{ $order->created_at->translatedFormat('M j, Y') }}</td>
                         <td class="text-end">
                             <a href="{{ route('admin.orders.show', $order) }}" class="dj-admin-link">{{ __('orders.view') }}</a>
                         </td>

@@ -14,7 +14,7 @@
                         @endif
                     </div>
                     <div class="text-end text-xs text-[var(--dj-rose-dust)] shrink-0">
-                        {{ $message->created_at->format('M j, Y H:i') }}
+                        {{ $message->created_at->translatedFormat('M j, Y H:i') }}
                         @unless ($message->is_read)
                             <form method="POST" action="{{ route('admin.contact-messages.read', $message) }}">
                                 @csrf @method('PATCH')

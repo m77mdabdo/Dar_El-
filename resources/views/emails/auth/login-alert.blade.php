@@ -20,7 +20,7 @@
         'djTitle' => __('emails.login_alert_tagline'),
         'djRows' => array_filter([
             ['label' => __('emails.login_alert_email'), 'value' => $user->email],
-            ['label' => __('emails.login_alert_time'), 'value' => $time->format('M j, Y H:i')],
+            ['label' => __('emails.login_alert_time'), 'value' => $time->translatedFormat('M j, Y H:i')],
             ['label' => __('emails.login_alert_ip'), 'value' => $ip],
             ['label' => __('emails.login_alert_device'), 'value' => $device],
             ['label' => __('emails.login_alert_browser'), 'value' => $browser],

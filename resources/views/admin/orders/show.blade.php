@@ -13,7 +13,7 @@
             <div class="dj-admin-card">
                 @foreach ($order->items as $item)
                     <div class="p-4 flex justify-between text-sm border-t border-[var(--dj-cream-2)] first:border-t-0">
-                        <span>{{ $item->product_name }} ({{ $item->size ?? '-' }}) &times; {{ $item->quantity }}</span>
+                        <span>{{ $item->product ? trans_field($item->product, 'name') : $item->product_name }} ({{ $item->size ?? '-' }}) &times; {{ $item->quantity }}</span>
                         <span class="font-semibold text-[var(--dj-maroon)]">{{ number_format($item->price * $item->quantity) }} EGP</span>
                     </div>
                 @endforeach
@@ -40,7 +40,7 @@
                     @foreach ($order->statusHistories as $history)
                         <li class="flex justify-between border-b border-[var(--dj-cream-2)] pb-2">
                             <span>{{ __('orders.status_'.$history->status) }} @if($history->note) — {{ $history->note }} @endif @if($history->changedBy) <span class="text-[var(--dj-rose-dust)]">{{ __('orders.by') }} {{ $history->changedBy->name }}</span> @endif</span>
-                            <span class="text-[var(--dj-rose-dust)]">{{ $history->created_at->format('M j, Y H:i') }}</span>
+                            <span class="text-[var(--dj-rose-dust)]">{{ $history->created_at->translatedFormat('M j, Y H:i') }}</span>
                         </li>
                     @endforeach
                 </ul>
@@ -58,7 +58,7 @@
                 <h2 class="font-semibold mb-2 text-[var(--dj-maroon-dark)]">{{ __('orders.shipping_address') }}</h2>
                 <p>{{ $order->address }}</p>
                 <p>{{ $order->city }}, {{ $order->governorate }}</p>
-                <p class="mt-2 text-[var(--dj-rose-dust)]">{{ $order->shippingMethod?->name_en }}</p>
+                <p class="mt-2 text-[var(--dj-rose-dust)]">{{ $order->shippingMethod ? trans_field($order->shippingMethod, 'name') : '' }}</p>
             </div>
             <div class="dj-admin-card p-4 space-y-1">
                 <div class="flex justify-between"><span>{{ __('orders.subtotal') }}</span><span>{{ number_format($order->subtotal) }} EGP</span></div>

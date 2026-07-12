@@ -33,6 +33,6 @@ class ContactController extends Controller
 
         Notification::send(User::admins(), new NewContactMessage($message));
 
-        return back()->with('status', 'Your message has been sent. We will get back to you soon.');
+        return back()->with('status', __('Your message has been sent. We will get back to you soon.'));
     }
 }

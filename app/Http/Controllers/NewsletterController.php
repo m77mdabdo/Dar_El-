@@ -22,6 +22,6 @@ class NewsletterController extends Controller
 
         Notification::send(User::admins(), new NewsletterSubscribed($subscriber));
 
-        return back()->with('status', 'Subscribed! Thanks for joining our newsletter.');
+        return back()->with('status', __('Subscribed! Thanks for joining our newsletter.'));
     }
 }

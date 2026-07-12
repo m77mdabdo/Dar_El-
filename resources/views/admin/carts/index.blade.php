@@ -83,13 +83,13 @@
                             </td>
                             <td>{{ $cart->items_count }}</td>
                             <td>{{ number_format($cart->total) }} EGP</td>
-                            <td>{{ $cart->last_activity_at->format('M j, Y H:i') }}</td>
+                            <td>{{ $cart->last_activity_at->translatedFormat('M j, Y H:i') }}</td>
                             <td>{{ $cart->abandonedDuration() ?? '-' }}</td>
                             <td>{{ $cart->reminder_count }}</td>
-                            <td>{{ $cart->last_reminder_sent_at?->format('M j, Y H:i') ?? '-' }}</td>
+                            <td>{{ $cart->last_reminder_sent_at?->translatedFormat('M j, Y H:i') ?? '-' }}</td>
                             <td>
                                 @php $djCartNextReminder = $cart->nextEligibleReminderAt(); @endphp
-                                {{ $djCartNextReminder ? ($djCartNextReminder->isPast() ? __('general.now') : $djCartNextReminder->format('M j, Y H:i')) : '-' }}
+                                {{ $djCartNextReminder ? ($djCartNextReminder->isPast() ? __('general.now') : $djCartNextReminder->translatedFormat('M j, Y H:i')) : '-' }}
                             </td>
                             <td><span class="dj-admin-badge {{ $djCartBadge }}">{{ __('carts.status_'.$cart->status) }}</span></td>
                             <td class="text-end space-x-3 rtl:space-x-reverse">
@@ -144,7 +144,7 @@
 
         $djCartTopProductsChart = [
             'type' => 'bar',
-            'data' => ['labels' => $charts['topProducts']->map(fn ($r) => $r->product->name_en)->all(), 'datasets' => [['label' => __('carts.chart_top_products'), 'data' => $charts['topProducts']->pluck('qty')->all(), 'backgroundColor' => '#601526', 'borderRadius' => 6, 'maxBarThickness' => 22]]],
+            'data' => ['labels' => $charts['topProducts']->map(fn ($r) => trans_field($r->product, 'name'))->all(), 'datasets' => [['label' => __('carts.chart_top_products'), 'data' => $charts['topProducts']->pluck('qty')->all(), 'backgroundColor' => '#601526', 'borderRadius' => 6, 'maxBarThickness' => 22]]],
             'options' => ['indexAxis' => 'y', 'responsive' => true, 'maintainAspectRatio' => false, 'plugins' => ['legend' => ['display' => false]], 'scales' => ['x' => ['grid' => ['color' => 'rgba(60,11,23,.06)']], 'y' => ['grid' => ['display' => false]]]],
         ];
     @endphp

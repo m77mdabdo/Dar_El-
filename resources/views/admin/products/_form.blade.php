@@ -16,7 +16,7 @@
     <label class="dj-admin-label">{{ __('products.category') }}</label>
     <select name="category_id" required class="dj-admin-input">
         @foreach ($categories as $category)
-            <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id ?? null) == $category->id)>{{ $category->name_en }}</option>
+            <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id ?? null) == $category->id)>{{ trans_field($category, 'name') }}</option>
         @endforeach
     </select>
     @error('category_id') <p class="dj-admin-error">{{ $message }}</p> @enderror

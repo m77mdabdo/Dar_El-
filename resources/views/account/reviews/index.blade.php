@@ -27,12 +27,12 @@
                 @endphp
                 <div class="dj-review-card">
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-                        <a href="{{ route('shop.show', $review->product) }}" style="font-weight:700; font-size:14px; color:var(--dj-maroon);">{{ $review->product->name_en }}</a>
+                        <a href="{{ route('shop.show', $review->product) }}" style="font-weight:700; font-size:14px; color:var(--dj-maroon);">{{ trans_field($review->product, 'name') }}</a>
                         <span style="font-size:11px; color:{{ $djReviewStatusColor }}; background:{{ $djReviewStatusBg }}; padding:2px 10px; border-radius:999px;">{{ __('reviews.status_'.$review->status) }}</span>
                     </div>
                     <span class="dj-stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>
                     <p style="font-size:13.5px; color:#8a6b70;">{{ str($review->comment)->limit(120) }}</p>
-                    <p style="font-size:11.5px; color:#a68b8f; margin-top:4px;">{{ $review->created_at->format('M j, Y') }}</p>
+                    <p style="font-size:11.5px; color:#a68b8f; margin-top:4px;">{{ $review->created_at->translatedFormat('M j, Y') }}</p>
 
                     <div style="display:flex; gap:14px; margin-top:8px;">
                         @if ($review->status === 'pending')

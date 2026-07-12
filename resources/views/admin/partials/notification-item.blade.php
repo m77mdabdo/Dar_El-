@@ -3,6 +3,12 @@
     $djType = $djData['type'] ?? 'default';
     $djUnread = is_null($notification->read_at);
 
+    // Prefers the locale-specific field saved by newer notifications
+    // (product_name_ar/product_name_en); falls back to the plain
+    // product_name key stored by notifications created before this
+    // locale-aware format existed, so old rows still render correctly.
+    $djLocaleField = fn (array $data, string $base) => $data[$base.'_'.app()->getLocale()] ?? $data[$base.'_en'] ?? $data[$base] ?? '';
+
     [$djLabel, $djMessage, $djUrl] = match ($djType) {
         'new_order' => [
             __('admin.notifications.type_new_order'),
@@ -11,12 +17,12 @@
         ],
         'low_stock' => [
             __('admin.notifications.type_low_stock'),
-            trim(($djData['product_name'] ?? '').' — '.($djData['size'] ?? '')),
+            trim($djLocaleField($djData, 'product_name').' — '.($djData['size'] ?? '')),
             route('admin.products.index', ['stock_status' => 'low_stock']),
         ],
         'out_of_stock' => [
             __('admin.notifications.type_out_of_stock'),
-            trim(($djData['product_name'] ?? '').' — '.($djData['size'] ?? '')),
+            trim($djLocaleField($djData, 'product_name').' — '.($djData['size'] ?? '')),
             route('admin.products.index', ['stock_status' => 'out_of_stock']),
         ],
         'new_customer' => [
@@ -41,12 +47,12 @@
         ],
         'new_product_review' => [
             __('admin.notifications.type_new_product_review'),
-            trim(($djData['product_name'] ?? '').' — '.($djData['rating'] ?? '').'★'),
+            trim($djLocaleField($djData, 'product_name').' — '.($djData['rating'] ?? '').'★'),
             isset($djData['review_id']) ? route('admin.reviews.show', $djData['review_id']) : null,
         ],
         'new_blog_comment' => [
             __('admin.notifications.type_new_blog_comment'),
-            $djData['blog_post_title'] ?? '',
+            $djLocaleField($djData, 'blog_post_title'),
             isset($djData['comment_id']) ? route('admin.blog-comments.show', $djData['comment_id']) : null,
         ],
         'cart_abandoned', 'high_value_cart_abandoned' => [

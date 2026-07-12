@@ -26,7 +26,7 @@
                                 <img src="{{ $w->product->cover_image_src }}" class="w-12 h-12 rounded-lg object-cover border border-[var(--dj-cream-2)]">
                             @endif
                         </td>
-                        <td class="font-medium text-[var(--dj-ink)]">{{ $w->product->name_en }}</td>
+                        <td class="font-medium text-[var(--dj-ink)]">{{ trans_field($w->product, 'name') }}</td>
                         <td>{{ number_format($w->product->price) }} EGP</td>
                         <td>
                             @php $djStatus = $w->product->stockStatus($w->product->totalStock()); @endphp

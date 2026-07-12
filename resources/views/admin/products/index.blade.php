@@ -62,8 +62,8 @@
                         @endphp
                         <tr>
                             <td><input type="checkbox" value="{{ $product->id }}" x-model="selected"></td>
-                            <td class="font-medium text-[var(--dj-ink)]">{{ $product->name_en }}</td>
-                            <td>{{ $product->category->name_en }}</td>
+                            <td class="font-medium text-[var(--dj-ink)]">{{ trans_field($product, 'name') }}</td>
+                            <td>{{ trans_field($product->category, 'name') }}</td>
                             <td>{{ number_format($product->price) }} EGP</td>
                             <td>
                                 {{ $product->total_stock }}

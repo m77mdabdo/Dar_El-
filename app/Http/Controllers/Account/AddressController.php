@@ -31,7 +31,7 @@ class AddressController extends Controller
             $request->user()->addresses()->whereKeyNot($address->id)->update(['is_default' => false]);
         }
 
-        return redirect()->route('account.addresses.index')->with('status', 'Address added.');
+        return redirect()->route('account.addresses.index')->with('status', __('Address added.'));
     }
 
     public function edit(Request $request, Address $address)
@@ -51,7 +51,7 @@ class AddressController extends Controller
             $request->user()->addresses()->whereKeyNot($address->id)->update(['is_default' => false]);
         }
 
-        return redirect()->route('account.addresses.index')->with('status', 'Address updated.');
+        return redirect()->route('account.addresses.index')->with('status', __('Address updated.'));
     }
 
     public function destroy(Request $request, Address $address): RedirectResponse
@@ -60,7 +60,7 @@ class AddressController extends Controller
 
         $address->delete();
 
-        return redirect()->route('account.addresses.index')->with('status', 'Address removed.');
+        return redirect()->route('account.addresses.index')->with('status', __('Address removed.'));
     }
 
     protected function validated(Request $request): array

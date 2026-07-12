@@ -23,11 +23,11 @@
                 @endphp
                 <div class="dj-review-card">
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-                        <a href="{{ route('blog.show', $comment->blogPost) }}" style="font-weight:700; font-size:14px; color:var(--dj-maroon);">{{ $comment->blogPost->title_en }}</a>
+                        <a href="{{ route('blog.show', $comment->blogPost) }}" style="font-weight:700; font-size:14px; color:var(--dj-maroon);">{{ trans_field($comment->blogPost, 'title') }}</a>
                         <span style="font-size:11px; color:{{ $djCommentStatusColor }}; background:{{ $djCommentStatusBg }}; padding:2px 10px; border-radius:999px;">{{ __('blog_comments.status_'.$comment->status) }}</span>
                     </div>
                     <p style="font-size:13.5px; color:#8a6b70;">{{ str($comment->comment)->limit(120) }}</p>
-                    <p style="font-size:11.5px; color:#a68b8f; margin-top:4px;">{{ $comment->created_at->format('M j, Y') }}</p>
+                    <p style="font-size:11.5px; color:#a68b8f; margin-top:4px;">{{ $comment->created_at->translatedFormat('M j, Y') }}</p>
 
                     <div style="display:flex; gap:14px; margin-top:8px;">
                         @if ($comment->status === 'pending')

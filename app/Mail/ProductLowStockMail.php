@@ -26,7 +26,7 @@ class ProductLowStockMail extends Mailable implements ShouldQueue
     {
         return new Envelope(
             to: [new Address($this->admin->email, $this->admin->name)],
-            subject: __('emails.admin_low_stock_subject', ['product' => $this->product->name_en]),
+            subject: __('emails.admin_low_stock_subject', ['product' => trans_field($this->product, 'name')]),
         );
     }
 

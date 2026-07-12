@@ -40,6 +40,8 @@ class ProductLowStock extends Notification implements ShouldQueue
             'type' => 'low_stock',
             'product_id' => $this->product->id,
             'product_name' => $this->product->name_en,
+            'product_name_ar' => $this->product->name_ar,
+            'product_name_en' => $this->product->name_en,
             'size' => $this->size->size,
             'stock' => $this->size->stock,
         ];

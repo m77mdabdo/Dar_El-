@@ -7,7 +7,7 @@
 
 @section('content')
     <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 20px;">
-        {{ __('emails.admin_new_review_intro', ['product' => $review->product->name_en]) }}
+        {{ __('emails.admin_new_review_intro', ['product' => trans_field($review->product, 'name')]) }}
     </p>
 
     <div style="text-align:center; margin:0 0 30px;">

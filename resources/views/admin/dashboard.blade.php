@@ -291,7 +291,7 @@
             <div>
                 @forelse ($lowStockProducts as $product)
                     <a href="{{ route('admin.products.edit', $product) }}" class="flex justify-between gap-3 px-4 py-3 text-sm border-t border-[var(--dj-cream-2)] first:border-t-0 hover:bg-[var(--dj-cream)] transition-colors">
-                        <span class="truncate">{{ trans_field($product, 'name') }} <span class="text-[var(--dj-rose-dust)]">— {{ $product->category?->name_en }}</span></span>
+                        <span class="truncate">{{ trans_field($product, 'name') }} <span class="text-[var(--dj-rose-dust)]">— {{ $product->category ? trans_field($product->category, 'name') : '' }}</span></span>
                         <span class="dj-admin-badge dj-admin-badge-gold shrink-0">{{ (int) $product->total_stock }} {{ __('admin.dashboard.products') }}</span>
                     </a>
                 @empty

@@ -6,6 +6,7 @@ use App\Services\ImageUploadService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -21,11 +22,11 @@ class Product extends Model
     const STATUS_ARCHIVED = 'archived';
 
     protected $fillable = [
-        'category_id', 'name_ar', 'name_en', 'slug', 'description_ar', 'description_en',
-        'price', 'compare_at_price', 'sku', 'image_url', 'badge', 'is_active', 'is_featured',
+        'category_id', 'brand_id', 'name_ar', 'name_en', 'slug', 'description_ar', 'description_en',
+        'price', 'compare_at_price', 'sku', 'barcode', 'image_url', 'badge', 'is_active', 'is_featured',
         'status', 'scheduled_publish_at', 'published_at',
         'meta_title_ar', 'meta_title_en', 'meta_description_ar', 'meta_description_en',
-        'sku_prefix', 'default_stock', 'default_low_stock_threshold', 'weight',
+        'sku_prefix', 'default_stock', 'default_low_stock_threshold', 'weight', 'dimensions',
     ];
 
     protected static function booted(): void
@@ -53,6 +54,16 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    public function collections(): BelongsToMany
+    {
+        return $this->belongsToMany(Collection::class, 'product_collection');
     }
 
     public function images(): HasMany
