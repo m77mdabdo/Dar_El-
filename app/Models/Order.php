@@ -9,10 +9,24 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
+    // The one standardized payment method value — used consistently in the
+    // checkout view, JS, StoreCheckoutRequest validation, this model, the
+    // admin order view, order/invoice emails, and the invoice PDF. The
+    // legacy 'cod' string is no longer written anywhere (a migration
+    // backfilled existing rows).
+    const PAYMENT_METHOD_COD = 'cash_on_delivery';
+
+    const PAYMENT_STATUS_PENDING = 'pending';
+
+    const PAYMENT_STATUS_PAID = 'paid';
+
+    const PAYMENT_STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'user_id', 'order_number', 'customer_name', 'customer_email', 'customer_phone',
         'governorate', 'city', 'address', 'notes', 'locale', 'subtotal', 'shipping_fee',
-        'coupon_code', 'discount_amount', 'shipping_method_id', 'total', 'status', 'payment_method',
+        'coupon_code', 'discount_amount', 'shipping_method_id', 'total', 'status',
+        'payment_method', 'payment_status',
         'stock_deducted_at', 'stock_restored_at',
     ];
 
