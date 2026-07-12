@@ -344,12 +344,14 @@
     <div class="meta-grid">
         <div class="meta-box">
             <div class="label">{{ __('invoice.payment_method') }}</div>
-            <div class="value">{{ $order->payment_method === 'cod' ? __('invoice.payment_method_cod') : $order->payment_method }}</div>
+            <div class="value">{{ $order->payment_method === \App\Models\Order::PAYMENT_METHOD_COD ? __('invoice.payment_method_cod') : $order->payment_method }}</div>
         </div>
-        @if ($order->shippingMethod)
+        @if ($order->shipping_method_name || $order->shippingMethod)
             <div class="meta-box">
                 <div class="label">{{ __('invoice.shipping') }}</div>
-                <div class="value">{{ $isRtl ? $order->shippingMethod->name_ar : $order->shippingMethod->name_en }}</div>
+                <div class="value">
+                    {{ $order->shipping_method_name ?? ($isRtl ? $order->shippingMethod->name_ar : $order->shippingMethod->name_en) }}
+                </div>
             </div>
         @endif
     </div>

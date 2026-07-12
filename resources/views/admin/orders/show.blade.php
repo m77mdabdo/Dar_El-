@@ -58,7 +58,20 @@
                 <h2 class="font-semibold mb-2 text-[var(--dj-maroon-dark)]">{{ __('orders.shipping_address') }}</h2>
                 <p>{{ $order->address }}</p>
                 <p>{{ $order->city }}, {{ $order->governorate }}</p>
-                <p class="mt-2 text-[var(--dj-rose-dust)]">{{ $order->shippingMethod ? trans_field($order->shippingMethod, 'name') : '' }}</p>
+                <p class="mt-2 text-[var(--dj-rose-dust)]">
+                    {{ $order->shipping_method_name ?? ($order->shippingMethod ? trans_field($order->shippingMethod, 'name') : '') }}
+                    @if ($order->shipping_delivery_min_days)
+                        &middot; {{ $order->shipping_delivery_min_days }}{{ $order->shipping_delivery_min_days !== $order->shipping_delivery_max_days ? '–'.$order->shipping_delivery_max_days : '' }} {{ __('days') }}
+                    @endif
+                </p>
+                @if ($order->customer_latitude && $order->customer_longitude)
+                    <p class="mt-1 text-xs text-[var(--dj-rose-dust)]">{{ $order->customer_latitude }}, {{ $order->customer_longitude }}</p>
+                @endif
+            </div>
+            <div class="dj-admin-card p-4">
+                <h2 class="font-semibold mb-2 text-[var(--dj-maroon-dark)]">{{ __('orders.payment') }}</h2>
+                <p>{{ $order->payment_method === \App\Models\Order::PAYMENT_METHOD_COD ? __('emails.order_payment_method_cod') : $order->payment_method }}</p>
+                <p class="mt-1 text-[var(--dj-rose-dust)]">{{ __('orders.payment_status_'.$order->payment_status) }}</p>
             </div>
             <div class="dj-admin-card p-4 space-y-1">
                 <div class="flex justify-between"><span>{{ __('orders.subtotal') }}</span><span>{{ number_format($order->subtotal) }} EGP</span></div>

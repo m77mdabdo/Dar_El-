@@ -46,7 +46,7 @@ class InvoiceGenerationTest extends TestCase
             'discount_amount' => 0,
             'total' => 2550,
             'status' => 'pending',
-            'payment_method' => 'cod',
+            'payment_method' => Order::PAYMENT_METHOD_COD,
         ], $overrides));
 
         $order->items()->create([
@@ -154,7 +154,8 @@ class InvoiceGenerationTest extends TestCase
             ->post(route('checkout.store'), [
                 'customer_name' => 'Test Customer', 'customer_email' => 'test@example.com', 'customer_phone' => '01000000000',
                 'governorate' => 'Cairo', 'city' => 'Nasr City', 'address' => '123 Test St',
-                'shipping_method_id' => $shippingMethod->id,
+                'shipping_method_id' => (string) $shippingMethod->id,
+                'payment_method' => Order::PAYMENT_METHOD_COD,
             ]);
 
         $order = Order::where('customer_email', 'test@example.com')->first();

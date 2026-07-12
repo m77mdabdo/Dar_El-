@@ -60,6 +60,8 @@ class CheckoutController extends Controller
         $items = $this->cart->items();
 
         if (empty($items)) {
+            Log::warning('Checkout blocked: cart empty', ['user_id' => $request->user()?->id]);
+
             return redirect()->route('cart.index')->with('error', __('Your cart is empty.'));
         }
 
@@ -85,8 +87,21 @@ class CheckoutController extends Controller
         $discount = $this->cart->discount();
         $total = max(0, $subtotal + $shippingFee - $discount);
 
+        // Snapshots of the shipping method actually chosen — survive a later
+        // edit/deactivation of the ShippingMethod row, same pattern as
+        // order_items.product_name. The 'standard' string fallback has no
+        // real row, so it snapshots the same literal defaults the checkout
+        // page would have shown for it.
+        $shippingMethodCode = $shippingMethod?->code ?? ShippingMethod::DEFAULT_CODE;
+        $shippingMethodName = $shippingMethod ? trans_field($shippingMethod, 'name') : __('Standard Delivery');
+        $shippingMinDays = $shippingMethod?->delivery_time_min_days ?? 3;
+        $shippingMaxDays = $shippingMethod?->delivery_time_max_days ?? 5;
+
         try {
-            $order = DB::transaction(function () use ($validated, $items, $shippingMethod, $shippingFee, $subtotal, $discount, $coupon, $total, $request) {
+            $order = DB::transaction(function () use (
+                $validated, $items, $shippingMethod, $shippingFee, $subtotal, $discount, $coupon, $total, $request,
+                $shippingMethodCode, $shippingMethodName, $shippingMinDays, $shippingMaxDays,
+            ) {
                 $order = Order::create([
                     'user_id' => $request->user()?->id,
                     'order_number' => 'ORD-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
@@ -103,10 +118,16 @@ class CheckoutController extends Controller
                     'coupon_code' => $coupon?->code,
                     'discount_amount' => $discount,
                     'shipping_method_id' => $shippingMethod?->id,
+                    'shipping_method_code' => $shippingMethodCode,
+                    'shipping_method_name' => $shippingMethodName,
+                    'shipping_delivery_min_days' => $shippingMinDays,
+                    'shipping_delivery_max_days' => $shippingMaxDays,
                     'total' => $total,
                     'status' => 'pending',
                     'payment_method' => $validated['payment_method'],
                     'payment_status' => Order::PAYMENT_STATUS_PENDING,
+                    'customer_latitude' => $validated['customer_latitude'] ?? null,
+                    'customer_longitude' => $validated['customer_longitude'] ?? null,
                 ]);
 
                 foreach ($items as $item) {
@@ -158,12 +179,21 @@ class CheckoutController extends Controller
         } catch (\RuntimeException $e) {
             // Stock-shortage messages are already specific and safe to show
             // the customer as-is (product name, size, remaining count).
+            Log::warning('Checkout blocked: stock check failed', [
+                'user_id' => $request->user()?->id,
+                'message' => $e->getMessage(),
+            ]);
+
             return back()->withErrors(['stock' => $e->getMessage()])->withInput();
         } catch (Throwable $e) {
+            // Deliberately excludes anything from $validated beyond the
+            // email (no password/OTP/payment fields exist on this form, but
+            // this stays a scalar allowlist rather than dumping the array).
             Log::error('Checkout order creation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'customer_email' => $validated['customer_email'] ?? null,
+                'user_id' => $request->user()?->id,
             ]);
 
             return back()
