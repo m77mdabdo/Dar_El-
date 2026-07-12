@@ -92,7 +92,13 @@
       "Bash(rm -f /tmp/dj_test_invoice_*.pdf /tmp/dj_test_invoice_*.pdf.png /tmp/dj_test_invoice_render.php)",
       "Bash(php -l app/Models/ShippingMethod.php)",
       "Bash(php -l app/Models/Order.php)",
-      "Bash(php -l database/migrations/2026_07_14_000001_add_payment_status_and_standardize_payment_method.php)"
+      "Bash(php -l database/migrations/2026_07_14_000001_add_payment_status_and_standardize_payment_method.php)",
+      "Bash(php -l database/migrations/2026_07_14_000002_add_structured_shipping_and_geolocation_fields.php)",
+      "Bash(php -l database/seeders/ShippingMethodSeeder.php)",
+      "Bash(php -l app/Http/Controllers/CheckoutController.php)",
+      "Bash(php -l app/Http/Requests/StoreCheckoutRequest.php)",
+      "Bash(php -r \"json_decode\\(file_get_contents\\('lang/ar.json'\\)\\); echo json_last_error_msg\\(\\).PHP_EOL;\")",
+      "Bash(php -l resources/views/checkout/success.blade.php)"
     ],
     "additionalDirectories": [
       "/tmp",

@@ -49,6 +49,10 @@ class StoreCheckoutRequest extends FormRequest
                 },
             ],
             'payment_method' => ['required', Rule::in([Order::PAYMENT_METHOD_COD])],
+            // Optional "Use My Current Location" capture — never required,
+            // manual address entry above is always sufficient on its own.
+            'customer_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'customer_longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 }

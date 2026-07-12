@@ -43,12 +43,13 @@
     @include('emails.partials.info-card', [
         'djIcon' => 'document',
         'djTitle' => __('emails.order_details_title'),
-        'djRows' => [
+        'djRows' => array_filter([
             ['label' => __('invoice.order_number'), 'value' => $order->order_number],
             ['label' => __('invoice.date'), 'value' => ($order->created_at ?? now())->translatedFormat('F j, Y')],
             ['label' => __('invoice.order_status'), 'value' => __('orders.status_'.$order->status)],
-            ['label' => __('invoice.payment_method'), 'value' => $order->payment_method === 'cod' ? __('emails.order_payment_method_cod') : $order->payment_method],
-        ],
+            ['label' => __('invoice.payment_method'), 'value' => $order->payment_method === \App\Models\Order::PAYMENT_METHOD_COD ? __('emails.order_payment_method_cod') : $order->payment_method],
+            $order->shipping_method_name ? ['label' => __('invoice.shipping'), 'value' => $order->shipping_method_name] : null,
+        ]),
     ])
 
     @include('emails.partials.info-card', [
