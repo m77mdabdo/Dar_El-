@@ -35,6 +35,7 @@ return [
     'payment_status_paid' => 'Paid',
     'payment_status_failed' => 'Failed',
     'payment_status_refunded' => 'Refunded',
+    'payment_status_cancelled' => 'Cancelled',
 
     'status_updated' => 'Order status updated.',
     'status_updated_with_restock' => 'Order status updated. Stock restored for :count item(s).',

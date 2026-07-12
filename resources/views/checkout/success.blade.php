@@ -25,8 +25,38 @@
             </div>
         </div>
 
+        <div style="text-align:left; background:#fff; border-radius:16px; padding:24px; margin-top:16px; box-shadow:0 10px 24px -18px rgba(60,11,23,.3);">
+            <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:#5a4448;">
+                <span>{{ __('Payment Method') }}</span>
+                <span>{{ $order->payment_method === \App\Models\Order::PAYMENT_METHOD_COD ? __('Cash on Delivery') : $order->payment_method }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:#5a4448;">
+                <span>{{ __('Shipping Method') }}</span>
+                <span>{{ $order->shipping_method_name ?? __('Standard Delivery') }}</span>
+            </div>
+            @if ($order->shipping_delivery_min_days)
+                <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:#5a4448;">
+                    <span>{{ __('Estimated Delivery') }}</span>
+                    <span>
+                        @if ($order->shipping_delivery_min_days === $order->shipping_delivery_max_days)
+                            {{ $order->shipping_delivery_min_days }} {{ __('days') }}
+                        @else
+                            {{ $order->shipping_delivery_min_days }}–{{ $order->shipping_delivery_max_days }} {{ __('days') }}
+                        @endif
+                    </span>
+                </div>
+            @endif
+            <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:#5a4448; gap:16px;">
+                <span>{{ __('Delivery Address') }}</span>
+                <span style="text-align:end;">{{ $order->address }}, {{ $order->city }}, {{ $order->governorate }}</span>
+            </div>
+        </div>
+
         <div style="margin-top:30px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
             <a href="{{ route('shop.index') }}" class="dj-hero-cta" style="position:relative;">{{ __('Continue Shopping') }}</a>
+            @auth
+                <a href="{{ route('account.orders.show', $order) }}" class="dj-hero-cta" style="position:relative;">{{ __('View Order') }}</a>
+            @endauth
         </div>
     </div>
 @endsection

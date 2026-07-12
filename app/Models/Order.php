@@ -27,6 +27,9 @@ class Order extends Model
         'governorate', 'city', 'address', 'notes', 'locale', 'subtotal', 'shipping_fee',
         'coupon_code', 'discount_amount', 'shipping_method_id', 'total', 'status',
         'payment_method', 'payment_status',
+        'shipping_method_code', 'shipping_method_name',
+        'shipping_delivery_min_days', 'shipping_delivery_max_days',
+        'customer_latitude', 'customer_longitude',
         'stock_deducted_at', 'stock_restored_at',
     ];
 

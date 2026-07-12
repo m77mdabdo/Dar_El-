@@ -123,7 +123,7 @@ class EmailPreviewController extends Controller
             'order_number' => 'ORD-PREVIEW-1', 'customer_name' => 'Layla Hassan', 'customer_email' => 'layla@example.com',
             'governorate' => 'Cairo', 'city' => 'Nasr City', 'address' => '123 Sample St',
             'subtotal' => 1200, 'shipping_fee' => 50, 'discount_amount' => 0, 'total' => 1250,
-            'status' => 'shipped', 'payment_method' => 'cod',
+            'status' => 'shipped', 'payment_method' => Order::PAYMENT_METHOD_COD,
         ]);
         $order->id = 999999;
         $item = OrderItem::make(['product_name' => $product->name_en, 'size' => 'M', 'price' => 1200, 'quantity' => 1]);

@@ -43,7 +43,8 @@ class CheckoutStockTest extends TestCase
             'governorate' => 'Cairo',
             'city' => 'Nasr City',
             'address' => '123 Test St',
-            'shipping_method_id' => $shippingMethod->id,
+            'shipping_method_id' => (string) $shippingMethod->id,
+            'payment_method' => Order::PAYMENT_METHOD_COD,
         ];
     }
 

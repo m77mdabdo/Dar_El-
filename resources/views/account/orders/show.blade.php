@@ -56,7 +56,7 @@
                 </div>
                 <div class="bg-white border border-stone-200 rounded-lg p-4">
                     <h2 class="font-medium mb-2">{{ __('orders.payment') }}</h2>
-                    <p>{{ $order->payment_method === 'cod' ? __('emails.order_payment_method_cod') : $order->payment_method }}</p>
+                    <p>{{ $order->payment_method === \App\Models\Order::PAYMENT_METHOD_COD ? __('emails.order_payment_method_cod') : $order->payment_method }}</p>
                 </div>
                 <div class="bg-white border border-stone-200 rounded-lg p-4 space-y-1">
                     <div class="flex justify-between"><span>{{ __('Subtotal') }}</span><span>{{ number_format($order->subtotal) }} EGP</span></div>
