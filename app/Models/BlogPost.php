@@ -10,7 +10,9 @@ class BlogPost extends Model
 {
     protected $fillable = [
         'title_ar', 'title_en', 'slug', 'excerpt_ar', 'excerpt_en',
-        'body_ar', 'body_en', 'cover_image', 'is_published', 'published_at',
+        'body_ar', 'body_en', 'cover_image', 'author_name', 'category',
+        'meta_title_ar', 'meta_title_en', 'meta_description_ar', 'meta_description_en',
+        'is_published', 'published_at',
     ];
 
     protected function casts(): array

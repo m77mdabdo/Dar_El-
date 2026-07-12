@@ -17,7 +17,7 @@
     @include('emails.partials.product-card', [
         'djRows' => $cart->items->map(fn ($item) => [
             'image' => $item->image_snapshot,
-            'name' => $item->product_name,
+            'name' => $item->product ? trans_field($item->product, 'name') : $item->product_name,
             'meta' => array_filter([
                 ! empty($item->variant_snapshot['size']) ? __('carts.size').': '.$item->variant_snapshot['size'] : null,
                 __('carts.quantity').': '.$item->quantity,

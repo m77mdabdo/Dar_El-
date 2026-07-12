@@ -30,7 +30,7 @@ class ProductBackInStockMail extends Mailable implements ShouldQueue
     {
         return new Envelope(
             to: [new Address($this->user->email, $this->user->name)],
-            subject: __('emails.back_in_stock_subject', ['product' => $this->product->name_en]),
+            subject: __('emails.back_in_stock_subject', ['product' => trans_field($this->product, 'name')]),
         );
     }
 

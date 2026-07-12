@@ -52,7 +52,7 @@ class CartController extends Controller
             return $this->cartJson();
         }
 
-        return back()->with('status', 'Added to cart.');
+        return back()->with('status', __('Added to cart.'));
     }
 
     public function update(Request $request, string $key): RedirectResponse|JsonResponse
@@ -96,10 +96,10 @@ class CartController extends Controller
         try {
             $this->cart->applyCoupon($validated['code']);
         } catch (\Throwable $e) {
-            return back()->with('error', 'Invalid or expired coupon code.');
+            return back()->with('error', __('Invalid or expired coupon code.'));
         }
 
-        return back()->with('status', 'Coupon applied.');
+        return back()->with('status', __('Coupon applied.'));
     }
 
     public function removeCoupon(): RedirectResponse

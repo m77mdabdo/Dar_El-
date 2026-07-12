@@ -9,7 +9,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mt-4 mb-8">
             <div>
                 <h1 class="font-serif text-3xl">{{ $order->order_number }}</h1>
-                <p class="text-sm text-stone-500 mt-1">{{ $order->created_at->format('F j, Y') }} &middot; <span class="font-medium text-stone-700">{{ __('orders.status_'.$order->status) }}</span></p>
+                <p class="text-sm text-stone-500 mt-1">{{ $order->created_at->translatedFormat('F j, Y') }} &middot; <span class="font-medium text-stone-700">{{ __('orders.status_'.$order->status) }}</span></p>
             </div>
             <a href="{{ route('account.orders.invoice', $order) }}" class="bg-stone-800 text-white text-sm px-4 py-2 rounded">{{ __('orders.download_invoice') }}</a>
         </div>
@@ -23,7 +23,7 @@
                                 <img src="{{ $item->product->cover_image_src }}" alt="" class="w-14 h-14 rounded-lg object-cover border border-stone-200 shrink-0">
                             @endif
                             <div class="flex-1 min-w-0">
-                                <p class="font-medium truncate">{{ $item->product_name }}</p>
+                                <p class="font-medium truncate">{{ $item->product ? trans_field($item->product, 'name') : $item->product_name }}</p>
                                 <p class="text-stone-500">
                                     @if ($item->size){{ __('orders.item_size', ['size' => $item->size]) }} &middot; @endif
                                     {{ __('orders.item_qty', ['qty' => $item->quantity]) }}
@@ -40,7 +40,7 @@
                         @foreach ($order->statusHistories as $history)
                             <li class="flex justify-between border-b border-stone-100 pb-2">
                                 <span>{{ ucfirst($history->status) }} @if($history->note) — {{ $history->note }} @endif</span>
-                                <span class="text-stone-400">{{ $history->created_at->format('M j, Y H:i') }}</span>
+                                <span class="text-stone-400">{{ $history->created_at->translatedFormat('M j, Y H:i') }}</span>
                             </li>
                         @endforeach
                     </ul>

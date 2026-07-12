@@ -28,7 +28,7 @@
                         </span>
                     </div>
                 </div>
-                <p class="text-xs text-[var(--dj-rose-dust)]">{{ __('customers.registered_at') }}: {{ $customer->created_at->format('M j, Y') }}</p>
+                <p class="text-xs text-[var(--dj-rose-dust)]">{{ __('customers.registered_at') }}: {{ $customer->created_at->translatedFormat('M j, Y') }}</p>
 
                 <div class="flex flex-wrap gap-3 mt-4 pt-4 border-t border-[var(--dj-cream-2)]">
                     <a href="{{ route('admin.customers.orders', $customer) }}" class="dj-admin-btn dj-admin-btn-secondary dj-admin-btn-sm">{{ __('customers.view_orders') }}</a>
@@ -92,7 +92,7 @@
                         @forelse ($recentOrders as $order)
                             <tr>
                                 <td class="font-semibold text-[var(--dj-maroon)]">{{ $order->order_number }}</td>
-                                <td>{{ $order->created_at->format('M j, Y') }}</td>
+                                <td>{{ $order->created_at->translatedFormat('M j, Y') }}</td>
                                 <td><span class="dj-admin-badge dj-admin-badge-info">{{ __('orders.status_'.$order->status) }}</span></td>
                                 <td>{{ number_format($order->total) }} EGP</td>
                                 <td class="text-end"><a href="{{ route('admin.orders.show', $order) }}" class="dj-admin-link">{{ __('general.view') }}</a></td>
@@ -114,13 +114,13 @@
                                 @if ($item->image_snapshot)
                                     <img src="{{ $item->image_snapshot }}" class="w-10 h-10 rounded-lg object-cover border border-[var(--dj-cream-2)]">
                                 @endif
-                                <span class="flex-1">{{ $item->product_name }} @if(!empty($item->variant_snapshot['size'])) ({{ $item->variant_snapshot['size'] }}) @endif &times; {{ $item->quantity }}</span>
+                                <span class="flex-1">{{ $item->product ? trans_field($item->product, 'name') : $item->product_name }} @if(!empty($item->variant_snapshot['size'])) ({{ $item->variant_snapshot['size'] }}) @endif &times; {{ $item->quantity }}</span>
                                 <span class="font-semibold text-[var(--dj-maroon)]">{{ number_format($item->total) }} EGP</span>
                             </div>
                         @endforeach
                     </div>
                     <p class="text-sm font-semibold text-[var(--dj-maroon-dark)] mt-3">{{ __('carts.cart_total') }}: {{ number_format($currentCart->total) }} EGP</p>
-                    <p class="text-xs text-[var(--dj-rose-dust)]">{{ __('carts.last_updated') }}: {{ $currentCart->last_activity_at->format('M j, Y H:i') }}</p>
+                    <p class="text-xs text-[var(--dj-rose-dust)]">{{ __('carts.last_updated') }}: {{ $currentCart->last_activity_at->translatedFormat('M j, Y H:i') }}</p>
                 @else
                     <p class="dj-admin-table-empty">{{ __('customers.no_current_cart') }}</p>
                 @endif
@@ -137,7 +137,7 @@
                                 @if ($w->product->cover_image_src)
                                     <img src="{{ $w->product->cover_image_src }}" class="w-full h-20 object-cover rounded-lg border border-[var(--dj-cream-2)] mb-1">
                                 @endif
-                                <p class="text-xs font-medium truncate">{{ $w->product->name_en }}</p>
+                                <p class="text-xs font-medium truncate">{{ trans_field($w->product, 'name') }}</p>
                                 <p class="text-xs text-[var(--dj-maroon)]">{{ number_format($w->product->price) }} EGP</p>
                             </div>
                         @endforeach
@@ -156,7 +156,7 @@
                     @forelse ($loginHistory as $entry)
                         <div class="border-t border-[var(--dj-cream-2)] pt-2 text-xs">
                             <p class="text-[var(--dj-ink)] font-medium">
-                                {{ \Illuminate\Support\Carbon::parse($entry->data['time'])->format('M j, Y H:i') }}
+                                {{ \Illuminate\Support\Carbon::parse($entry->data['time'])->translatedFormat('M j, Y H:i') }}
                                 @if ($entry->data['provider'] ?? null)
                                     <span class="dj-admin-badge dj-admin-badge-info ms-1">{{ ucfirst($entry->data['provider']) }}</span>
                                 @endif
@@ -184,7 +184,7 @@
                     @forelse ($customer->customerNotes as $note)
                         <div class="border-t border-[var(--dj-cream-2)] pt-2">
                             <p class="text-sm text-[var(--dj-ink)]">{{ $note->note }}</p>
-                            <p class="text-xs text-[var(--dj-rose-dust)] mt-1">{{ $note->admin?->name }} &middot; {{ $note->created_at->format('M j, Y H:i') }}</p>
+                            <p class="text-xs text-[var(--dj-rose-dust)] mt-1">{{ $note->admin?->name }} &middot; {{ $note->created_at->translatedFormat('M j, Y H:i') }}</p>
                         </div>
                     @empty
                         <p class="dj-admin-table-empty">{{ __('customers.no_notes') }}</p>

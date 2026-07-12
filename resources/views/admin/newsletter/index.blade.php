@@ -19,7 +19,7 @@
                 @forelse ($subscribers as $subscriber)
                     <tr>
                         <td class="font-medium text-[var(--dj-ink)]">{{ $subscriber->email }}</td>
-                        <td>{{ $subscriber->created_at->format('M j, Y H:i') }}</td>
+                        <td>{{ $subscriber->created_at->translatedFormat('M j, Y H:i') }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="2" class="dj-admin-table-empty">{{ __('newsletter.no_subscribers') }}</td></tr>

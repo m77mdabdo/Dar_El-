@@ -39,6 +39,8 @@ class NewProductReviewSubmitted extends Notification implements ShouldQueue
             'type' => 'new_product_review',
             'review_id' => $this->review->id,
             'product_name' => $this->review->product->name_en,
+            'product_name_ar' => $this->review->product->name_ar,
+            'product_name_en' => $this->review->product->name_en,
             'rating' => $this->review->rating,
         ];
     }

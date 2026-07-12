@@ -11,7 +11,7 @@
     </h2>
 
     <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 22px;">
-        {{ __('emails.blog_comment_rejected_intro', ['post' => $comment->blogPost->title_en]) }}
+        {{ __('emails.blog_comment_rejected_intro', ['post' => trans_field($comment->blogPost, 'title')]) }}
     </p>
 
     @if ($comment->rejection_reason)

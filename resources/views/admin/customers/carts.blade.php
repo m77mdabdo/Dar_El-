@@ -24,7 +24,7 @@
                         <td>{{ $cart->items_count }}</td>
                         <td>{{ number_format($cart->total) }} EGP</td>
                         <td><span class="dj-admin-badge {{ $cart->status === 'converted' ? 'dj-admin-badge-success' : ($cart->status === 'abandoned' ? 'dj-admin-badge-gold' : 'dj-admin-badge-info') }}">{{ __('carts.status_'.$cart->status) }}</span></td>
-                        <td>{{ $cart->last_activity_at->format('M j, Y H:i') }}</td>
+                        <td>{{ $cart->last_activity_at->translatedFormat('M j, Y H:i') }}</td>
                         <td class="text-end"><a href="{{ route('admin.carts.show', $cart) }}" class="dj-admin-link">{{ __('general.view') }}</a></td>
                     </tr>
                 @empty

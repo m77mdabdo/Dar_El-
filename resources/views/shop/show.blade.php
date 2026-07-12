@@ -17,7 +17,12 @@
 
             <div>
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-                    <p style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--dj-rose-dust); margin-bottom:8px;">{{ trans_field($product->category, 'name') }}</p>
+                    <p style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--dj-rose-dust); margin-bottom:8px;">
+                        {{ trans_field($product->category, 'name') }}
+                        @if ($product->brand)
+                            <span style="opacity:.6;">·</span> {{ trans_field($product->brand, 'name') }}
+                        @endif
+                    </p>
                     @auth
                         <button type="button" class="dj-wishlist-btn dj-wishlist-btn-static {{ in_array($product->id, $wishlistedIds ?? [], true) ? 'dj-active' : '' }}"
                                 aria-label="{{ __('Toggle Wishlist') }}" data-wishlist-product="{{ $product->id }}"
@@ -119,7 +124,7 @@
                             @endforeach
                         </div>
                     @endif
-                    <p style="font-size:11.5px; color:#a68b8f; margin-top:8px;">{{ $review->created_at->format('M j, Y') }}</p>
+                    <p style="font-size:11.5px; color:#a68b8f; margin-top:8px;">{{ $review->created_at->translatedFormat('M j, Y') }}</p>
                     <form method="POST" action="{{ route('reviews.helpful', $review) }}">
                         @csrf
                         <button type="submit" class="dj-review-helpful">{{ __('reviews.mark_helpful') }} ({{ $review->helpful_count }})</button>
@@ -213,6 +218,19 @@
         <div class="dj-grid" style="padding-top:0;">
             @foreach ($relatedProducts as $related)
                 @include('shop.partials.product-card', ['product' => $related])
+            @endforeach
+        </div>
+    @endif
+
+    @if ($recommendedProducts->isNotEmpty())
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="dj-section-title" style="text-align:left; padding:20px 0;">
+                <h2 style="font-size:24px;">{{ __('More from') }} {{ trans_field($product->brand, 'name') }}</h2>
+            </div>
+        </div>
+        <div class="dj-grid" style="padding-top:0;">
+            @foreach ($recommendedProducts as $recommended)
+                @include('shop.partials.product-card', ['product' => $recommended])
             @endforeach
         </div>
     @endif

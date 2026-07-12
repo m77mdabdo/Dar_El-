@@ -14,7 +14,15 @@
             </div>
         @endif
 
-        <div class="dj-blog-date" style="margin-bottom:10px;">{{ $post->published_at?->translatedFormat('F j, Y') }}</div>
+        <div class="dj-blog-date" style="margin-bottom:10px;">
+            {{ $post->published_at?->translatedFormat('F j, Y') }}
+            @if ($post->author_name)
+                <span style="opacity:.6;">·</span> {{ __('By') }} {{ $post->author_name }}
+            @endif
+            @if ($post->category)
+                <span style="opacity:.6;">·</span> {{ $post->category }}
+            @endif
+        </div>
         <h1 style="font-size:26px; color:var(--dj-maroon); margin-bottom:20px;">{{ trans_field($post, 'title') }}</h1>
 
         <div style="font-size:14.5px; line-height:2; color:#5a4448;">
@@ -31,7 +39,7 @@
                     <div class="dj-comment-avatar">{{ mb_substr($comment->name, 0, 1) }}</div>
                     <div class="dj-comment-body">
                         <span class="dj-comment-name">{{ $comment->name }}</span>
-                        <span class="dj-comment-date">{{ $comment->created_at->format('M j, Y') }}</span>
+                        <span class="dj-comment-date">{{ $comment->created_at->translatedFormat('M j, Y') }}</span>
                         <p class="dj-comment-text">{{ $comment->comment }}</p>
                     </div>
                 </div>
@@ -60,7 +68,7 @@
                                 <div class="dj-comment-avatar">{{ mb_substr($own->name, 0, 1) }}</div>
                                 <div class="dj-comment-body">
                                     <span style="font-size:11px; color:{{ $djOwnColor }}; background:{{ $djOwnBg }}; padding:2px 10px; border-radius:999px;">{{ __('blog_comments.status_'.$own->status) }}</span>
-                                    <span class="dj-comment-date">{{ $own->created_at->format('M j, Y') }}</span>
+                                    <span class="dj-comment-date">{{ $own->created_at->translatedFormat('M j, Y') }}</span>
 
                                     @if ($own->status === 'pending')
                                         <form method="POST" action="{{ route('blog.comments.update', $own) }}" class="mt-2">

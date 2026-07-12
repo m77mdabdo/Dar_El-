@@ -29,7 +29,7 @@
 
             <div>
                 <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ __('blog_comments.blog_post') }}</p>
-                <a href="{{ route('admin.blog.edit', $comment->blogPost) }}" class="dj-admin-link font-medium">{{ $comment->blogPost->title_en }}</a>
+                <a href="{{ route('admin.blog.edit', $comment->blogPost) }}" class="dj-admin-link font-medium">{{ trans_field($comment->blogPost, 'title') }}</a>
             </div>
 
             <div>
@@ -52,13 +52,13 @@
             @endif
 
             @if ($comment->status === 'approved' && $comment->approvedBy)
-                <p class="text-xs text-[var(--dj-rose-dust)]">{{ $comment->approved_at->format('M j, Y H:i') }} &middot; {{ $comment->approvedBy->name }}</p>
+                <p class="text-xs text-[var(--dj-rose-dust)]">{{ $comment->approved_at->translatedFormat('M j, Y H:i') }} &middot; {{ $comment->approvedBy->name }}</p>
             @endif
 
             @if ($comment->status === 'rejected')
                 <div class="border-t border-[var(--dj-cream-2)] pt-3">
                     @if ($comment->rejectedBy)
-                        <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ $comment->rejected_at->format('M j, Y H:i') }} &middot; {{ $comment->rejectedBy->name }}</p>
+                        <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ $comment->rejected_at->translatedFormat('M j, Y H:i') }} &middot; {{ $comment->rejectedBy->name }}</p>
                     @endif
                     @if ($comment->rejection_reason)
                         <p class="text-xs text-[var(--dj-rose-dust)] mb-1">{{ __('blog_comments.rejection_reason_label') }}</p>

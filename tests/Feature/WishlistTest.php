@@ -74,7 +74,7 @@ class WishlistTest extends TestCase
         $response = $this->actingAs($user)->get(route('wishlist.index'));
 
         $response->assertOk();
-        $response->assertSee($product->name_en);
+        $response->assertSee($product->name_ar);
     }
 
     public function test_move_to_cart_removes_wishlist_item_and_adds_to_cart(): void

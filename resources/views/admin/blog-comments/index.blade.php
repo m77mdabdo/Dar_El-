@@ -38,7 +38,7 @@
         <select name="blog_post_id" onchange="this.form.submit()" class="dj-admin-input w-auto">
             <option value="">{{ __('blog_comments.all_posts') }}</option>
             @foreach ($posts as $post)
-                <option value="{{ $post->id }}" {{ (string) request('blog_post_id') === (string) $post->id ? 'selected' : '' }}>{{ $post->title_en }}</option>
+                <option value="{{ $post->id }}" {{ (string) request('blog_post_id') === (string) $post->id ? 'selected' : '' }}>{{ trans_field($post, 'title') }}</option>
             @endforeach
         </select>
 
@@ -72,10 +72,10 @@
                     @endphp
                     <tr>
                         <td class="font-medium text-[var(--dj-ink)]">{{ $comment->name }}</td>
-                        <td>{{ $comment->blogPost->title_en }}</td>
+                        <td>{{ trans_field($comment->blogPost, 'title') }}</td>
                         <td>{{ str($comment->comment)->limit(60) }}</td>
                         <td><span class="dj-admin-badge {{ $djCommentBadge }}">{{ __('blog_comments.status_'.$comment->status) }}</span></td>
-                        <td>{{ $comment->created_at->format('M j, Y') }}</td>
+                        <td>{{ $comment->created_at->translatedFormat('M j, Y') }}</td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">
                             <a href="{{ route('admin.blog-comments.show', $comment) }}" class="dj-admin-link">{{ __('general.view') }}</a>
 
@@ -155,7 +155,7 @@
         <ol class="space-y-2 text-sm">
             @forelse ($charts['topCommented'] as $row)
                 <li class="flex justify-between border-b border-[var(--dj-cream-2)] pb-2">
-                    <span>{{ $row->blogPost->title_en }}</span>
+                    <span>{{ trans_field($row->blogPost, 'title') }}</span>
                     <span class="text-[var(--dj-rose-dust)]">{{ $row->count }}</span>
                 </li>
             @empty

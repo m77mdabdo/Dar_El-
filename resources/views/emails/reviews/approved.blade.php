@@ -11,7 +11,7 @@
     </h2>
 
     <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 8px;">
-        {{ __('emails.review_approved_intro', ['product' => $review->product->name_en]) }}
+        {{ __('emails.review_approved_intro', ['product' => trans_field($review->product, 'name')]) }}
     </p>
 
     @include('emails.partials.button', ['href' => route('shop.show', $review->product), 'label' => __('emails.review_view_button')])

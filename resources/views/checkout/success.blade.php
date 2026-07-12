@@ -15,7 +15,7 @@
         <div style="text-align:left; background:#fff; border-radius:16px; padding:24px; margin-top:26px; box-shadow:0 10px 24px -18px rgba(60,11,23,.3);">
             @foreach ($order->items as $item)
                 <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:#5a4448;">
-                    <span>{{ $item->product_name }} ({{ $item->size }}) &times; {{ $item->quantity }}</span>
+                    <span>{{ $item->product ? trans_field($item->product, 'name') : $item->product_name }} ({{ $item->size }}) &times; {{ $item->quantity }}</span>
                     <span>{{ number_format($item->price * $item->quantity) }} EGP</span>
                 </div>
             @endforeach

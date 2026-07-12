@@ -20,7 +20,7 @@
             <tbody>
                 @forelse ($categories as $category)
                     <tr>
-                        <td class="font-medium text-[var(--dj-ink)]">{{ $category->name_en }}</td>
+                        <td class="font-medium text-[var(--dj-ink)]">{{ trans_field($category, 'name') }}</td>
                         <td>{{ $category->products_count }}</td>
                         <td><span class="dj-admin-badge {{ $category->is_active ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">{{ $category->is_active ? __('general.active') : __('general.inactive') }}</span></td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">

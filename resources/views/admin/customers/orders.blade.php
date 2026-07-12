@@ -22,7 +22,7 @@
                 @forelse ($orders as $order)
                     <tr>
                         <td class="font-semibold text-[var(--dj-maroon)]">{{ $order->order_number }}</td>
-                        <td>{{ $order->created_at->format('M j, Y') }}</td>
+                        <td>{{ $order->created_at->translatedFormat('M j, Y') }}</td>
                         <td><span class="dj-admin-badge dj-admin-badge-info">{{ __('orders.status_'.$order->status) }}</span></td>
                         <td>{{ number_format($order->total) }} EGP</td>
                         <td class="text-end"><a href="{{ route('admin.orders.show', $order) }}" class="dj-admin-link">{{ __('general.view') }}</a></td>

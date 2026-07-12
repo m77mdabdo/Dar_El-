@@ -33,7 +33,7 @@ class BlogCommentController extends Controller
 
         $stats = $this->stats();
         $charts = $this->charts();
-        $posts = BlogPost::orderBy('title_en')->get(['id', 'title_en']);
+        $posts = BlogPost::orderBy('title_en')->get(['id', 'title_ar', 'title_en']);
 
         return view('admin.blog-comments.index', compact('comments', 'stats', 'charts', 'posts'));
     }

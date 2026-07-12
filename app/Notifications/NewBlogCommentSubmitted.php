@@ -40,6 +40,8 @@ class NewBlogCommentSubmitted extends Notification implements ShouldQueue
             'comment_id' => $this->comment->id,
             'blog_post_id' => $this->comment->blog_post_id,
             'blog_post_title' => $this->comment->blogPost->title_en,
+            'blog_post_title_ar' => $this->comment->blogPost->title_ar,
+            'blog_post_title_en' => $this->comment->blogPost->title_en,
         ];
     }
 }

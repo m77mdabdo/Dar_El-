@@ -61,7 +61,7 @@ class CheckoutController extends Controller
         $items = $this->cart->items();
 
         if (empty($items)) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('cart.index')->with('error', __('Your cart is empty.'));
         }
 
         $shippingMethod = ShippingMethod::findOrFail($validated['shipping_method_id']);
@@ -152,7 +152,7 @@ class CheckoutController extends Controller
 
         $this->cart->clear();
 
-        return redirect()->route('checkout.success', $order)->with('status', 'Order placed successfully.');
+        return redirect()->route('checkout.success', $order)->with('status', __('Order placed successfully.'));
     }
 
     public function success(Order $order): View

@@ -83,7 +83,7 @@
                             @endif
                         </td>
                         <td>{{ $customer->wishlists_count }}</td>
-                        <td>{{ $customer->created_at->format('M j, Y') }}</td>
+                        <td>{{ $customer->created_at->translatedFormat('M j, Y') }}</td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">
                             <a href="{{ route('admin.customers.show', $customer) }}" class="dj-admin-link">{{ __('customers.view_customer') }}</a>
                         </td>

@@ -17,7 +17,7 @@
     @include('emails.partials.product-card', [
         'djRows' => $wishlists->map(fn ($wishlist) => [
             'image' => $wishlist->product?->cover_image_src,
-            'name' => $wishlist->product?->name_en,
+            'name' => $wishlist->product ? trans_field($wishlist->product, 'name') : null,
             'meta' => [],
             'price' => number_format($wishlist->product?->price ?? 0).' EGP',
         ])->all(),

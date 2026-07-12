@@ -27,7 +27,7 @@
                         <td>{{ $coupon->type === 'percentage' ? __('coupons.percentage') : __('coupons.fixed') }}</td>
                         <td>{{ $coupon->value }}{{ $coupon->type === 'percentage' ? '%' : ' EGP' }}</td>
                         <td>{{ $coupon->used_count }}{{ $coupon->max_uses ? '/'.$coupon->max_uses : '' }}</td>
-                        <td>{{ $coupon->expires_at?->format('M j, Y') ?? '-' }}</td>
+                        <td>{{ $coupon->expires_at?->translatedFormat('M j, Y') ?? '-' }}</td>
                         <td><span class="dj-admin-badge {{ $coupon->is_active ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">{{ $coupon->is_active ? __('general.active') : __('general.inactive') }}</span></td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">
                             <a href="{{ route('admin.coupons.edit', $coupon) }}" class="dj-admin-link">{{ __('general.edit') }}</a>

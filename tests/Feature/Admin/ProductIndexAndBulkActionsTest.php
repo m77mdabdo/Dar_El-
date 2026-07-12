@@ -52,24 +52,28 @@ class ProductIndexAndBulkActionsTest extends TestCase
         $bySku = $this->makeProduct(['name_en' => 'Another', 'name_ar' => 'آخر', 'sku' => 'UNIQUE-SKU']);
         $noMatch = $this->makeProduct(['name_en' => 'Unrelated', 'name_ar' => 'غير ذلك', 'sku' => 'NOPE']);
 
+        // Products display by their Arabic name (current locale) regardless
+        // of which language matched the search term — search matches
+        // name_ar/name_en/sku, but the admin table always renders via
+        // trans_field(), so assertions check name_ar here.
         $response = $this->actingAs($admin)->get(route('admin.products.index', ['search' => 'Silk']));
-        $response->assertSee('Silk Abaya')->assertDontSee('Unrelated');
+        $response->assertSee('شيء')->assertDontSee('غير ذلك');
 
         $response = $this->actingAs($admin)->get(route('admin.products.index', ['search' => 'حرير']));
-        $response->assertSee('Other');
+        $response->assertSee('عباية حرير');
 
         $response = $this->actingAs($admin)->get(route('admin.products.index', ['search' => 'UNIQUE-SKU']));
-        $response->assertSee('Another');
+        $response->assertSee('آخر');
     }
 
     public function test_index_filters_by_status(): void
     {
         $admin = $this->makeAdmin();
-        $published = $this->makeProduct(['name_en' => 'Published One', 'status' => Product::STATUS_PUBLISHED]);
-        $draft = $this->makeProduct(['name_en' => 'Draft One', 'status' => Product::STATUS_DRAFT, 'is_active' => false]);
+        $published = $this->makeProduct(['name_en' => 'Published One', 'name_ar' => 'منشور واحد', 'status' => Product::STATUS_PUBLISHED]);
+        $draft = $this->makeProduct(['name_en' => 'Draft One', 'name_ar' => 'مسودة واحدة', 'status' => Product::STATUS_DRAFT, 'is_active' => false]);
 
         $response = $this->actingAs($admin)->get(route('admin.products.index', ['status' => 'draft']));
-        $response->assertSee('Draft One')->assertDontSee('Published One');
+        $response->assertSee('مسودة واحدة')->assertDontSee('منشور واحد');
     }
 
     public function test_bulk_publish_sets_status_and_is_active(): void

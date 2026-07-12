@@ -162,7 +162,7 @@ class CartService
         $coupon = Coupon::where('code', $code)->firstOrFail();
 
         if (! $coupon->isValidFor($this->subtotal())) {
-            throw new \RuntimeException('This coupon is not valid for your order.');
+            throw new \RuntimeException(__('This coupon is not valid for your order.'));
         }
 
         Session::put('coupon_code', $coupon->code);

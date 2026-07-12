@@ -36,7 +36,7 @@ class ReviewController extends Controller
 
         $stats = $this->stats();
         $charts = $this->charts();
-        $products = Product::orderBy('name_en')->get(['id', 'name_en']);
+        $products = Product::orderBy('name_en')->get(['id', 'name_ar', 'name_en']);
 
         return view('admin.reviews.index', compact('reviews', 'stats', 'charts', 'products'));
     }
