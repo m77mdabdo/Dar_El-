@@ -73,10 +73,32 @@
       "Bash(disown)",
       "Bash(php -l app/Http/Controllers/Admin/ReviewController.php)",
       "Bash(php -l app/Http/Controllers/Admin/BlogCommentController.php)",
-      "Bash(rm -f /tmp/dj_final_*.html /tmp/c3.txt /tmp/c4.txt /tmp/artisan_serve.log)"
+      "Bash(rm -f /tmp/dj_final_*.html /tmp/c3.txt /tmp/c4.txt /tmp/artisan_serve.log)",
+      "Bash(cd /Applications/XAMPP/xamppfiles/htdocs/dar-el-jamila *)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://127.0.0.1:8000/ --max-time 5)",
+      "Bash(curl -s -o /dev/null -w \"shop: %{http_code}\\\\n\" http://127.0.0.1:8000/shop --max-time 5)",
+      "Bash(curl -s -o /dev/null -w \"blog: %{http_code}\\\\n\" http://127.0.0.1:8000/blog --max-time 5)",
+      "Bash(git check-ignore *)",
+      "Bash(rm -f /tmp/dj_cleanup_trim.php /tmp/dj_fix_category_images.php /tmp/test_recover.jpg /tmp/dj_verify_*.html *)",
+      "Bash(curl -s -o /dev/null -w \"cart: %{http_code}\\\\n\" http://127.0.0.1:8000/cart --max-time 5)",
+      "Bash(php -r '$c = json_decode\\(file_get_contents\\(\"composer.json\"\\), true\\); print_r\\(array_keys\\($c[\"require\"]\\)\\);')",
+      "Bash(composer --version)",
+      "Bash(composer diagnose *)",
+      "Bash(composer install *)",
+      "Bash(php -r 'require '\\\\''vendor/autoload.php'\\\\''; $o = new Dompdf\\\\Options\\(\\); echo $o->getFontDir\\(\\) . PHP_EOL; echo $o->getFontCache\\(\\) . PHP_EOL;')",
+      "Bash(qlmanage -t -s 1000 -o . dj_test_invoice_en.pdf dj_test_invoice_ar.pdf)",
+      "Bash(python3 -c \"import fitz\")",
+      "Bash(php -r \"var_dump\\(class_exists\\('Imagick'\\)\\);\")",
+      "Bash(rm -f /tmp/dj_test_invoice_*.pdf /tmp/dj_test_invoice_*.pdf.png /tmp/dj_test_invoice_render.php)",
+      "Bash(php -l app/Models/ShippingMethod.php)",
+      "Bash(php -l app/Models/Order.php)",
+      "Bash(php -l database/migrations/2026_07_14_000001_add_payment_status_and_standardize_payment_method.php)"
     ],
     "additionalDirectories": [
-      "/tmp"
+      "/tmp",
+      "/Applications/XAMPP/xamppfiles/htdocs/dar-el-jamila/storage/logs",
+      "/Applications/XAMPP/xamppfiles/htdocs/dar-el-jamila/storage/framework/testing/disks",
+      "/Applications/XAMPP/xamppfiles/htdocs/dar-el-jamila/storage/fonts"
     ]
   }
 }
