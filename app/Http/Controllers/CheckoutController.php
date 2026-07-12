@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCheckoutRequest;
 use App\Jobs\GenerateAndSendInvoice;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
@@ -13,12 +14,13 @@ use App\Notifications\NewOrderPlaced;
 use App\Services\CartService;
 use App\Services\CartTrackingService;
 use App\Services\StockAlertService;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Throwable;
 
 class CheckoutController extends Controller
 {
@@ -34,29 +36,26 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index');
         }
 
+        // Guarantees the shipping-method radio list below is never empty —
+        // this is the fix for the "shipping method is required" dead end:
+        // the page used to render zero options whenever the shipping_methods
+        // table had no active rows, while validation still required one.
+        ShippingMethod::ensureAtLeastOneActive();
+
         return view('checkout.show', [
             'items' => $this->cart->items(),
             'subtotal' => $this->cart->subtotal(),
             'discount' => $this->cart->discount(),
             'coupon' => $this->cart->appliedCoupon(),
-            'shippingMethods' => ShippingMethod::where('is_active', true)->get(),
+            'shippingMethods' => ShippingMethod::where('is_active', true)->orderBy('fee')->get(),
             'heroImage' => Setting::get('checkout_hero_image', 'https://images.unsplash.com/photo-1772474569781-2fb1c6539f8c?w=1600&q=80&auto=format&fit=crop'),
             'hasStockIssues' => ! $this->cart->isValid(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCheckoutRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'customer_name' => ['required', 'string', 'max:255'],
-            'customer_email' => ['required', 'email', 'max:255'],
-            'customer_phone' => ['required', 'string', 'max:30'],
-            'governorate' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string'],
-            'notes' => ['nullable', 'string'],
-            'shipping_method_id' => ['required', 'exists:shipping_methods,id'],
-        ]);
+        $validated = $request->validated();
 
         $items = $this->cart->items();
 
@@ -64,14 +63,30 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', __('Your cart is empty.'));
         }
 
-        $shippingMethod = ShippingMethod::findOrFail($validated['shipping_method_id']);
+        // Re-run the same self-heal as show() — store() is a separate
+        // request and can't assume show() ran first (a bookmarked URL, a
+        // resubmitted form, etc.), so the "standard" fallback in
+        // StoreCheckoutRequest genuinely stays a last resort rather than
+        // silently becoming the normal path.
+        ShippingMethod::ensureAtLeastOneActive();
+
+        $shippingMethod = $validated['shipping_method_id'] !== 'standard'
+            ? ShippingMethod::find($validated['shipping_method_id'])
+            : null;
+
+        $shippingFee = $shippingMethod->fee ?? (int) Setting::get('default_shipping_fee', 0);
+
+        // Recalculated from the database on every request — subtotal comes
+        // from CartService (which reads live Product prices, never a
+        // frontend-submitted value), and the shipping fee just resolved
+        // above is a live ShippingMethod row, not anything the client sent.
         $subtotal = $this->cart->subtotal();
         $coupon = $this->cart->appliedCoupon();
         $discount = $this->cart->discount();
-        $total = max(0, $subtotal + $shippingMethod->fee - $discount);
+        $total = max(0, $subtotal + $shippingFee - $discount);
 
         try {
-            $order = DB::transaction(function () use ($validated, $items, $shippingMethod, $subtotal, $discount, $coupon, $total, $request) {
+            $order = DB::transaction(function () use ($validated, $items, $shippingMethod, $shippingFee, $subtotal, $discount, $coupon, $total, $request) {
                 $order = Order::create([
                     'user_id' => $request->user()?->id,
                     'order_number' => 'ORD-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
@@ -84,13 +99,14 @@ class CheckoutController extends Controller
                     'notes' => $validated['notes'] ?? null,
                     'locale' => app()->getLocale(),
                     'subtotal' => $subtotal,
-                    'shipping_fee' => $shippingMethod->fee,
+                    'shipping_fee' => $shippingFee,
                     'coupon_code' => $coupon?->code,
                     'discount_amount' => $discount,
-                    'shipping_method_id' => $shippingMethod->id,
+                    'shipping_method_id' => $shippingMethod?->id,
                     'total' => $total,
                     'status' => 'pending',
-                    'payment_method' => 'cod',
+                    'payment_method' => $validated['payment_method'],
+                    'payment_status' => Order::PAYMENT_STATUS_PENDING,
                 ]);
 
                 foreach ($items as $item) {
@@ -140,11 +156,34 @@ class CheckoutController extends Controller
                 return $order;
             });
         } catch (\RuntimeException $e) {
+            // Stock-shortage messages are already specific and safe to show
+            // the customer as-is (product name, size, remaining count).
             return back()->withErrors(['stock' => $e->getMessage()])->withInput();
+        } catch (Throwable $e) {
+            Log::error('Checkout order creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'customer_email' => $validated['customer_email'] ?? null,
+            ]);
+
+            return back()
+                ->withErrors(['order' => __('Something went wrong while placing your order. Please try again.')])
+                ->withInput();
         }
 
-        GenerateAndSendInvoice::dispatch($order);
-        Notification::send(User::admins(), new NewOrderPlaced($order));
+        // Everything below only runs once the order is durably committed —
+        // the cart is never cleared, and the customer is never bounced to
+        // an error page, for a problem that happens after this point.
+        try {
+            GenerateAndSendInvoice::dispatch($order);
+            Notification::send(User::admins(), new NewOrderPlaced($order));
+        } catch (Throwable $e) {
+            Log::error('Post-order notification/invoice dispatch failed (order already created successfully)', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         if ($request->user()) {
             $this->cartTracking->markConverted($request->user(), $order);
