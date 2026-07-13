@@ -20,10 +20,12 @@ class InvoiceMail extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      *
-     * $invoice is nullable so a PDF-generation failure never blocks the
-     * order confirmation itself from going out — see
-     * GenerateAndSendInvoice, which catches that failure, notifies admins,
-     * and still sends this mail with $invoice = null.
+     * $invoice is nullable — null when this is the immediate "order placed"
+     * confirmation dispatched right after checkout (CheckoutController),
+     * before any PDF exists; set when this is the later "invoice ready"
+     * follow-up dispatched by GenerateAndSendInvoice once generation
+     * succeeds. Same Mailable/view for both, since the view already adapts
+     * its copy and attachment to whichever state it's given.
      */
     public function __construct(public Order $order, public ?Invoice $invoice = null)
     {
@@ -36,7 +38,9 @@ class InvoiceMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails.order_confirmation_subject', ['number' => $this->order->order_number]),
+            subject: $this->invoice
+                ? __('emails.invoice_ready_subject', ['number' => $this->order->order_number])
+                : __('emails.order_confirmation_subject', ['number' => $this->order->order_number]),
         );
     }
 
