@@ -94,7 +94,7 @@
      * on it. None of that spacing was load-bearing for readability.
      */
 
-    .page { padding: 8mm 14mm 8mm; }
+    .page { padding: 6mm 14mm 6mm; }
 
     /* ----- Header ----- */
     .header {
@@ -113,7 +113,8 @@
         background-color: #3C0B17;
         color: #fff;
         border-radius: 14px;
-        padding: 18px 24px;
+        padding: 14px 24px;
+        page-break-inside: avoid;
     }
     .header table td { vertical-align: top; }
     .brand-mark { font-size: 22px; font-weight: 700; letter-spacing: .5px; color: var(--dj-gold); }
@@ -128,6 +129,7 @@
         margin-top: 10px;
         background: var(--dj-secondary);
         border-radius: 10px;
+        page-break-inside: avoid;
     }
     .strip td { padding: 9px 16px; vertical-align: middle; }
     .strip-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--dj-muted); font-weight: 600; display: block; }
@@ -144,14 +146,15 @@
     }
 
     /* ----- Address cards ----- */
-    .cards-row { width: 100%; margin-top: 12px; }
+    .cards-row { width: 100%; margin-top: 8px; }
     .cards-row td { vertical-align: top; width: 50%; }
     .cards-row .spacer { width: 12px; }
     .card {
         background: #fff;
         border: 1px solid var(--dj-border);
         border-radius: 12px;
-        padding: 12px 16px;
+        padding: 10px 16px;
+        page-break-inside: avoid;
     }
     .card-label {
         font-size: 10px;
@@ -197,6 +200,7 @@
         letter-spacing: .4px;
         padding: 8px 10px;
     }
+    .items tbody tr { page-break-inside: avoid; }
     .items tbody td {
         padding: 8px 10px;
         border-bottom: 1px solid var(--dj-border);
@@ -213,14 +217,15 @@
     .item-name { font-weight: 700; color: var(--dj-ink); font-size: 11.5px; }
 
     /* ----- Totals ----- */
-    .totals-wrap { text-align: {{ $isRtl ? 'left' : 'right' }}; margin-top: 12px; }
+    .totals-wrap { text-align: {{ $isRtl ? 'left' : 'right' }}; margin-top: 8px; }
     .totals-card {
         display: inline-block;
         width: 260px;
         background: var(--dj-secondary);
         border-radius: 12px;
-        padding: 12px 16px;
+        padding: 10px 16px;
         text-align: {{ $isRtl ? 'right' : 'left' }};
+        page-break-inside: avoid;
     }
     .totals-row { width: 100%; font-size: 11.5px; }
     .totals-row td { padding: 3px 0; }
@@ -232,32 +237,33 @@
     .grand-total-value { font-size: 17px; font-weight: 700; color: var(--dj-primary); }
 
     /* ----- Meta grid (payment/status) ----- */
-    .meta-grid { width: 100%; margin-top: 12px; }
+    .meta-grid { width: 100%; margin-top: 8px; }
     .meta-grid td { vertical-align: top; width: 50%; }
     .meta-grid .spacer { width: 12px; }
     .meta-box {
         background: #fff;
         border: 1px solid var(--dj-border);
         border-radius: 12px;
-        padding: 10px 16px;
+        padding: 8px 14px;
+        page-break-inside: avoid;
     }
     .meta-box .label { font-size: 9.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--dj-muted); font-weight: 700; }
     .meta-box .value { font-size: 12px; font-weight: 700; color: var(--dj-ink); margin-top: 3px; }
 
     .notes-box {
-        margin-top: 10px;
+        margin-top: 8px;
         background: var(--dj-secondary);
         border-{{ $isRtl ? 'right' : 'left' }}: 3px solid var(--dj-primary);
-        padding: 10px 16px;
+        padding: 8px 16px;
         font-size: 11px;
         color: var(--dj-ink);
-        line-height: 1.5;
+        line-height: 1.4;
     }
 
     /* ----- Footer ----- */
     .footer {
-        margin-top: 12px;
-        padding-top: 8px;
+        margin-top: 10px;
+        padding-top: 6px;
         border-top: 1px solid var(--dj-border);
         text-align: center;
     }
