@@ -41,6 +41,7 @@ return [
 
     // Orders
     'order_confirmation_subject' => 'تم تأكيد طلبك رقم :number من دار الجميلة',
+    'invoice_ready_subject' => 'فاتورة طلبك رقم :number جاهزة الآن',
     'order_confirmation_tagline' => 'تأكيد الطلب',
     'order_confirmation_greeting' => 'شكرًا لطلبك، :name!',
     'order_confirmation_intro' => 'تم استلام طلبك رقم :number، وفاتورتك رقم :invoice مرفقة بهذا البريد الإلكتروني.',
