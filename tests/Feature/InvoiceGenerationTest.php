@@ -379,4 +379,142 @@ class InvoiceGenerationTest extends TestCase
         $response->assertSee(__('emails.order_payment_method_cod'));
         $response->assertSee(__('orders.status_'.$order->status));
     }
+
+    /**
+     * @return int Page count, parsed straight out of the PDF's own
+     *             /Pages /Count dictionary entry — no external binary
+     *             (pdftoppm/ghostscript/Imagick) is available in this
+     *             environment, but every PDF is required to declare this
+     *             value, so a plain regex is a reliable, dependency-free
+     *             way to assert on page count in a test.
+     */
+    protected function pdfPageCount(string $pdfBytes): int
+    {
+        preg_match('/\/Type\s*\/Pages.{0,80}?\/Count\s+(\d+)/s', $pdfBytes, $matches);
+
+        return isset($matches[1]) ? (int) $matches[1] : 0;
+    }
+
+    public function test_arabic_invoice_pdf_renders_on_a_single_page_for_a_normal_order(): void
+    {
+        // Regression test for the exact bug reported: this order (2 items
+        // + notes, no discount) previously split across 2 pages with the
+        // entire product table pushed past page 1 — caused by 26mm of top
+        // page padding plus generous spacing throughout, not by content
+        // genuinely needing more room.
+        $order = $this->makeOrder(['locale' => 'ar', 'notes' => 'Please deliver after 5pm.']);
+        $order->load('items.product');
+
+        $pdf = app(\App\Services\InvoicePdfRenderer::class)->render('invoices.pdf', [
+            'order' => $order,
+            'invoiceNumber' => 'INV-TEST-0001',
+            'locale' => 'ar',
+            'isRtl' => true,
+            'djSupportEmail' => null,
+            'djWhatsapp' => null,
+        ]);
+
+        $this->assertSame(1, $this->pdfPageCount($pdf));
+    }
+
+    public function test_english_invoice_pdf_also_renders_on_a_single_page(): void
+    {
+        $order = $this->makeOrder(['locale' => 'en']);
+        $order->load('items.product');
+
+        $pdf = app(\App\Services\InvoicePdfRenderer::class)->render('invoices.pdf', [
+            'order' => $order,
+            'invoiceNumber' => 'INV-TEST-0002',
+            'locale' => 'en',
+            'isRtl' => false,
+            'djSupportEmail' => null,
+            'djWhatsapp' => null,
+        ]);
+
+        $this->assertSame(1, $this->pdfPageCount($pdf));
+    }
+
+    public function test_invoice_pdf_header_uses_a_solid_background_not_a_gradient(): void
+    {
+        // dompdf-specific bug, confirmed by isolated rendering: a
+        // `background: linear-gradient(...)` declaration on the same
+        // element as a `background-color` fallback caused dompdf to
+        // render NO background at all (verified via get_drawings() on
+        // the rendered PDF: zero fill rectangles with the gradient line
+        // present, one correct fill rectangle without it) — leaving the
+        // header's light gold/cream text unreadable against a plain
+        // white page. This must never come back, so the compiled view
+        // must never contain a linear-gradient declaration.
+        $html = view('invoices.pdf', [
+            'order' => $this->makeOrder()->load('items.product'),
+            'invoiceNumber' => 'INV-TEST-0003',
+            'locale' => 'en',
+            'isRtl' => false,
+            'djSupportEmail' => null,
+            'djWhatsapp' => null,
+        ])->render();
+
+        // The phrase "background: linear-gradient" legitimately appears
+        // once, in this template's own explanatory CSS comment about why
+        // it isn't used — so assert on the exact declaration (including
+        // the gradient's specific angle/stops) instead of the bare phrase.
+        $this->assertStringNotContainsString('background: linear-gradient(135deg, #5B1024', $html);
+        $this->assertStringContainsString('background-color: #3C0B17', $html);
+    }
+
+    public function test_invoice_pdf_forces_ltr_on_multi_column_tables_for_reliable_rtl_layout(): void
+    {
+        // dompdf does not reverse <table> column order for RTL documents
+        // (confirmed by isolated rendering: the exact same 2-column
+        // table rendered correctly side-by-side under dir="ltr" but
+        // collapsed into one centered, overlapping block under
+        // dir="rtl") — every multi-column layout table in the RTL
+        // invoice must force dir="ltr" on itself and instead swap which
+        // content goes in which cell to get the correct visual order.
+        $html = view('invoices.pdf', [
+            'order' => $this->makeOrder(['locale' => 'ar'])->load('items.product'),
+            'invoiceNumber' => 'INV-TEST-0004',
+            'locale' => 'ar',
+            'isRtl' => true,
+            'djSupportEmail' => null,
+            'djWhatsapp' => null,
+        ])->render();
+
+        $this->assertStringContainsString('<table dir="ltr" style="width:100%; direction:ltr;">', $html);
+        $this->assertStringContainsString('<table class="strip" dir="ltr"', $html);
+        $this->assertStringContainsString('<table class="cards-row" dir="ltr"', $html);
+        $this->assertStringContainsString('<table class="items" dir="ltr"', $html);
+        $this->assertStringContainsString('<table class="totals-row" dir="ltr"', $html);
+        $this->assertStringContainsString('<table class="grand-total-row" dir="ltr"', $html);
+        $this->assertStringContainsString('<table class="meta-grid" dir="ltr"', $html);
+    }
+
+    public function test_arabic_invoice_pdf_shows_brand_on_the_right_and_invoice_title_on_the_left(): void
+    {
+        $order = $this->makeOrder(['locale' => 'ar'])->load('items.product');
+
+        $html = view('invoices.pdf', [
+            'order' => $order,
+            'invoiceNumber' => 'INV-TEST-0005',
+            'locale' => 'ar',
+            'isRtl' => true,
+            'djSupportEmail' => null,
+            'djWhatsapp' => null,
+        ])->render();
+
+        // Search from after the stylesheet so the .brand-mark/.invoice-title
+        // CSS rule definitions (which necessarily appear in source order,
+        // not visual order) aren't mistaken for the actual body content.
+        $bodyStart = strpos($html, '<body>');
+        $brandPosition = strpos($html, 'class="brand-mark"', $bodyStart);
+        $invoiceTitlePosition = strpos($html, 'class="invoice-title"', $bodyStart);
+
+        $this->assertNotFalse($brandPosition);
+        $this->assertNotFalse($invoiceTitlePosition);
+        // The header's <table dir="ltr"> renders its first markup cell on
+        // the physical left — for an RTL invoice that must be the
+        // invoice-title block, with the brand block second (physical
+        // right), matching Arabic reading order.
+        $this->assertLessThan($brandPosition, $invoiceTitlePosition);
+    }
 }
