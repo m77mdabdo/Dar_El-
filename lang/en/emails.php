@@ -41,6 +41,7 @@ return [
 
     // Orders
     'order_confirmation_subject' => 'Your Dar El-Jamila order :number is confirmed',
+    'invoice_ready_subject' => 'Your invoice for order :number is ready',
     'order_confirmation_tagline' => 'Order Confirmation',
     'order_confirmation_greeting' => 'Thank you for your order, :name!',
     'order_confirmation_intro' => 'Your order :number has been placed and your invoice #:invoice is attached to this email.',

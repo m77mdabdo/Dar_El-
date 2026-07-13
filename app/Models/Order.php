@@ -70,4 +70,36 @@ class Order extends Model
     {
         return $this->hasMany(OrderStatusHistory::class)->latest('created_at');
     }
+
+    /**
+     * The single source of truth for "where do customer-facing order emails
+     * go" — prefers the email snapshot taken at checkout time (correct for
+     * both guests and logged-in customers, and immune to the account's
+     * email changing later), falling back to the linked account only if
+     * that snapshot is somehow empty. Never resolves to an admin/system
+     * address, and returns null (never an invalid string) if nothing usable
+     * is found so callers can safely skip sending instead of erroring.
+     */
+    public function resolveCustomerEmail(): ?string
+    {
+        $email = $this->customer_email ?: $this->user?->email;
+
+        return $email && filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+    }
+
+    /**
+     * Privacy-safe stand-in for logging a recipient — never write a full
+     * email address to the logs, just enough to spot-check the right
+     * domain/mailbox shape without exposing the address itself.
+     */
+    public static function maskEmailForLogging(?string $email): ?string
+    {
+        if (! $email || ! str_contains($email, '@')) {
+            return null;
+        }
+
+        [$local, $domain] = explode('@', $email, 2);
+
+        return mb_substr($local, 0, 1).'***@'.$domain;
+    }
 }

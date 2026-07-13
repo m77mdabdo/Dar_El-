@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCheckoutRequest;
 use App\Jobs\GenerateAndSendInvoice;
+use App\Mail\InvoiceMail;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\ProductSize;
@@ -11,12 +12,14 @@ use App\Models\Setting;
 use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Notifications\NewOrderPlaced;
+use App\Notifications\OrderPlaced;
 use App\Services\CartService;
 use App\Services\CartTrackingService;
 use App\Services\StockAlertService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -203,17 +206,50 @@ class CheckoutController extends Controller
 
         // Everything below only runs once the order is durably committed —
         // the cart is never cleared, and the customer is never bounced to
-        // an error page, for a problem that happens after this point.
-        try {
-            GenerateAndSendInvoice::dispatch($order);
-            Notification::send(User::admins(), new NewOrderPlaced($order));
-        } catch (Throwable $e) {
-            Log::error('Post-order notification/invoice dispatch failed (order already created successfully)', [
+        // an error page, for a problem that happens after this point. Each
+        // dispatch is isolated in its own try/catch (via dispatchSafely) so
+        // a failure in one — e.g. an unresolvable customer email — can
+        // never suppress the others, most importantly the admin
+        // notification, which must always fire regardless of customer-side
+        // outcomes.
+        $customerEmail = $order->resolveCustomerEmail();
+
+        if ($customerEmail) {
+            // $invoice is intentionally omitted (null) here — this is the
+            // immediate "order placed" confirmation, sent before any PDF
+            // exists. GenerateAndSendInvoice sends the same Mailable again
+            // with the real invoice once generation succeeds (see there).
+            $this->dispatchSafely($order, InvoiceMail::class, function () use ($order, $customerEmail) {
+                Mail::to($customerEmail)->locale($order->locale ?? app()->getLocale())->send(new InvoiceMail($order));
+            }, [
+                'recipient_resolved' => true,
+                'recipient_masked' => Order::maskEmailForLogging($customerEmail),
+            ]);
+        } else {
+            Log::warning('Order confirmation email skipped: no resolvable customer email', [
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
-                'error' => $e->getMessage(),
+                'recipient_resolved' => false,
             ]);
         }
+
+        // Database notification for the customer's own account — guests
+        // have no notifiable account to attach one to, so they rely solely
+        // on the email above. Deliberately a different notification class
+        // from the admin one below (never the same class sent to both).
+        if ($order->user_id) {
+            $this->dispatchSafely($order, OrderPlaced::class, function () use ($order) {
+                $order->user->notify(new OrderPlaced($order));
+            });
+        }
+
+        $this->dispatchSafely($order, NewOrderPlaced::class, function () use ($order) {
+            Notification::send(User::admins(), new NewOrderPlaced($order));
+        });
+
+        $this->dispatchSafely($order, GenerateAndSendInvoice::class, function () use ($order) {
+            GenerateAndSendInvoice::dispatch($order);
+        });
 
         if ($request->user()) {
             $this->cartTracking->markConverted($request->user(), $order);
@@ -227,5 +263,33 @@ class CheckoutController extends Controller
     public function success(Order $order): View
     {
         return view('checkout.success', compact('order'));
+    }
+
+    /**
+     * Runs one post-commit dispatch (a mail send, a notification, a queued
+     * job) in isolation — a failure here is logged and swallowed rather
+     * than propagated, so e.g. a bad customer email can never take down the
+     * admin notification that runs right after it, and vice versa. Never
+     * logs a full email address (see Order::maskEmailForLogging()).
+     */
+    private function dispatchSafely(Order $order, string $class, \Closure $action, array $context = []): void
+    {
+        try {
+            $action();
+
+            Log::info('Order post-commit dispatch succeeded', array_merge([
+                'order_id' => $order->id,
+                'class' => $class,
+                'status' => 'success',
+            ], $context));
+        } catch (Throwable $e) {
+            Log::error('Order post-commit dispatch failed (order already created successfully)', array_merge([
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'class' => $class,
+                'error' => $e->getMessage(),
+                'status' => 'failed',
+            ], $context));
+        }
     }
 }

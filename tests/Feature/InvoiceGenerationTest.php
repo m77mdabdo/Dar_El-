@@ -308,7 +308,7 @@ class InvoiceGenerationTest extends TestCase
         $response->assertSessionHas('error', __('orders.invoice_not_ready'));
     }
 
-    public function test_invoice_generation_failure_still_sends_the_confirmation_email_and_notifies_admins(): void
+    public function test_invoice_generation_failure_sends_no_mail_and_notifies_admins(): void
     {
         Mail::fake();
         Notification::fake();
@@ -335,7 +335,11 @@ class InvoiceGenerationTest extends TestCase
         GenerateAndSendInvoice::dispatchSync($order);
 
         $this->assertSame(0, Invoice::where('order_id', $order->id)->count());
-        Mail::assertQueued(InvoiceMail::class, fn ($mail) => $mail->hasTo($order->customer_email) && $mail->invoice === null);
+        // The immediate order confirmation is sent from CheckoutController,
+        // not this job — on a PDF failure this job now sends nothing at
+        // all (the customer already has their confirmation; there's simply
+        // no "invoice ready" follow-up to send).
+        Mail::assertNotQueued(InvoiceMail::class);
         Notification::assertSentTo($admin, \App\Notifications\InvoiceGenerationFailedAdminNotification::class);
     }
 

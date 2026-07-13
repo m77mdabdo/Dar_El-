@@ -34,13 +34,13 @@ class GenerateAndSendInvoice implements ShouldQueue
     /**
      * Execute the job.
      *
-     * The order confirmation email must always go out even if PDF
-     * generation itself fails (a missing font, a disk/permissions issue on
-     * a fresh deploy, dompdf hitting a memory limit, etc.) — previously a
-     * failure here meant the customer received NO email at all, since
-     * sending it was the last line of this same method. PDF generation is
-     * now isolated so a failure there degrades to "confirmation without an
-     * invoice attached" instead of "nothing sent".
+     * The order confirmation itself is sent immediately after checkout
+     * (CheckoutController::store()), independent of this job — so a PDF
+     * failure here never costs the customer their only email. This job's
+     * only remaining email responsibility is the "invoice ready" follow-up,
+     * sent once (and only once) generation actually succeeds; on failure,
+     * generateInvoice() already logs and notifies admins, and there is
+     * nothing further to send.
      */
     public function handle(): void
     {
@@ -49,7 +49,38 @@ class GenerateAndSendInvoice implements ShouldQueue
         $locale = $this->order->locale ?? config('app.locale');
         $invoice = $this->generateInvoice($locale);
 
-        Mail::to($this->order->customer_email)->locale($locale)->send(new InvoiceMail($this->order, $invoice));
+        if (! $invoice) {
+            return;
+        }
+
+        $customerEmail = $this->order->resolveCustomerEmail();
+
+        if (! $customerEmail) {
+            Log::warning('Invoice-ready email skipped: no resolvable customer email', [
+                'order_id' => $this->order->id,
+                'order_number' => $this->order->order_number,
+            ]);
+
+            return;
+        }
+
+        try {
+            Mail::to($customerEmail)->locale($locale)->send(new InvoiceMail($this->order, $invoice));
+
+            Log::info('Invoice-ready email dispatched', [
+                'order_id' => $this->order->id,
+                'mailable' => InvoiceMail::class,
+                'recipient_masked' => Order::maskEmailForLogging($customerEmail),
+                'status' => 'success',
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Invoice-ready email dispatch failed', [
+                'order_id' => $this->order->id,
+                'mailable' => InvoiceMail::class,
+                'error' => $e->getMessage(),
+                'status' => 'failed',
+            ]);
+        }
     }
 
     protected function generateInvoice(string $locale): ?Invoice
