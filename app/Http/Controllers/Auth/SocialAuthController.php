@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\SocialAuthenticator;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
 use Throwable;
 
 /**
@@ -37,17 +39,44 @@ class SocialAuthController extends Controller
             $request->session()->put('url.intended', url($redirect->value()));
         }
 
-        if (config('app.debug')) {
-            $config = config("services.{$provider}", []);
-            logger()->info('Social OAuth config', [
+        $configuredRedirect = (string) (config("services.{$provider}.redirect") ?? '');
+
+        // Root-cause guard for the exact "Google sends me to localhost"
+        // production bug: that happens when the *.env* redirect URL is a
+        // local-dev value, not a code path — this can't be fixed by code
+        // alone, but the app must never silently start an OAuth flow that
+        // is guaranteed to strand the user, so refuse and log loudly
+        // instead of sending them to Google only to bounce off localhost
+        // on the way back.
+        if (app()->environment('production') && $this->pointsAtLocalHost($configuredRedirect)) {
+            Log::critical('OAuth misconfigured: redirect URL points at localhost in production', [
                 'provider' => $provider,
-                'client_id' => $config['client_id'] ?? null,
-                'client_secret_set' => ! empty($config['client_secret']),
-                'redirect' => $config['redirect'] ?? null,
+                'configured_redirect' => $configuredRedirect,
+                'app_url' => config('app.url'),
+            ]);
+
+            return redirect()->route('login')->withErrors([
+                'email' => __('Sign-in with :provider is temporarily unavailable. Please use your email and password, or try again shortly.', ['provider' => ucfirst($provider)]),
+            ]);
+        }
+
+        if (config('app.debug')) {
+            logger()->info('Social OAuth redirect', [
+                'provider' => $provider,
+                'client_id_set' => ! empty(config("services.{$provider}.client_id")),
+                'client_secret_set' => ! empty(config("services.{$provider}.client_secret")),
+                'redirect' => $configuredRedirect,
             ]);
         }
 
         return Socialite::driver($provider)->redirect();
+    }
+
+    protected function pointsAtLocalHost(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+
+        return in_array($host, [null, '', 'localhost', '127.0.0.1'], true);
     }
 
     public function callback(Request $request, string $provider): RedirectResponse
@@ -56,8 +85,45 @@ class SocialAuthController extends Controller
 
         try {
             $socialUser = Socialite::driver($provider)->user();
+        } catch (InvalidStateException $e) {
+            // The single most common real-world cause: the browser didn't
+            // send back the same session cookie that was present when
+            // redirect() ran — a session-cookie/domain/HTTPS-detection
+            // mismatch, not anything about the user's Google account. Log
+            // enough to diagnose *that* without ever logging the request's
+            // actual cookie/token values.
+            Log::warning('Social auth callback failed: session state mismatch', [
+                'provider' => $provider,
+                'exception' => InvalidStateException::class,
+                'route' => $request->route()?->getName(),
+                'callback_url' => $request->fullUrl(),
+                'app_url' => config('app.url'),
+                'had_session_id' => $request->hasSession() && $request->session()->isStarted(),
+            ]);
+
+            return redirect()->route('login')->withErrors([
+                'email' => __('Your sign-in session expired before Google could confirm it. Please try again.'),
+            ]);
+        } catch (RequestException $e) {
+            Log::error('Social auth callback failed: provider API error', [
+                'provider' => $provider,
+                'exception' => RequestException::class,
+                'status' => $e->getResponse()?->getStatusCode(),
+                'route' => $request->route()?->getName(),
+            ]);
+
+            return redirect()->route('login')->withErrors([
+                'email' => __('Something went wrong signing you in. Please try again.'),
+            ]);
         } catch (Throwable $e) {
-            Log::warning('Social auth callback failed', ['provider' => $provider, 'error' => $e->getMessage()]);
+            Log::warning('Social auth callback failed', [
+                'provider' => $provider,
+                'exception' => $e::class,
+                'error' => $e->getMessage(),
+                'route' => $request->route()?->getName(),
+                'callback_url' => $request->fullUrl(),
+                'app_url' => config('app.url'),
+            ]);
 
             return redirect()->route('login')->withErrors([
                 'email' => __('Something went wrong signing you in. Please try again.'),

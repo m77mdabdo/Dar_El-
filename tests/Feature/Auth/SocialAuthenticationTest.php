@@ -5,11 +5,16 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Notifications\LoginAlertNotification;
 use App\Notifications\NewCustomerRegistered;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use GuzzleHttp\Psr7\Response as Psr7Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Mockery;
 use Tests\TestCase;
@@ -139,5 +144,62 @@ class SocialAuthenticationTest extends TestCase
         $response = $this->get(route('social.callback', 'google'));
 
         $response->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function test_callback_shows_a_friendly_error_on_invalid_state_without_leaking_details(): void
+    {
+        $provider = Mockery::mock(Provider::class);
+        $provider->shouldReceive('user')->andThrow(new InvalidStateException());
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $response = $this->get(route('social.callback', 'google'));
+
+        $this->assertGuest();
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertSame(0, User::count());
+    }
+
+    public function test_callback_shows_a_friendly_error_when_the_provider_api_fails(): void
+    {
+        $request = new Psr7Request('GET', 'https://oauth2.googleapis.com/token');
+        $response = new Psr7Response(500, [], 'Internal Server Error');
+
+        $provider = Mockery::mock(Provider::class);
+        $provider->shouldReceive('user')->andThrow(new RequestException('Server error', $request, $response));
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $result = $this->get(route('social.callback', 'google'));
+
+        $this->assertGuest();
+        $result->assertRedirect(route('login'));
+        $result->assertSessionHasErrors('email');
+    }
+
+    public function test_redirect_refuses_a_localhost_callback_url_in_production_instead_of_stranding_the_user(): void
+    {
+        $this->app->detectEnvironment(fn () => 'production');
+        config(['services.google.redirect' => 'http://localhost:8000/auth/google/callback']);
+
+        Log::shouldReceive('critical')->once();
+
+        $response = $this->get(route('social.redirect', 'google'));
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+    }
+
+    public function test_redirect_proceeds_normally_in_production_with_a_real_https_callback_url(): void
+    {
+        $this->app->detectEnvironment(fn () => 'production');
+        config(['services.google.redirect' => 'https://dar-el-jamila.com/auth/google/callback']);
+
+        $provider = Mockery::mock(Provider::class);
+        $provider->shouldReceive('redirect')->andReturn(new RedirectResponse('https://accounts.google.com/o/oauth2/auth'));
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $response = $this->get(route('social.redirect', 'google'));
+
+        $response->assertRedirect('https://accounts.google.com/o/oauth2/auth');
     }
 }
