@@ -248,8 +248,15 @@ class CheckoutController extends Controller
         });
 
         $this->dispatchSafely($order, GenerateAndSendInvoice::class, function () use ($order) {
-            GenerateAndSendInvoice::dispatch($order);
-        });
+            // ->afterCommit() is belt-and-suspenders here — this whole
+            // block already runs after DB::transaction() above has
+            // returned (and therefore committed), but stating it
+            // explicitly means the guarantee survives even if a future
+            // refactor moves this call somewhere less obviously safe.
+            GenerateAndSendInvoice::dispatch($order)->afterCommit();
+        }, [
+            'queue_connection' => config('queue.default'),
+        ]);
 
         if ($request->user()) {
             $this->cartTracking->markConverted($request->user(), $order);

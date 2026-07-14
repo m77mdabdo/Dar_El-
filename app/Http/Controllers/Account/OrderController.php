@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -36,15 +37,23 @@ class OrderController extends Controller
 
         $invoice = $order->invoice;
 
-        if (! $invoice || ! $invoice->pdf_path || ! Storage::disk('local')->exists($invoice->pdf_path)) {
+        if (! $invoice || ! $invoice->isDownloadable()) {
             // The order itself is real (route model binding already
-            // guaranteed that) — only the invoice isn't ready yet, e.g. its
-            // generation is still queued or previously failed. A bare 404
-            // here reads as a broken link; send the visitor back to the
-            // order they were just looking at with an explanation instead.
+            // guaranteed that) — only the invoice isn't ready yet. A bare
+            // 404 here reads as a broken link; send the visitor back to
+            // the order they were just looking at with an explanation
+            // instead. "failed" gets a distinct message from "still
+            // queued/processing" — previously both cases showed the same
+            // "still preparing" text forever, with no way for the
+            // customer (or support) to tell a permanent failure apart
+            // from normal in-progress generation.
             $showRoute = $request->route()->getName() === 'admin.orders.invoice' ? 'admin.orders.show' : 'account.orders.show';
 
-            return redirect()->route($showRoute, $order)->with('error', __('orders.invoice_not_ready'));
+            $message = $invoice?->status === Invoice::STATUS_FAILED
+                ? __('orders.invoice_generation_failed')
+                : __('orders.invoice_not_ready');
+
+            return redirect()->route($showRoute, $order)->with('error', $message);
         }
 
         return Storage::disk('local')->download($invoice->pdf_path, "{$invoice->invoice_number}.pdf");
