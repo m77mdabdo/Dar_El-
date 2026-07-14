@@ -34,7 +34,14 @@ class GenerateAndSendInvoice implements ShouldQueue
      */
     public function __construct(protected Order $order)
     {
-        //
+        // Set at runtime rather than redeclared as a class property —
+        // Queueable's own `public $queue;` has no default value, and PHP's
+        // trait composition rejects a redeclaration that adds one.
+        // PDF generation is the slowest work in the app; keeping it off
+        // the 'high'/'default' queues means it can never delay an OTP
+        // resend, a login alert, or an order-confirmation notification
+        // that happens to be queued behind it.
+        $this->queue = 'invoices';
     }
 
     /**
@@ -54,8 +61,12 @@ class GenerateAndSendInvoice implements ShouldQueue
      */
     public function handle(InvoicePdfService $invoicePdfService): void
     {
+        $jobStartedAt = microtime(true);
+
         Log::info('Invoice job started', [
             'order_id' => $this->order->id,
+            'job' => static::class,
+            'queue' => $this->queue,
             'attempt' => $this->attempts(),
         ]);
 
@@ -96,6 +107,8 @@ class GenerateAndSendInvoice implements ShouldQueue
             return;
         }
 
+        $mailStartedAt = microtime(true);
+
         Mail::to($customerEmail)->locale($locale)->send(new InvoiceMail($this->order, $invoice));
 
         $invoice->update(['status' => Invoice::STATUS_EMAILED, 'emailed_at' => now()]);
@@ -105,6 +118,8 @@ class GenerateAndSendInvoice implements ShouldQueue
             'mailable' => InvoiceMail::class,
             'recipient_masked' => Order::maskEmailForLogging($customerEmail),
             'status' => 'success',
+            'smtp_duration_ms' => (int) ((microtime(true) - $mailStartedAt) * 1000),
+            'job_duration_ms' => (int) ((microtime(true) - $jobStartedAt) * 1000),
         ]);
     }
 
@@ -119,6 +134,8 @@ class GenerateAndSendInvoice implements ShouldQueue
     {
         Log::error('Invoice job failed', [
             'order_id' => $this->order->id,
+            'job' => static::class,
+            'queue' => $this->queue,
             'attempt' => $this->attempts(),
             'exception' => $e::class,
             'message' => $e->getMessage(),

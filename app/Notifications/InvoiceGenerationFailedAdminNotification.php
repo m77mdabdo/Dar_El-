@@ -13,7 +13,10 @@ class InvoiceGenerationFailedAdminNotification extends Notification implements S
 
     public function __construct(public Order $order, public string $errorMessage)
     {
-        //
+        // Grouped with the invoice workflow's own queue rather than
+        // 'default' — see GenerateAndSendInvoice for why redeclaring
+        // Queueable's `$queue` property directly isn't possible.
+        $this->queue = 'invoices';
     }
 
     /**
