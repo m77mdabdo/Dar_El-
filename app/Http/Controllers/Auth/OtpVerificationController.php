@@ -53,7 +53,7 @@ class OtpVerificationController extends Controller
         }
 
         return $user->redirectResponseAfterAuth()
-            ->with('status', __('Your account has been verified. Welcome to Dar El-Jamila!'));
+            ->with('status', __('Your account has been verified. Welcome to Dar El Jamila!'));
     }
 
     /**

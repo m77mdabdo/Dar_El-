@@ -77,7 +77,7 @@ class InvoicePdfService
             Log::info('Invoice Arabic source check', [
                 'order_id' => $order->id,
                 'invoice_label' => __('invoice.invoice', [], 'ar'),
-                'brand_name' => __('Dar El-Jamila', [], 'ar'),
+                'brand_name' => __('Dar El Jamila', [], 'ar'),
                 'date_label' => __('invoice.date', [], 'ar'),
             ]);
 

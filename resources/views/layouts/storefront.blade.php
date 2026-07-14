@@ -6,24 +6,29 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>window.djI18n = { close: @json(__('Close')) };</script>
     <meta name="description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
-    <meta property="og:title" content="@yield('title', config('app.name', 'Dar El-Jamila'))">
+    <meta property="og:title" content="@yield('title', config('app.name', 'Dar El Jamila'))">
     <meta property="og:description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
-    <meta property="og:image" content="@yield('og_image', asset('favicon.ico'))">
+    <meta property="og:image" content="@yield('og_image', asset('assets/branding/favicon-512.png'))">
     <meta property="og:type" content="website">
-    <title>@yield('title', config('app.name', 'Dar El-Jamila'))</title>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', config('app.name', 'Dar El Jamila'))">
+    <meta name="twitter:description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
+    <meta name="twitter:image" content="@yield('og_image', asset('assets/branding/favicon-512.png'))">
+    <title>@yield('title', config('app.name', 'Dar El Jamila'))</title>
+    @include('partials.favicon-links')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="dj-storefront min-h-screen flex flex-col {{ app()->getLocale() === 'en' ? 'dj-en' : '' }}">
 
-    <div id="dj-splash"><div class="dj-splash-mark">{{ __('Dar El-Jamila') }}</div><div class="dj-splash-line"></div></div>
+    <div id="dj-splash"><x-brand-logo class="dj-splash-mark" style="width:220px;height:auto;" /><div class="dj-splash-line"></div></div>
     <div id="dj-scroll-progress"></div>
     <button id="dj-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="{{ __('Back to top') }}">↑</button>
 
     <div x-data="{ mobileNavOpen: false }">
     <nav class="dj-nav">
-        <div class="dj-nav-logo"><a href="{{ route('home') }}"><span class="dj-mark">{{ __('Dar El-Jamila') }}</span></a></div>
+        <div class="dj-nav-logo"><a href="{{ route('home') }}"><x-brand-logo class="dj-nav-logo-img" style="height:38px;width:auto;" /></a></div>
 
         <div class="dj-nav-links">
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'dj-active' : '' }}">{{ __('Home') }}</a>
@@ -120,8 +125,8 @@
     </main>
 
     <footer class="dj-footer">
-        <div class="dj-f-logo">{{ __('Dar El-Jamila') }}</div>
-        <p>{{ __('Beautiful you are for choosing Dar El-Jamila. To order, reach out to us directly via social media or email.') }}</p>
+        <x-brand-logo class="dj-f-logo" style="height:46px;width:auto;margin-inline:auto;" />
+        <p>{{ __('Beautiful you are for choosing Dar El Jamila. To order, reach out to us directly via social media or email.') }}</p>
 
         <form method="POST" action="{{ route('newsletter.store') }}" class="dj-newsletter-form" style="margin-bottom:30px;">
             @csrf
@@ -142,7 +147,7 @@
             <a href="mailto:{{ \App\Models\Setting::get('support_email', 'hello@dar-el-jamila.com') }}" title="Email">✉</a>
         </div>
 
-        <div class="dj-fine">&copy; {{ date('Y') }} {{ __('Dar El-Jamila. All rights reserved.') }}</div>
+        <div class="dj-fine">&copy; {{ date('Y') }} {{ __('Dar El Jamila. All rights reserved.') }}</div>
     </footer>
 
     @include('partials.cart-drawer')

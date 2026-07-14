@@ -96,7 +96,7 @@ class DemoProductSeeder extends Seeder
                 $fabric = $vocab['fabrics'][$i % count($vocab['fabrics'])];
                 $occasion = $vocab['occasions'][$i % count($vocab['occasions'])];
 
-                $descriptionEn = "{$nameEn} — {$styleEn} in {$fabric['en']}, cut for {$occasion['en']}. A refined piece from the Dar El-Jamila collection, designed with lasting quality in mind.";
+                $descriptionEn = "{$nameEn} — {$styleEn} in {$fabric['en']}, cut for {$occasion['en']}. A refined piece from the Dar El Jamila collection, designed with lasting quality in mind.";
                 $descriptionAr = "{$nameAr} بخامة {$fabric['ar']}، مصمم لِـ{$occasion['ar']}. قطعة راقية من مجموعة دار الجميلة، صُنعت لتدوم.";
 
                 $price = random_int((int) ($priceRange[0] / 10), (int) ($priceRange[1] / 10)) * 10;
@@ -130,7 +130,7 @@ class DemoProductSeeder extends Seeder
                         'status' => Product::STATUS_PUBLISHED,
                         'published_at' => now(),
                         'meta_title_ar' => $nameAr.' — دار الجميلة',
-                        'meta_title_en' => $nameEn.' — Dar El-Jamila',
+                        'meta_title_en' => $nameEn.' — Dar El Jamila',
                         'meta_description_ar' => $descriptionAr,
                         'meta_description_en' => $descriptionEn,
                         'sku_prefix' => $skuBase,

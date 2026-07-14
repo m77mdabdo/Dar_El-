@@ -5,19 +5,19 @@ return [
     'footer_contact' => 'Need help? Contact us at :email',
     'footer_whatsapp' => 'WhatsApp: :number',
     'footer_visit_website' => 'Visit our website',
-    'footer_copyright' => 'Dar El-Jamila. All rights reserved.',
-    'footer_disclaimer' => 'This is an automated message from Dar El-Jamila. Please do not reply directly to this email.',
+    'footer_copyright' => 'Dar El Jamila. All rights reserved.',
+    'footer_disclaimer' => 'This is an automated message from Dar El Jamila. Please do not reply directly to this email.',
     'ignore_note' => "If you did not request this email, please ignore it.",
 
     // OTP
-    'otp_subject' => 'Your Dar El-Jamila verification code',
+    'otp_subject' => 'Your Dar El Jamila verification code',
     'otp_greeting' => 'Hello :name',
     'otp_intro' => 'Use the code below to verify your account.',
     'otp_expires' => 'This code will expire in :minutes minutes.',
     'otp_security_note' => 'If you did not request this code, you can safely ignore this email.',
 
     // Password reset
-    'password_reset_subject' => 'Reset your Dar El-Jamila password',
+    'password_reset_subject' => 'Reset your Dar El Jamila password',
     'password_reset_tagline' => 'Password Reset',
     'password_reset_greeting' => 'Hello :name',
     'password_reset_intro' => 'We received a request to reset your password. Click the button below to choose a new one.',
@@ -40,7 +40,7 @@ return [
     'login_alert_reset_button' => 'Reset Password',
 
     // Orders
-    'order_confirmation_subject' => 'Your Dar El-Jamila order :number is confirmed',
+    'order_confirmation_subject' => 'Your Dar El Jamila order :number is confirmed',
     'invoice_ready_subject' => 'Your invoice for order :number is ready',
     'order_confirmation_tagline' => 'Order Confirmation',
     'order_confirmation_greeting' => 'Thank you for your order, :name!',
@@ -66,13 +66,13 @@ return [
     'order_status_tagline' => 'Order Update',
     'order_status_greeting' => 'Hello :name',
     'order_status_intro' => 'Your order :number status is now:',
-    'order_status_thanks' => 'Thank you for shopping with Dar El-Jamila!',
+    'order_status_thanks' => 'Thank you for shopping with Dar El Jamila!',
 
     // Carts
-    'cart_reminder_subject' => 'Your Dar El-Jamila cart is waiting for you',
+    'cart_reminder_subject' => 'Your Dar El Jamila cart is waiting for you',
     'cart_reminder_tagline' => 'Your Cart',
     'cart_reminder_greeting' => 'Hello :name',
-    'cart_reminder_intro' => 'Your Dar El-Jamila cart is still waiting for you. Complete your order before your selected items sell out.',
+    'cart_reminder_intro' => 'Your Dar El Jamila cart is still waiting for you. Complete your order before your selected items sell out.',
 
     // Reviews
     'review_approved_subject' => 'Your review has been approved',
@@ -100,9 +100,9 @@ return [
 
     // Admin notifications
     'admin_tagline' => 'Admin Notification',
-    'admin_user_welcome_subject' => 'Your Dar El-Jamila staff account has been created',
+    'admin_user_welcome_subject' => 'Your Dar El Jamila staff account has been created',
     'admin_user_welcome_greeting' => 'Welcome, :name',
-    'admin_user_welcome_intro' => 'A :role account has been created for you on the Dar El-Jamila admin dashboard.',
+    'admin_user_welcome_intro' => 'A :role account has been created for you on the Dar El Jamila admin dashboard.',
     'admin_user_welcome_credentials_title' => 'Your Login Details',
     'admin_user_welcome_password' => 'Temporary Password',
     'admin_user_welcome_note' => 'For your security, please log in and change this password as soon as possible.',
@@ -177,9 +177,9 @@ return [
     'back_in_stock_button' => 'Shop Now',
 
     // Newsletter welcome (template only — not wired to any trigger yet)
-    'newsletter_welcome_subject' => 'Welcome to the Dar El-Jamila newsletter',
+    'newsletter_welcome_subject' => 'Welcome to the Dar El Jamila newsletter',
     'newsletter_welcome_tagline' => 'Newsletter',
     'newsletter_welcome_greeting' => 'Hello',
-    'newsletter_welcome_intro' => 'Thank you for subscribing! You will now be the first to hear about new collections, exclusive offers, and styling tips from Dar El-Jamila.',
+    'newsletter_welcome_intro' => 'Thank you for subscribing! You will now be the first to hear about new collections, exclusive offers, and styling tips from Dar El Jamila.',
     'newsletter_welcome_button' => 'Explore the Shop',
 ];

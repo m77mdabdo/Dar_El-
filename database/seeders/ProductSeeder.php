@@ -37,7 +37,7 @@ class ProductSeeder extends Seeder
                     'name_ar' => $data['name_ar'],
                     'name_en' => $data['name_en'],
                     'description_ar' => 'وصف المنتج بالعربية.',
-                    'description_en' => 'A beautifully crafted piece from the Dar El-Jamila collection.',
+                    'description_en' => 'A beautifully crafted piece from the Dar El Jamila collection.',
                     'price' => $data['price'],
                     'sku' => strtoupper(Str::random(8)),
                     'image_url' => $data['image_url'],

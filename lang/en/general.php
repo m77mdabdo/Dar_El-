@@ -26,4 +26,16 @@ return [
     'update' => 'Update',
     'now' => 'Now',
     'description' => 'Description',
+
+    'errors' => [
+        'back_home' => 'Back to Home',
+        '404_title' => 'Page Not Found',
+        '404_message' => "The page you're looking for doesn't exist or may have been moved.",
+        '403_title' => 'Access Denied',
+        '403_message' => "You don't have permission to view this page.",
+        '500_title' => 'Something Went Wrong',
+        '500_message' => "We're working to fix this. Please try again shortly.",
+        '503_title' => 'Down for Maintenance',
+        '503_message' => "We're making some improvements and will be back shortly. Thank you for your patience.",
+    ],
 ];

@@ -13,7 +13,7 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $defaults = [
-            'store_name' => 'Dar El-Jamila',
+            'store_name' => 'Dar El Jamila',
             'support_email' => 'support@darel-jamila.com',
             'whatsapp_number' => '+201000000000',
             'default_shipping_fee' => '75',

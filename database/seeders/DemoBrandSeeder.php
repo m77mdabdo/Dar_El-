@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * 45 fictional fashion labels sold through the Dar El-Jamila marketplace.
+ * 45 fictional fashion labels sold through the Dar El Jamila marketplace.
  * Logos are generated locally (a stock photo API has no way to return an
  * actual logo for a made-up brand — see DemoLogoGenerator); banners are
  * real downloaded boutique/fashion photography. Idempotent via

@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('About Us') . ' — Dar El-Jamila')
+@section('title', __('About Us') . ' — Dar El Jamila')
 @section('meta_description', __('A story of passion that started with a simple dream: fashion that reflects the identity of the Arab woman with a modern touch'))
 
 @section('content')
@@ -10,7 +10,7 @@
         <div class="dj-particles" data-particles="12"></div>
         <div class="dj-lattice-bg"></div>
         <div class="dj-eyebrow">{{ __('Our Story') }}</div>
-        <h1>{{ __('Dar El-Jamila') }}</h1>
+        <h1>{{ __('Dar El Jamila') }}</h1>
         <p>{{ __('A story of passion that started with a simple dream: fashion that reflects the identity of the Arab woman with a modern touch') }}</p>
     </section>
 
@@ -22,14 +22,14 @@
         <div class="dj-story-text dj-reveal">
             <div class="dj-eyebrow">{{ __('About Us') }}</div>
             <h2>{{ __('Craftsmanship That Tells a Story') }}</h2>
-            <p>{{ __("Dar El-Jamila began as a small idea inside a design studio, born from the passion of a woman who believed an abaya is more than fabric — it's identity, presence, and confidence.") }}</p>
-            <p>{{ __('Today, after years of continuous growth, Dar El-Jamila is trusted by over 15,000 followers, thanks to close attention to detail and the finest fabric choices.') }}</p>
+            <p>{{ __("Dar El Jamila began as a small idea inside a design studio, born from the passion of a woman who believed an abaya is more than fabric — it's identity, presence, and confidence.") }}</p>
+            <p>{{ __('Today, after years of continuous growth, Dar El Jamila is trusted by over 15,000 followers, thanks to close attention to detail and the finest fabric choices.') }}</p>
             <p>{{ __("Every piece is designed and tailored with care, so what reaches you isn't just clothing — it's a complete experience of luxury and comfort.") }}</p>
         </div>
     </div>
 
     <section class="dj-timeline">
-        <div class="dj-section-title"><h2>{{ __('Our Journey') }}</h2><p>{{ __('Milestones along the Dar El-Jamila journey') }}</p></div>
+        <div class="dj-section-title"><h2>{{ __('Our Journey') }}</h2><p>{{ __('Milestones along the Dar El Jamila journey') }}</p></div>
         <div class="dj-timeline-track" style="margin-top:40px;">
             <div class="dj-t-item dj-reveal">
                 <span class="dj-yr">{{ __('The Beginning') }}</span>
@@ -39,7 +39,7 @@
             <div class="dj-t-item dj-reveal">
                 <span class="dj-yr">{{ __('Growth') }}</span>
                 <h4>{{ __('Official Page Launch') }}</h4>
-                <p>{{ __('The Dar El-Jamila Instagram account launched, expanding our customer base across many governorates.') }}</p>
+                <p>{{ __('The Dar El Jamila Instagram account launched, expanding our customer base across many governorates.') }}</p>
             </div>
             <div class="dj-t-item dj-reveal">
                 <span class="dj-yr">{{ __('Expansion') }}</span>

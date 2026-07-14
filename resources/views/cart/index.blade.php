@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('Your Cart') . ' — Dar El-Jamila')
+@section('title', __('Your Cart') . ' — Dar El Jamila')
 
 @section('content')
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">

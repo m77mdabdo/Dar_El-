@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('Shop') . ' — Dar El-Jamila')
+@section('title', __('Shop') . ' — Dar El Jamila')
 @section('meta_description', __("Abayas, evening dresses, isdal and accessories, all hand-picked with care"))
 
 @section('content')

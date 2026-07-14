@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('Checkout') . ' — Dar El-Jamila')
+@section('title', __('Checkout') . ' — Dar El Jamila')
 
 @section('content')
     <section class="dj-page-hero dj-photo-wrap dj-tint-maroon dj-strong" style="min-height:220px;">

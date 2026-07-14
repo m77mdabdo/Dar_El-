@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Dar El-Jamila') }}</title>
+    <title>{{ __('Dar El Jamila') }}</title>
     <style>
         .dj-email-btn:hover { background:#4a1a2c !important; box-shadow:0 10px 24px -8px rgba(60,11,23,0.45) !important; }
         .dj-email-link:hover { opacity:.75; }
@@ -30,7 +30,7 @@
         </div>
 
         <p style="text-align:center; font-size:10.5px; letter-spacing:.4px; color:#B79A85; margin:22px 0 0; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-            {{ __('Dar El-Jamila') }} &middot; {{ __('invoice.tagline') }}
+            {{ __('Dar El Jamila') }} &middot; {{ __('invoice.tagline') }}
         </p>
     </div>
 </body>

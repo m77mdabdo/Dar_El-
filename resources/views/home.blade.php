@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('Dar El-Jamila — Fashion Design House'))
+@section('title', __('Dar El Jamila — Fashion Design House'))
 @section('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion — design that blends heritage with modernity.'))
 
 @php
@@ -21,7 +21,7 @@
         <div class="dj-mesh"><span></span><span></span><span></span></div>
         <div class="dj-particles" data-particles="18"></div>
         <div class="dj-lattice-bg"></div>
-        <div class="dj-hero-eyebrow">{{ __('Dar El-Jamila — Fashion Design House') }}</div>
+        <div class="dj-hero-eyebrow">{{ __('Dar El Jamila — Fashion Design House') }}</div>
         <h1>{{ __('Your Beauty Deserves an ') }}<span>{{ __('Exceptional Touch') }}</span></h1>
         <p>{{ __('Abayas and dresses crafted with care to highlight your elegance in every occasion — design that blends heritage with modernity.') }}</p>
         <a href="{{ route('shop.index') }}" class="dj-hero-cta">{{ __('Shop the Collection →') }}</a>
@@ -113,7 +113,7 @@
         <div class="dj-trust-item dj-reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2L12 2z"/></svg><span>{{ __('100% Quality Guaranteed') }}</span></div>
     </section>
 
-    <div class="dj-section-title"><h2>{{ __('Behind the Scenes') }}</h2><p>{{ __('Glimpses from the Dar El-Jamila world') }}</p></div>
+    <div class="dj-section-title"><h2>{{ __('Behind the Scenes') }}</h2><p>{{ __('Glimpses from the Dar El Jamila world') }}</p></div>
     <div class="dj-editorial">
         @php
             $djEditorial = [
@@ -146,7 +146,7 @@
             </div>
             <div class="dj-test-card dj-reveal">
                 <div class="dj-stars">★★★★★</div>
-                <p>"{{ __('Dar El-Jamila has become my go-to for every occasion. The designs are one-of-a-kind.') }}"</p>
+                <p>"{{ __('Dar El Jamila has become my go-to for every occasion. The designs are one-of-a-kind.') }}"</p>
                 <div class="dj-test-author"><div class="dj-avatar">ه</div><span>Heba S.</span></div>
             </div>
         </div>
@@ -187,7 +187,7 @@
     </section>
 
     @if ($latestPosts->isNotEmpty())
-        <div class="dj-section-title"><h2>{{ __('From the Journal') }}</h2><p>{{ __('Style tips, occasion looks, and behind-the-scenes from the Dar El-Jamila world') }}</p></div>
+        <div class="dj-section-title"><h2>{{ __('From the Journal') }}</h2><p>{{ __('Style tips, occasion looks, and behind-the-scenes from the Dar El Jamila world') }}</p></div>
         <div class="dj-blog-grid">
             @foreach ($latestPosts as $post)
                 <a href="{{ route('blog.show', $post) }}" class="dj-blog-card dj-reveal">

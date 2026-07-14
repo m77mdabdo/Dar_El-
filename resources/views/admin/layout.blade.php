@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', __('admin.dashboard.title')) — {{ __('admin.brand') }}</title>
+    @include('partials.favicon-links')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     {{-- Loaded before admin.js so its alpine:init listener attaches before Alpine.start() fires. --}}
@@ -33,7 +34,9 @@
             class="dj-admin-sidebar w-72 min-[1024px]:w-64 shrink-0 fixed min-[1024px]:relative inset-y-0 {{ $rtl ? 'right-0' : 'left-0' }} z-40 transition-transform duration-200 min-[1024px]:translate-x-0 overflow-y-auto dj-admin-sidebar-scroll"
         >
             <div class="dj-admin-brand-block sticky top-0 bg-transparent">
-                <div class="dj-admin-brand-mark">{{ __('admin.brand') }}</div>
+                <a href="{{ route('admin.dashboard') }}" class="dj-admin-brand-mark">
+                    <x-brand-logo style="height:34px;width:auto;" />
+                </a>
             </div>
 
             @include('admin.partials.sidebar')

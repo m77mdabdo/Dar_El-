@@ -44,7 +44,7 @@ class DemoCategorySeeder extends Seeder
                     'description_ar' => $definition['description_ar'],
                     'description_en' => $definition['description_en'],
                     'meta_title_ar' => $definition['name_ar'].' — دار الجميلة',
-                    'meta_title_en' => $definition['name_en'].' — Dar El-Jamila',
+                    'meta_title_en' => $definition['name_en'].' — Dar El Jamila',
                     'meta_description_ar' => $definition['description_ar'],
                     'meta_description_en' => $definition['description_en'],
                     'image' => $image,
