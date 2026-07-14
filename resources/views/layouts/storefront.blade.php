@@ -28,7 +28,7 @@
 
     <div x-data="{ mobileNavOpen: false }">
     <nav class="dj-nav">
-        <div class="dj-nav-logo"><a href="{{ route('home') }}"><x-brand-logo class="dj-navbar-logo" /></a></div>
+        <div class="dj-nav-logo"><a href="{{ route('home') }}"><x-brand-logo class="dj-nav-logo-img" style="height:38px;width:auto;" /></a></div>
 
         <div class="dj-nav-links">
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'dj-active' : '' }}">{{ __('Home') }}</a>
@@ -125,7 +125,7 @@
     </main>
 
     <footer class="dj-footer">
-        <x-brand-logo class="dj-f-logo dj-footer-logo" />
+        <x-brand-logo class="dj-f-logo" style="height:46px;width:auto;margin-inline:auto;" />
         <p>{{ __('Beautiful you are for choosing Dar El Jamila. To order, reach out to us directly via social media or email.') }}</p>
 
         <form method="POST" action="{{ route('newsletter.store') }}" class="dj-newsletter-form" style="margin-bottom:30px;">

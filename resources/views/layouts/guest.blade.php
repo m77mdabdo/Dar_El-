@@ -16,7 +16,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-stone-50">
 
             <div class="w-full max-w-md flex items-center justify-between px-6 sm:px-0 mb-4">
-                <a href="{{ route('home') }}"><x-brand-logo variant="light" class="dj-guest-logo" /></a>
+                <a href="{{ route('home') }}"><x-brand-logo variant="light" style="height:40px;width:auto;" /></a>
 
                 <div class="flex items-center gap-1 text-sm text-stone-400">
                     <span aria-hidden="true">🌐</span>
