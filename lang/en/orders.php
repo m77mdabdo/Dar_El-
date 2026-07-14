@@ -15,6 +15,7 @@ return [
     'all_orders' => 'All Orders',
     'download_invoice' => 'Download Invoice',
     'invoice_not_ready' => 'Your invoice is still being prepared. Please check back in a few minutes.',
+    'invoice_generation_failed' => 'We ran into a problem generating your invoice. Please try again shortly or contact support.',
     'item_size' => 'Size :size',
     'item_qty' => 'Qty :qty',
     'push_new_status' => 'Push New Status',

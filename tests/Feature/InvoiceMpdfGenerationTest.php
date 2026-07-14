@@ -297,7 +297,12 @@ class InvoiceMpdfGenerationTest extends TestCase
         $invoice = app(InvoicePdfService::class)->generate($order, 'ar');
 
         $this->assertNull($invoice);
-        $this->assertSame(0, Invoice::where('order_id', $order->id)->count());
+        // A row now exists (created as "processing" before rendering even
+        // starts, so a failure is always observable) and was marked failed
+        // — it never silently vanishes as if nothing had been attempted.
+        $failedInvoice = Invoice::where('order_id', $order->id)->first();
+        $this->assertNotNull($failedInvoice);
+        $this->assertSame(Invoice::STATUS_FAILED, $failedInvoice->status);
         \Illuminate\Support\Facades\Notification::assertSentTo(
             $admin,
             \App\Notifications\InvoiceGenerationFailedAdminNotification::class

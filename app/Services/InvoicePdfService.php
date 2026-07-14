@@ -39,11 +39,24 @@ class InvoicePdfService
     {
         $order->loadMissing(['items.product', 'shippingMethod', 'user']);
 
-        try {
-            $existing = Invoice::where('order_id', $order->id)->first();
-            $invoiceNumber = $existing?->invoice_number ?? $this->generateInvoiceNumber();
-            $finalPath = $existing?->pdf_path ?: 'invoices/'.Str::slug($invoiceNumber).'.pdf';
+        $existing = Invoice::where('order_id', $order->id)->first();
+        $invoiceNumber = $existing?->invoice_number ?? $this->generateInvoiceNumber();
+        $finalPath = $existing?->pdf_path ?: 'invoices/'.Str::slug($invoiceNumber).'.pdf';
 
+        // Persisted *before* rendering starts — this is what lets the
+        // customer-facing "invoice not ready" page tell "still queued/
+        // processing, check back soon" apart from "failed, contact
+        // support": previously, a failure left no invoice row at all, so
+        // the page showed the same generic message forever with no way
+        // to distinguish the two. A prior successful pdf_path is left
+        // untouched here (only invoice_number/status change), so a
+        // failed *regeneration* attempt never hides an already-valid PDF.
+        $invoice = Invoice::updateOrCreate(
+            ['order_id' => $order->id],
+            ['invoice_number' => $invoiceNumber, 'status' => Invoice::STATUS_PROCESSING]
+        );
+
+        try {
             $engine = config('invoice.pdf_engine', 'mpdf');
             $template = $engine === 'dompdf' ? 'invoices.pdf' : 'invoices.pdf-mpdf';
             $viewData = $this->normalizeInvoiceData($order, $invoiceNumber, $locale);
@@ -82,10 +95,12 @@ class InvoicePdfService
 
             $this->writeAtomically($finalPath, $pdfBytes);
 
-            $invoice = Invoice::updateOrCreate(
-                ['order_id' => $order->id],
-                ['invoice_number' => $invoiceNumber, 'pdf_path' => $finalPath, 'issued_at' => now()]
-            );
+            $invoice->update([
+                'pdf_path' => $finalPath,
+                'issued_at' => now(),
+                'status' => Invoice::STATUS_GENERATED,
+                'failed_reason' => null,
+            ]);
 
             $absolutePath = Storage::disk('local')->path($finalPath);
 
@@ -100,9 +115,19 @@ class InvoicePdfService
 
             return $invoice;
         } catch (Throwable $e) {
+            // A safe, short summary only — never the full exception
+            // message verbatim if it could plausibly contain a path,
+            // credential, or other environment detail; $e->getMessage()
+            // here is from our own PDF-generation code (validation
+            // errors, mPDF/dompdf failures), not user input.
+            $invoice->update([
+                'status' => Invoice::STATUS_FAILED,
+                'failed_reason' => Str::limit($e->getMessage(), 500),
+            ]);
+
             Log::error('Invoice PDF generation failed', [
                 'order_id' => $order->id,
-                'invoice_number' => $invoiceNumber ?? null,
+                'invoice_number' => $invoiceNumber,
                 'engine' => $engine ?? config('invoice.pdf_engine', 'mpdf'),
                 'exception' => $e::class,
                 'message' => $e->getMessage(),

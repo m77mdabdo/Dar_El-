@@ -17,6 +17,19 @@ class GenerateAndSendInvoice implements ShouldQueue
     use Queueable;
 
     /**
+     * Kept comfortably under the Hostinger cron worker's own
+     * --max-time=50 budget (see the queue:work cron command) so a single
+     * slow attempt can never eat the whole cron window and starve every
+     * other queued job behind it.
+     */
+    public int $timeout = 45;
+
+    public int $tries = 3;
+
+    /** @var array<int, int> */
+    public array $backoff = [60, 300, 900];
+
+    /**
      * Create a new job instance.
      */
     public function __construct(protected Order $order)
@@ -30,17 +43,45 @@ class GenerateAndSendInvoice implements ShouldQueue
      * The order confirmation itself is sent immediately after checkout
      * (CheckoutController::store()), independent of this job — so a PDF
      * failure here never costs the customer their only email. This job's
-     * only remaining email responsibility is the "invoice ready" follow-up,
-     * sent once (and only once) generation actually succeeds; on failure,
-     * generateInvoice() already logs and notifies admins, and there is
-     * nothing further to send.
+     * only remaining email responsibility is the "invoice ready" follow-up.
+     *
+     * Both PDF generation and email sending are allowed to throw here
+     * (nothing is silently swallowed into a false "success") — the order
+     * itself was already safely committed in a separate, earlier
+     * transaction before this job ever runs, so there is no risk in
+     * letting a real failure become a real queue retry/failed-job entry
+     * instead of vanishing into a log line nobody's watching.
      */
     public function handle(InvoicePdfService $invoicePdfService): void
     {
-        $locale = $this->order->locale ?? config('app.locale');
-        $invoice = $invoicePdfService->generate($this->order, $locale);
+        Log::info('Invoice job started', [
+            'order_id' => $this->order->id,
+            'attempt' => $this->attempts(),
+        ]);
 
-        if (! $invoice) {
+        $locale = $this->order->locale ?? config('app.locale');
+
+        // Skip regenerating a PDF that's already valid on disk — a retry
+        // after e.g. a transient SMTP failure shouldn't re-render the
+        // same file again, it should just resume from "send the email".
+        $invoice = $this->order->invoice;
+
+        if (! $invoice || ! $invoice->isDownloadable()) {
+            $invoice = $invoicePdfService->generate($this->order, $locale);
+
+            if (! $invoice) {
+                // generate() already logged the specific cause and
+                // notified admins; throwing here is what makes Laravel's
+                // own retry/backoff and queue:failed bookkeeping apply,
+                // instead of the customer being silently left with no
+                // invoice and no record of anything having gone wrong.
+                throw new \RuntimeException("Invoice PDF generation failed for order {$this->order->id}");
+            }
+        }
+
+        if ($invoice->status === Invoice::STATUS_EMAILED) {
+            // Already delivered on a previous attempt — never send the
+            // same customer the same invoice twice.
             return;
         }
 
@@ -55,22 +96,37 @@ class GenerateAndSendInvoice implements ShouldQueue
             return;
         }
 
-        try {
-            Mail::to($customerEmail)->locale($locale)->send(new InvoiceMail($this->order, $invoice));
+        Mail::to($customerEmail)->locale($locale)->send(new InvoiceMail($this->order, $invoice));
 
-            Log::info('Invoice-ready email dispatched', [
-                'order_id' => $this->order->id,
-                'mailable' => InvoiceMail::class,
-                'recipient_masked' => Order::maskEmailForLogging($customerEmail),
-                'status' => 'success',
-            ]);
-        } catch (Throwable $e) {
-            Log::error('Invoice-ready email dispatch failed', [
-                'order_id' => $this->order->id,
-                'mailable' => InvoiceMail::class,
-                'error' => $e->getMessage(),
-                'status' => 'failed',
-            ]);
-        }
+        $invoice->update(['status' => Invoice::STATUS_EMAILED, 'emailed_at' => now()]);
+
+        Log::info('Invoice email sent', [
+            'order_id' => $this->order->id,
+            'mailable' => InvoiceMail::class,
+            'recipient_masked' => Order::maskEmailForLogging($customerEmail),
+            'status' => 'success',
+        ]);
+    }
+
+    /**
+     * Called once by Laravel after all $tries attempts are exhausted —
+     * this is the terminal "give up" state, recorded on the invoice
+     * itself so the customer-facing page can show a clear failure
+     * message instead of "still preparing" forever, and so an admin can
+     * see it needs manual attention without having to read the log.
+     */
+    public function failed(Throwable $e): void
+    {
+        Log::error('Invoice job failed', [
+            'order_id' => $this->order->id,
+            'attempt' => $this->attempts(),
+            'exception' => $e::class,
+            'message' => $e->getMessage(),
+        ]);
+
+        Invoice::where('order_id', $this->order->id)->update([
+            'status' => Invoice::STATUS_FAILED,
+            'failed_reason' => \Illuminate\Support\Str::limit($e->getMessage(), 500),
+        ]);
     }
 }

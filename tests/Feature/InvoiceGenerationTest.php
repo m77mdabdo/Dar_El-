@@ -332,9 +332,25 @@ class InvoiceGenerationTest extends TestCase
 
         $order = $this->makeOrder();
 
-        GenerateAndSendInvoice::dispatchSync($order);
+        // dispatchSync() runs the job inline, bypassing Laravel's queue
+        // worker — so the RuntimeException the job now deliberately throws
+        // on a real failure propagates straight out here instead of being
+        // caught by the worker-level retry/failed() machinery (that only
+        // applies to jobs actually run via queue:work).
+        try {
+            GenerateAndSendInvoice::dispatchSync($order);
+            $this->fail('Expected GenerateAndSendInvoice to throw on PDF generation failure.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('Invoice PDF generation failed', $e->getMessage());
+        }
 
-        $this->assertSame(0, Invoice::where('order_id', $order->id)->count());
+        // A row now exists (created as "processing" before rendering even
+        // starts) and was marked failed — this is what lets the customer's
+        // invoice page show a distinct "generation failed" message instead
+        // of "still preparing" forever.
+        $invoice = Invoice::where('order_id', $order->id)->first();
+        $this->assertNotNull($invoice);
+        $this->assertSame(Invoice::STATUS_FAILED, $invoice->status);
         // The immediate order confirmation is sent from CheckoutController,
         // not this job — on a PDF failure this job now sends nothing at
         // all (the customer already has their confirmation; there's simply
@@ -516,5 +532,97 @@ class InvoiceGenerationTest extends TestCase
         // invoice-title block, with the brand block second (physical
         // right), matching Arabic reading order.
         $this->assertLessThan($brandPosition, $invoiceTitlePosition);
+    }
+
+    public function test_retrying_the_job_after_a_successful_send_never_resends_the_invoice_email(): void
+    {
+        Mail::fake();
+        Storage::fake('local');
+        $order = $this->makeOrder();
+
+        GenerateAndSendInvoice::dispatchSync($order);
+        Mail::assertQueued(InvoiceMail::class, 1);
+
+        $invoiceNumberAfterFirstRun = Invoice::where('order_id', $order->id)->first()->invoice_number;
+
+        // Simulates a retry (e.g. a stale queue entry re-picked up, or a
+        // manual redispatch) against an order whose invoice already made
+        // it all the way to "emailed" — must be a pure no-op, not a
+        // second email to the same customer or a second invoice number.
+        // A real retry loads a fresh Order (a new job instance queried from
+        // the jobs table), so force the same here rather than relying on
+        // Eloquent's in-memory relation cache from the first run.
+        $order->refresh();
+        GenerateAndSendInvoice::dispatchSync($order);
+
+        Mail::assertQueued(InvoiceMail::class, 1);
+        $invoice = Invoice::where('order_id', $order->id)->first();
+        $this->assertSame(1, Invoice::where('order_id', $order->id)->count());
+        $this->assertSame($invoiceNumberAfterFirstRun, $invoice->invoice_number);
+        $this->assertSame(Invoice::STATUS_EMAILED, $invoice->status);
+    }
+
+    public function test_retrying_the_job_after_a_pdf_already_exists_does_not_regenerate_it(): void
+    {
+        Mail::fake();
+        Storage::fake('local');
+        $order = $this->makeOrder();
+
+        GenerateAndSendInvoice::dispatchSync($order);
+        $invoice = Invoice::where('order_id', $order->id)->first();
+        $originalPath = $invoice->pdf_path;
+        $originalNumber = $invoice->invoice_number;
+
+        // Force back to "processing" to simulate a retry that only got as
+        // far as PDF generation before a prior attempt failed (e.g. the
+        // email send failed) — the job must resume from "send the email"
+        // rather than re-rendering a perfectly valid PDF.
+        $invoice->update(['status' => Invoice::STATUS_GENERATED]);
+        $order->refresh();
+
+        GenerateAndSendInvoice::dispatchSync($order);
+
+        $invoice->refresh();
+        $this->assertSame($originalPath, $invoice->pdf_path);
+        $this->assertSame($originalNumber, $invoice->invoice_number);
+        $this->assertSame(Invoice::STATUS_EMAILED, $invoice->status);
+    }
+
+    public function test_failed_hook_persists_failed_status_and_reason_on_the_invoice(): void
+    {
+        $order = $this->makeOrder();
+        Invoice::create([
+            'order_id' => $order->id,
+            'invoice_number' => 'INV-TEST-FAILHOOK',
+            'status' => Invoice::STATUS_PROCESSING,
+        ]);
+
+        $job = new GenerateAndSendInvoice($order);
+        $job->failed(new \RuntimeException('SMTP authentication failed (simulated)'));
+
+        $invoice = Invoice::where('order_id', $order->id)->first();
+        $this->assertSame(Invoice::STATUS_FAILED, $invoice->status);
+        $this->assertStringContainsString('SMTP authentication failed', $invoice->failed_reason);
+    }
+
+    public function test_account_orders_invoice_shows_a_distinct_message_after_permanent_failure(): void
+    {
+        $user = User::factory()->create();
+        Role::findOrCreate('customer', 'web');
+        $user->assignRole('customer');
+        $order = $this->makeOrder(['user_id' => $user->id]);
+        Invoice::create([
+            'order_id' => $order->id,
+            'invoice_number' => 'INV-TEST-FAILMSG',
+            'status' => Invoice::STATUS_FAILED,
+            'failed_reason' => 'Simulated permanent failure',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account.orders.invoice', $order));
+
+        $response->assertRedirect(route('account.orders.show', $order));
+        $response->assertSessionHas('error', __('orders.invoice_generation_failed'));
+        // Never leaks internal exception detail to the customer.
+        $this->assertStringNotContainsString('Simulated permanent failure', session('error'));
     }
 }
