@@ -117,7 +117,7 @@
         page-break-inside: avoid;
     }
     .header table td { vertical-align: top; }
-    .brand-logo-inline { width: 22px; height: 22px; vertical-align: middle; margin: 0 8px -4px 8px; }
+    .brand-logo-inline { width: 26px; height: 26px; vertical-align: middle; margin: 0 8px -5px 8px; }
     .brand-mark { font-size: 22px; font-weight: 700; letter-spacing: .5px; color: var(--dj-gold); }
     .brand-tagline { font-size: 10.5px; color: #F7F0E7; margin-top: 4px; letter-spacing: .3px; }
     .invoice-title { font-size: 17px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
