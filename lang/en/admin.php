@@ -2,7 +2,7 @@
 
 return [
 
-    'brand' => 'Dar El-Jamila',
+    'brand' => 'Dar El Jamila',
     'back_to_store' => 'Back to Store',
     'log_out' => 'Log Out',
     'menu' => 'Menu',

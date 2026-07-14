@@ -52,7 +52,7 @@ class DemoCollectionSeeder extends Seeder
             ['slug' => 'modern', 'name_ar' => 'مجموعة عصرية', 'name_en' => 'Modern', 'description_ar' => 'قصّات جريئة وخطوط بسيطة لإطلالة عصرية مميزة.', 'description_en' => 'Bold cuts and clean lines for a distinctly modern silhouette.'],
             ['slug' => 'daily-wear', 'name_ar' => 'إطلالات يومية', 'name_en' => 'Daily Wear', 'description_ar' => 'قطع عملية ومريحة لارتداء يومي دون مجهود إضافي.', 'description_en' => 'Practical, comfortable pieces for effortless everyday wear.'],
             ['slug' => 'formal', 'name_ar' => 'إطلالات رسمية', 'name_en' => 'Formal', 'description_ar' => 'قطع أنيقة ومحتشمة تناسب المناسبات الرسمية وأجواء العمل الراقية.', 'description_en' => 'Polished, modest pieces suited to formal occasions and elevated workwear.'],
-            ['slug' => 'featured', 'name_ar' => 'مختارات مميزة', 'name_en' => 'Featured', 'description_ar' => 'أبرز القطع المختارة من فريق دار الجميلة لهذا الموسم.', 'description_en' => 'This season\'s standout pieces, handpicked by the Dar El-Jamila team.'],
+            ['slug' => 'featured', 'name_ar' => 'مختارات مميزة', 'name_en' => 'Featured', 'description_ar' => 'أبرز القطع المختارة من فريق دار الجميلة لهذا الموسم.', 'description_en' => 'This season\'s standout pieces, handpicked by the Dar El Jamila team.'],
         ];
     }
 }

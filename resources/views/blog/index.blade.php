@@ -1,7 +1,7 @@
 @extends('layouts.storefront')
 
-@section('title', __('Blog') . ' — Dar El-Jamila')
-@section('meta_description', __('Style tips, occasion looks, and behind-the-scenes from the Dar El-Jamila world'))
+@section('title', __('Blog') . ' — Dar El Jamila')
+@section('meta_description', __('Style tips, occasion looks, and behind-the-scenes from the Dar El Jamila world'))
 
 @section('content')
     <section class="dj-page-hero dj-photo-wrap dj-tint-maroon dj-strong">
@@ -11,7 +11,7 @@
         <div class="dj-lattice-bg"></div>
         <div class="dj-eyebrow">{{ __('Blog') }}</div>
         <h1>{{ __('Tales of Elegance') }}</h1>
-        <p>{{ __('Style tips, occasion looks, and behind-the-scenes from the Dar El-Jamila world') }}</p>
+        <p>{{ __('Style tips, occasion looks, and behind-the-scenes from the Dar El Jamila world') }}</p>
     </section>
 
     <div class="dj-blog-grid">

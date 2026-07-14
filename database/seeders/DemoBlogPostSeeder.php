@@ -52,7 +52,7 @@ class DemoBlogPostSeeder extends Seeder
                     'author_name' => self::AUTHORS[$i % count(self::AUTHORS)],
                     'category' => $post['category'],
                     'meta_title_ar' => $post['title_ar'].' — مدونة دار الجميلة',
-                    'meta_title_en' => $post['title_en'].' — Dar El-Jamila Blog',
+                    'meta_title_en' => $post['title_en'].' — Dar El Jamila Blog',
                     'meta_description_ar' => $post['excerpt_ar'],
                     'meta_description_en' => $post['excerpt_en'],
                     'is_published' => true,
@@ -251,7 +251,7 @@ class DemoBlogPostSeeder extends Seeder
     protected function giftIdeas(): array
     {
         return [
-            'title_en' => 'Gift Ideas from Dar El-Jamila', 'title_ar' => 'أفكار هدايا من دار الجميلة',
+            'title_en' => 'Gift Ideas from Dar El Jamila', 'title_ar' => 'أفكار هدايا من دار الجميلة',
             'category' => 'Gift Guide',
             'excerpt_en' => 'Thoughtful gift ideas for every budget and occasion.',
             'excerpt_ar' => 'أفكار هدايا مدروسة تناسب كل ميزانية ومناسبة.',
@@ -263,7 +263,7 @@ class DemoBlogPostSeeder extends Seeder
     protected function behindTheScenes(): array
     {
         return [
-            'title_en' => 'Behind the Scenes of a Dar El-Jamila Collection', 'title_ar' => 'خلف كواليس مجموعة من دار الجميلة',
+            'title_en' => 'Behind the Scenes of a Dar El Jamila Collection', 'title_ar' => 'خلف كواليس مجموعة من دار الجميلة',
             'category' => 'Our Story',
             'excerpt_en' => 'A look at how a collection comes together, from fabric selection to final fitting.',
             'excerpt_ar' => 'نظرة على كيفية تجهيز مجموعة كاملة، من اختيار القماش إلى التفصيل النهائي.',

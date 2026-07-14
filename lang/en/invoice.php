@@ -27,7 +27,7 @@ return [
     'order_status' => 'Order Status',
     'notes' => 'Notes',
 
-    'thank_you' => 'Thank you for shopping with Dar El-Jamila.',
+    'thank_you' => 'Thank you for shopping with Dar El Jamila.',
     'contact_support' => 'Questions about this invoice? Contact us at :email.',
     'tagline' => 'Timeless Elegance. Crafted for You.',
 ];

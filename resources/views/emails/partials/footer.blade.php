@@ -19,7 +19,7 @@
     @endisset
 
     <p style="margin:0 0 4px;">
-        <a href="{{ route('home') }}" class="dj-email-link" style="color:#601526; font-size:13px; text-decoration:none; font-weight:700; letter-spacing:.5px; font-family: Georgia, 'Times New Roman', serif;">{{ __('Dar El-Jamila') }}</a>
+        <a href="{{ route('home') }}" class="dj-email-link" style="color:#601526; font-size:13px; text-decoration:none; font-weight:700; letter-spacing:.5px; font-family: Georgia, 'Times New Roman', serif;">{{ __('Dar El Jamila') }}</a>
     </p>
     <p style="margin:0 0 16px;">
         <a href="{{ route('home') }}" class="dj-email-link" style="color:#9C5064; font-size:11.5px; text-decoration:none; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;">{{ __('emails.footer_visit_website') }}</a>

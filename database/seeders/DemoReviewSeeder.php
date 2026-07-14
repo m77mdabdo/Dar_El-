@@ -29,7 +29,7 @@ class DemoReviewSeeder extends Seeder
         ['rating' => 3, 'en' => 'Good piece overall, though the color was slightly different from what I expected on screen.', 'ar' => 'قطعة جيدة بشكل عام، لكن اللون كان مختلفًا قليلاً عما ظهر على الشاشة.'],
         ['rating' => 5, 'en' => 'Perfect for the occasion I bought it for. Comfortable, elegant, and true to the photos.', 'ar' => 'مثالية للمناسبة التي اشتريتها من أجلها. مريحة وأنيقة ومطابقة للصور تمامًا.'],
         ['rating' => 4, 'en' => 'Great addition to my wardrobe. The fabric quality feels premium and well worth the price.', 'ar' => 'إضافة رائعة لخزانتي. جودة القماش تبدو فاخرة وتستحق السعر تمامًا.'],
-        ['rating' => 5, 'en' => 'This is my second order from Dar El-Jamila and it did not disappoint. Fast shipping too.', 'ar' => 'هذا طلبي الثاني من دار الجميلة ولم يخيّب ظني. الشحن كان سريعًا أيضًا.'],
+        ['rating' => 5, 'en' => 'This is my second order from Dar El Jamila and it did not disappoint. Fast shipping too.', 'ar' => 'هذا طلبي الثاني من دار الجميلة ولم يخيّب ظني. الشحن كان سريعًا أيضًا.'],
         ['rating' => 3, 'en' => 'Nice piece but I wish there were more color options available for it.', 'ar' => 'قطعة جميلة لكن كنت أتمنى توفر خيارات ألوان أكثر لها.'],
     ];
 

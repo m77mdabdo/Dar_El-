@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('Order Confirmed') . ' — Dar El-Jamila')
+@section('title', __('Order Confirmed') . ' — Dar El Jamila')
 
 @section('content')
     <div class="dj-confirm-wrap">
@@ -8,7 +8,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
         </div>
         <h2>{{ __('Your Order Has Been Received!') }}</h2>
-        <p>{{ __("Thank you for trusting Dar El-Jamila. We'll start preparing your order right away.") }}</p>
+        <p>{{ __("Thank you for trusting Dar El Jamila. We'll start preparing your order right away.") }}</p>
         <div class="dj-order-number">#{{ $order->order_number }}</div>
         <p>{{ __('A confirmation email with your invoice is on its way.') }}</p>
 

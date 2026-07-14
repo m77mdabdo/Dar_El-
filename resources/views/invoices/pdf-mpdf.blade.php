@@ -58,6 +58,7 @@
         page-break-inside: avoid;
     }
     .header td { vertical-align: top; }
+    .brand-logo-inline { width: 20px; height: 20px; vertical-align: middle; margin: 0 8px -3px 8px; }
     .brand-mark { font-size: 20px; font-weight: bold; color: #E8C39A; }
     .brand-tagline { font-size: 10px; color: #F7F0E7; margin-top: 4px; }
     .invoice-title { font-size: 15px; font-weight: bold; text-transform: uppercase; color: #ffffff; }
@@ -180,7 +181,14 @@
     <table class="header">
         <tr>
             <td style="width:50%;">
-                <div class="brand-mark">{{ __('Dar El-Jamila') }}</div>
+                {{--
+                    The icon is an inline <img> inside the existing text
+                    divs, not a nested <table> — a nested table is its own
+                    block box with a shrink-to-fit width, so it would not
+                    be repositioned by this cell's RTL column reversal the
+                    way inline content correctly is.
+                --}}
+                <div class="brand-mark"><img src="{{ public_path('assets/branding/favicon-192.png') }}" class="brand-logo-inline" alt="">{{ __('Dar El Jamila') }}</div>
                 <div class="brand-tagline">{{ __('invoice.tagline') }}</div>
             </td>
             <td style="width:50%;" class="{{ $isRtl ? 'ltr' : '' }}" @if(!$isRtl) style="text-align:right;" @endif>
@@ -320,7 +328,7 @@
     @endif
 
     <div class="footer">
-        <div class="footer-brand">{{ __('Dar El-Jamila') }}</div>
+        <div class="footer-brand">{{ __('Dar El Jamila') }}</div>
         <div class="footer-line">{{ __('invoice.thank_you') }}</div>
         @if ($djSupportEmail ?? null)
             <div class="footer-line">{{ __('invoice.contact_support', ['email' => $djSupportEmail]) }}</div>
@@ -328,7 +336,7 @@
         @if ($djWhatsapp ?? null)
             <div class="footer-line ltr-center">{{ $djWhatsapp }}</div>
         @endif
-        <div class="footer-line">&copy; {{ now()->year }} {{ __('Dar El-Jamila') }}</div>
+        <div class="footer-line">&copy; {{ now()->year }} {{ __('Dar El Jamila') }}</div>
     </div>
 
 </body>

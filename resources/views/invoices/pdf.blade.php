@@ -117,6 +117,7 @@
         page-break-inside: avoid;
     }
     .header table td { vertical-align: top; }
+    .brand-logo-inline { width: 22px; height: 22px; vertical-align: middle; margin: 0 8px -4px 8px; }
     .brand-mark { font-size: 22px; font-weight: 700; letter-spacing: .5px; color: var(--dj-gold); }
     .brand-tagline { font-size: 10.5px; color: #F7F0E7; margin-top: 4px; letter-spacing: .3px; }
     .invoice-title { font-size: 17px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
@@ -280,7 +281,16 @@
         // always forced to ltr and these arrays put the "reads first"
         // content in the array's first slot — rendered into whichever
         // markup cell ends up physically on the correct side.
-        $djBrandBlock = '<div class="brand-mark">'.e(__('Dar El-Jamila')).'</div><div class="brand-tagline">'.e(__('invoice.tagline')).'</div>';
+        // A plain inline <img> inside the existing block-level divs, not a
+        // nested <table> — a nested table is a block box with its own
+        // shrink-to-fit width, so the parent td's text-align:right (used
+        // for the Arabic/RTL slot) would not reposition it, leaving the
+        // logo stranded on the physical left even when this block renders
+        // in the right-hand cell. An inline <img> is positioned by the
+        // same inherited text-align as the surrounding text, exactly like
+        // the .brand-mark/.brand-tagline divs already were.
+        $djBrandLogoTag = '<img src="'.e(public_path('assets/branding/favicon-192.png')).'" class="brand-logo-inline" alt="">';
+        $djBrandBlock = '<div class="brand-mark">'.$djBrandLogoTag.e(__('Dar El Jamila')).'</div><div class="brand-tagline">'.e(__('invoice.tagline')).'</div>';
         $djInvoiceBlock = '<div class="invoice-title">'.e(__('invoice.invoice')).'</div><div class="invoice-number">'.e($invoiceNumber).'</div><div class="invoice-date">'.e($order->created_at->translatedFormat('F j, Y')).'</div>';
         $djHeaderCells = $isRtl ? [$djInvoiceBlock, $djBrandBlock] : [$djBrandBlock, $djInvoiceBlock];
     @endphp
@@ -449,7 +459,7 @@
     @endif
 
     <div class="footer">
-        <div class="footer-brand">{{ __('Dar El-Jamila') }}</div>
+        <div class="footer-brand">{{ __('Dar El Jamila') }}</div>
         <div class="footer-line">{{ __('invoice.thank_you') }}</div>
         @if ($djSupportEmail ?? null)
             <div class="footer-line">{{ __('invoice.contact_support', ['email' => $djSupportEmail]) }}</div>
@@ -457,7 +467,7 @@
         @if ($djWhatsapp ?? null)
             <div class="footer-line" dir="ltr">{{ $djWhatsapp }}</div>
         @endif
-        <div class="footer-line">&copy; {{ now()->year }} {{ __('Dar El-Jamila') }}</div>
+        <div class="footer-line">&copy; {{ now()->year }} {{ __('Dar El Jamila') }}</div>
     </div>
 
 </div>
