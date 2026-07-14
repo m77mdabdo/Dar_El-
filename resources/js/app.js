@@ -162,21 +162,33 @@ window.djAddToCart = async function (addUrl, size, quantity, successMessage, err
     }
 };
 
-window.djChangeCartQty = async function (updateUrlBase, key, newQty) {
+window.djChangeCartQty = async function (updateUrlBase, key, newQty, triggerEl) {
+    // triggerEl is optional (older call sites still work) — when present,
+    // its .dj-qty wrapper dims and both +/- buttons lock for the duration
+    // of the request, so a second click can't race the first while the
+    // drawer's line items are about to be replaced wholesale anyway.
+    const qtyWrap = triggerEl?.closest('.dj-qty');
+    qtyWrap?.classList.add('dj-loading');
+
     try {
         const data = await djFetch(`${updateUrlBase}/${key}`, 'PATCH', { quantity: newQty });
         djUpdateCartFromResponse(data);
     } catch (e) {
         djShowToast(e.data?.error || 'Could not update quantity.');
+        qtyWrap?.classList.remove('dj-loading');
     }
 };
 
-window.djRemoveFromCart = async function (removeUrlBase, key) {
+window.djRemoveFromCart = async function (removeUrlBase, key, triggerEl) {
+    const row = triggerEl?.closest('.dj-cart-item');
+    if (row) { row.style.opacity = '.4'; row.style.pointerEvents = 'none'; }
+
     try {
         const data = await djFetch(`${removeUrlBase}/${key}`, 'DELETE');
         djUpdateCartFromResponse(data);
     } catch (e) {
         djShowToast(e.data?.error || 'Could not remove item.');
+        if (row) { row.style.opacity = ''; row.style.pointerEvents = ''; }
     }
 };
 
@@ -207,10 +219,20 @@ window.djChangeModalQty = function (delta) {
     djRenderProductModal();
 };
 
-window.djConfirmModalAdd = async function () {
+window.djConfirmModalAdd = async function (event) {
     if (!djModalProduct || !djModalSize) return;
-    const ok = await djAddToCart(djModalProduct.addUrl, djModalSize, djModalQty, djModalProduct.addedMessage, djModalProduct.errorMessage);
-    if (ok) djCloseModal();
+    const btn = event?.currentTarget || document.querySelector('.dj-modal-add');
+    btn?.classList.add('dj-btn-loading');
+    btn && (btn.disabled = true);
+    try {
+        const ok = await djAddToCart(djModalProduct.addUrl, djModalSize, djModalQty, djModalProduct.addedMessage, djModalProduct.errorMessage);
+        if (ok) djCloseModal();
+    } finally {
+        // No need to reset on success — the modal is about to close; on
+        // failure the modal stays open and must be interactive again.
+        btn?.classList.remove('dj-btn-loading');
+        btn && (btn.disabled = false);
+    }
 };
 
 function djStockStatusLabel(stock, p) {
@@ -270,7 +292,7 @@ function djRenderProductModal() {
                 <span style="font-size:12.5px; color:#8a6b70;">${p.qtyLabel}</span>
                 <button onclick="djChangeModalQty(-1)" ${djModalQty <= 1 ? 'disabled' : ''}>-</button><span>${djModalQty}</span><button onclick="djChangeModalQty(1)" ${djModalQty >= stock ? 'disabled' : ''}>+</button>
             </div>
-            <button class="dj-modal-add" ${stock <= 0 ? 'disabled' : ''} onclick="djConfirmModalAdd()">${stock <= 0 ? p.outOfStockLabel : p.addToCartLabel}</button>
+            <button class="dj-modal-add" ${stock <= 0 ? 'disabled' : ''} onclick="djConfirmModalAdd(event)">${stock <= 0 ? p.outOfStockLabel : p.addToCartLabel}</button>
             <div class="dj-modal-trust">
                 <span>${p.trust1}</span><span>${p.trust2}</span><span>${p.trust3}</span>
             </div>
@@ -388,6 +410,40 @@ const djStatObserver = new IntersectionObserver((entries) => {
 /* ===== SPLASH / SCROLL PROGRESS / BACK TO TOP ===== */
 window.addEventListener('load', () => {
     setTimeout(() => document.getElementById('dj-splash')?.classList.add('dj-hide'), 1200);
+});
+
+/* ===== PAGE NAVIGATION LOADING BAR =====
+   Purely visual acknowledgment that a click was registered — the actual
+   navigation is entirely the browser's normal full-page load, untouched.
+   Skips anything that isn't a real same-tab navigation (new tab, download,
+   mailto:, in-page #anchor, modified click) so it never fires when nothing
+   is actually about to load. */
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (link.target && link.target !== '_self') return;
+    if (link.hasAttribute('download')) return;
+
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+
+    let url;
+    try { url = new URL(href, window.location.href); } catch { return; }
+    if (url.origin !== window.location.origin) return;
+    if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+
+    document.getElementById('dj-nav-progress')?.classList.add('dj-active');
+});
+
+document.addEventListener('submit', (e) => {
+    if (e.defaultPrevented || e.target.target) return;
+    document.getElementById('dj-nav-progress')?.classList.add('dj-active');
+});
+
+window.addEventListener('pageshow', () => {
+    // Fires on the new page's own load, and again if a user navigates
+    // back via bfcache — either way the bar should never be left showing.
+    document.getElementById('dj-nav-progress')?.classList.remove('dj-active');
 });
 
 window.addEventListener('scroll', () => {

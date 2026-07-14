@@ -292,7 +292,15 @@
                 djShowToast('{{ __('Please choose a size.') }}');
                 return;
             }
-            await djAddToCart(djPdpForm.dataset.addUrl, selected.dataset.size, djPdpQty, '{{ __('Added to cart ✓') }}', '{{ __('Could not add this item.') }}');
+            const addBtn = document.getElementById('dj-pdp-add-btn');
+            addBtn.disabled = true;
+            addBtn.classList.add('dj-btn-loading');
+            try {
+                await djAddToCart(djPdpForm.dataset.addUrl, selected.dataset.size, djPdpQty, '{{ __('Added to cart ✓') }}', '{{ __('Could not add this item.') }}');
+            } finally {
+                addBtn.classList.remove('dj-btn-loading');
+                djPdpRefreshStockUi();
+            }
         }
 
         djPdpRefreshStockUi();

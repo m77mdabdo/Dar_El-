@@ -23,6 +23,7 @@
 <body class="dj-storefront min-h-screen flex flex-col {{ app()->getLocale() === 'en' ? 'dj-en' : '' }}">
 
     <div id="dj-splash"><x-brand-logo class="dj-splash-mark" style="width:220px;height:auto;" /><div class="dj-splash-line"></div></div>
+    <div id="dj-nav-progress" aria-hidden="true"></div>
     <div id="dj-scroll-progress"></div>
     <button id="dj-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="{{ __('Back to top') }}">↑</button>
 
@@ -61,7 +62,7 @@
             @auth
                 <div class="relative hidden sm:block" x-data="{ open: false }">
                     <button @click="open = !open" class="text-cream-2 text-sm hover:text-gold">{{ auth()->user()->name }}</button>
-                    <div x-show="open" @click.outside="open = false" x-cloak class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-44 bg-white border border-stone-200 rounded shadow-lg py-1 z-10 text-sm text-stone-700">
+                    <div x-show="open" x-transition @click.outside="open = false" x-cloak class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-44 bg-white border border-stone-200 rounded shadow-lg py-1 z-10 text-sm text-stone-700">
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('Profile') }}</a>
                         <a href="{{ route('account.orders.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('My Orders') }}</a>
                         <a href="{{ route('account.reviews.index') }}" class="block px-4 py-2 hover:bg-stone-50">{{ __('reviews.title') }}</a>
@@ -83,7 +84,7 @@
         </div>
     </nav>
 
-    <div class="dj-mobile-menu" x-show="mobileNavOpen" x-cloak @click.outside="mobileNavOpen = false">
+    <div class="dj-mobile-menu" x-show="mobileNavOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" x-cloak @click.outside="mobileNavOpen = false">
         <a href="{{ route('home') }}" @click="mobileNavOpen = false">{{ __('Home') }}</a>
         <a href="{{ route('shop.index') }}" @click="mobileNavOpen = false">{{ __('Shop') }}</a>
         <a href="{{ route('services') }}" @click="mobileNavOpen = false">{{ __('Services') }}</a>
