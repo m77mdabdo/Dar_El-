@@ -11,12 +11,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
+use Throwable;
 
 class RegisteredUserController extends Controller
 {
@@ -64,7 +66,20 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        $this->otp->generate($user);
+        // The account already exists and the customer is already logged in
+        // at this point — a transient mail-transport failure here must not
+        // 500 the whole registration. OtpService already logged the
+        // specific cause; the customer lands on the OTP screen either way
+        // and can use "resend" once the transport issue clears.
+        try {
+            $this->otp->generate($user);
+        } catch (Throwable $e) {
+            Log::warning('Registration OTP send failed; account created, customer can resend', [
+                'user_id' => $user->id,
+            ]);
+
+            return redirect()->route('otp.notice')->with('status', __('Your account was created, but we could not send your verification code. Please use "Resend code" below.'));
+        }
 
         return redirect()->route('otp.notice');
     }

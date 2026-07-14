@@ -45,7 +45,14 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // Was `null` (no timeout) — a slow/unreachable SMTP host would
+            // then hang for however long PHP's default socket timeout
+            // (and any TLS/DNS retry) allows, which is exactly how a
+            // synchronous send (OTP, password reset, the immediate order
+            // confirmation) can block a request for minutes instead of
+            // seconds. A bounded timeout makes a bad connection fail fast
+            // and visibly instead of hanging.
+            'timeout' => (int) env('MAIL_TIMEOUT', 10),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 

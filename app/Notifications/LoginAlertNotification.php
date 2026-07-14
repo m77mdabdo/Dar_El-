@@ -19,7 +19,13 @@ class LoginAlertNotification extends Notification implements ShouldQueue
         public Carbon $time,
         public ?string $provider = null,
     ) {
-        //
+        // Set at runtime rather than redeclared as a class property —
+        // Queueable's own `public $queue;` has no default value, and PHP's
+        // trait composition rejects a redeclaration that adds one.
+        // High-priority queue: a security-relevant, auth-adjacent alert
+        // must never sit behind slower default-queue work (order/cart
+        // notifications) or invoice PDF generation.
+        $this->queue = 'high';
     }
 
     /**

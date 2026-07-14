@@ -53,6 +53,27 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(EmailVerificationOtp::class);
     }
 
+    /**
+     * Overrides the MustVerifyEmail trait's default (sends Laravel's
+     * native link-based VerifyEmail notification). This app verifies
+     * exclusively through the custom OTP system (OtpService /
+     * OtpVerificationNotification) — but Laravel's framework
+     * unconditionally wires `Registered` to this method on every
+     * registration (see Illuminate\Foundation\Support\Providers\
+     * EventServiceProvider::configureEmailVerification(), which isn't
+     * app code and can't be disabled via config). Left as the native
+     * send, this was a second, redundant, blocking synchronous email on
+     * every registration — sent immediately before the real OTP, so any
+     * SMTP slowness delayed the OTP customers actually need by roughly
+     * double. No-op instead: the account's un-verified state and the
+     * OTP flow are completely unaffected, only this unused duplicate
+     * email is skipped.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        //
+    }
+
     public function carts(): HasMany
     {
         return $this->hasMany(Cart::class);
