@@ -18,7 +18,7 @@
 
     <div class="dj-login-card">
         <div class="dj-login-brand">
-            <x-brand-logo style="height:44px;width:auto;margin-inline:auto;" />
+            <x-brand-logo class="dj-auth-logo" />
             <div class="dj-login-tagline">{{ __('Timeless Elegance. Crafted for You.') }}</div>
         </div>
 
