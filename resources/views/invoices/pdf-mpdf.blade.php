@@ -58,7 +58,7 @@
         page-break-inside: avoid;
     }
     .header td { vertical-align: top; }
-    .brand-logo-inline { width: 24px; height: 24px; vertical-align: middle; margin: 0 8px -4px 8px; }
+    .brand-logo-inline { width: 20px; height: 20px; vertical-align: middle; margin: 0 8px -3px 8px; }
     .brand-mark { font-size: 20px; font-weight: bold; color: #E8C39A; }
     .brand-tagline { font-size: 10px; color: #F7F0E7; margin-top: 4px; }
     .invoice-title { font-size: 15px; font-weight: bold; text-transform: uppercase; color: #ffffff; }
