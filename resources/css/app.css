@@ -1134,66 +1134,30 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
    minmax(250px,1fr))`, which naturally gives multiple columns on tablet/
    desktop but can only ever fit ONE column below ~530px (two 250px-min
    tracks don't fit in a 320-767px viewport). This block forces exactly
-   two tracks across the full mobile range instead, and tightens the card
-   internals (title clamp, stacked price/button, smaller badges) so a
-   card at roughly half its previous width never overflows or wraps
-   unpredictably. Placed after the narrower 640/480/390px blocks above so
-   it wins the cascade for `.dj-grid` at every width in 320–767px;
-   tablet (768px+) and desktop are completely untouched — this block's
-   own max-width caps at 767px, one pixel below the existing 768px
-   breakpoint used everywhere else in this file. `.dj-wishlist-grid` (the
-   wishlist listing page) has the identical auto-fit/minmax floor problem
-   with its own minmax(240px)/minmax(160px) rules above — same fix, same
-   reasoning, folded into this block for one source of truth instead of a
-   second near-duplicate breakpoint. Card-internal rules below (h3 clamp,
-   .dj-card-bottom, .dj-price, .dj-add-btn, .dj-stock-badge) already apply
-   to wishlist cards too since they share those class names with the main
-   product card. */
+   two tracks across the full mobile range instead — parent grid only,
+   nothing on the card itself (no font-size/padding/description/button
+   changes) so the existing product card renders visually identical, just
+   at half its previous column width. Placed after the narrower 640/480/
+   390px blocks above so it wins the cascade for `.dj-grid` at every width
+   in 320–767px; tablet (768px+) and desktop are completely untouched —
+   this block's own max-width caps at 767px, one pixel below the existing
+   768px breakpoint used everywhere else in this file. */
 @media (max-width: 767px) {
-    .dj-grid, .dj-wishlist-grid {
+    .dj-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        column-gap: 14px;
-        row-gap: 18px;
+        gap: 10px;
     }
-    .dj-grid { padding: 20px 14px 50px; }
 
-    /* The two wishlist actions (Move to Cart / Remove) sit side by side at
-       full card width; at ~half that width they no longer fit on one line
-       without truncating — stacked instead, same pattern as the price/
-       button stack below. */
+    /* .dj-wishlist-grid (wishlist listing) has the identical auto-fit/
+       minmax floor problem with its own minmax(240px)/minmax(160px) rules
+       above; same parent-only fix, its own separate card markup is
+       otherwise untouched. */
+    .dj-wishlist-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
     .dj-wishlist-actions { flex-direction: column; align-items: stretch; gap: 8px; }
     .dj-wishlist-actions .dj-ci-remove { text-align: center; }
-
-    /* Grid items stretch to equal row height by default; the title clamp
-       below removes the remaining variance from short vs. long names. */
-    .dj-card-body { padding: 12px 12px 14px; gap: 5px; }
-    .dj-card-body h3 {
-        font-size: 13.5px;
-        line-height: 1.35;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: calc(1.35em * 2);
-    }
-    /* The 50-character excerpt still varies enough in rendered length at
-       this card width to unbalance row heights, and reads as clutter at
-       ~150px wide — hidden here, still present (and unaffected) in the
-       product detail page and everywhere wider than mobile. */
-    .dj-card-body .dj-desc { display: none; }
-    .dj-rating { font-size: 10.5px; }
-    .dj-stock-badge { font-size: 10.5px; margin: 4px 0; }
-    .dj-tag { top: 10px; font-size: 9.5px; padding: 4px 9px; }
-    .dj-ribbon { top: 10px; font-size: 9px; padding: 4px 10px; }
-
-    /* Price-beside-button no longer has room to sit on one line without
-       either wrapping the button label or squeezing the price — stacked
-       instead, full-width button, matching the same pattern already used
-       for .dj-modal-add/.dj-place-order-btn elsewhere in this file. */
-    .dj-card-bottom { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 8px; }
-    .dj-price { font-size: 14.5px; text-align: center; }
-    .dj-add-btn { width: 100%; text-align: center; padding: 10px 10px; font-size: 12px; }
 }
 
 /* =========================================================
