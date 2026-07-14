@@ -89,7 +89,17 @@ class InvoicePdfService
             $previousLocale = App::getLocale();
             App::setLocale($locale);
 
+            Log::info('Invoice PDF generation started', [
+                'order_id' => $order->id,
+                'invoice_number' => $invoiceNumber,
+                'engine' => $engine,
+            ]);
+
+            $renderStartedAt = microtime(true);
+
             $pdfBytes = $this->render($engine, $viewData);
+
+            $renderDurationMs = (int) ((microtime(true) - $renderStartedAt) * 1000);
 
             App::setLocale($previousLocale);
 
@@ -104,11 +114,12 @@ class InvoicePdfService
 
             $absolutePath = Storage::disk('local')->path($finalPath);
 
-            Log::info('Invoice PDF file written', [
+            Log::info('Invoice PDF generation completed', [
                 'order_id' => $order->id,
                 'invoice_number' => $invoiceNumber,
                 'engine' => $engine,
                 'absolute_path' => $absolutePath,
+                'render_duration_ms' => $renderDurationMs,
                 'size' => filesize($absolutePath),
                 'modified_at' => date('Y-m-d H:i:s', filemtime($absolutePath)),
             ]);

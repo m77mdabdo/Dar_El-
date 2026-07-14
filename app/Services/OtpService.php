@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\EmailVerificationOtp;
+use App\Models\Order;
 use App\Models\User;
 use App\Notifications\OtpVerificationNotification;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class OtpService
 {
@@ -16,7 +19,16 @@ class OtpService
     protected const RESEND_COOLDOWN_SECONDS = 60;
 
     /**
-     * Generate a fresh OTP for the user, invalidate any previous ones, and send it.
+     * Generate a fresh OTP for the user, invalidate any previous ones, and
+     * send it. Sent synchronously (OtpVerificationNotification does not
+     * implement ShouldQueue) since the customer is actively waiting — the
+     * code exists in the database the instant this method returns, and the
+     * mail transport has either accepted it or thrown by the time it does.
+     *
+     * @throws Throwable if the mail transport rejects/fails to send — the
+     *                    OTP row still exists (so "resend" cooldown/attempt
+     *                    logic stays correct), but the caller must not tell
+     *                    the customer a code was sent when it wasn't.
      */
     public function generate(User $user): EmailVerificationOtp
     {
@@ -31,7 +43,34 @@ class OtpService
             'attempts' => 0,
         ]);
 
-        $user->notify(new OtpVerificationNotification($otp, self::EXPIRES_IN_MINUTES));
+        $maskedEmail = Order::maskEmailForLogging($user->email);
+
+        Log::info('OTP mail sending started', [
+            'user_id' => $user->id,
+            'recipient_masked' => $maskedEmail,
+        ]);
+
+        $startedAt = microtime(true);
+
+        try {
+            $user->notify(new OtpVerificationNotification($otp, self::EXPIRES_IN_MINUTES));
+        } catch (Throwable $e) {
+            Log::error('OTP mail transport failed', [
+                'user_id' => $user->id,
+                'recipient_masked' => $maskedEmail,
+                'duration_ms' => (int) ((microtime(true) - $startedAt) * 1000),
+                'exception' => $e::class,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+
+        Log::info('OTP mail transport completed', [
+            'user_id' => $user->id,
+            'recipient_masked' => $maskedEmail,
+            'duration_ms' => (int) ((microtime(true) - $startedAt) * 1000),
+        ]);
 
         return $record;
     }

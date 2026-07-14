@@ -8,8 +8,10 @@ use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Throwable;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -45,7 +47,17 @@ class AuthenticatedSessionController extends Controller
 
         if (! $user->hasVerifiedEmail()) {
             if ($this->otp->canResend($user)) {
-                $this->otp->generate($user);
+                try {
+                    $this->otp->generate($user);
+                } catch (Throwable $e) {
+                    // Login itself already succeeded — a transport failure
+                    // here must not 500 the request. OtpService already
+                    // logged the specific cause; the customer can use
+                    // "resend" from the OTP screen once it clears.
+                    Log::warning('Login-triggered OTP resend failed', ['user_id' => $user->id]);
+
+                    return redirect()->route('otp.notice')->with('status', __('We could not send a new verification code. Please use "Resend code" below.'));
+                }
             }
 
             return redirect()->route('otp.notice');

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Throwable;
 
 class OtpVerificationController extends Controller
 {
@@ -73,7 +75,19 @@ class OtpVerificationController extends Controller
             ]);
         }
 
-        $this->otp->generate($user);
+        // The success message below must only ever be shown once the mail
+        // transport has actually accepted the message — generate() sends
+        // synchronously and throws on a transport failure, so a caught
+        // exception here means the customer genuinely was not sent a code.
+        try {
+            $this->otp->generate($user);
+        } catch (Throwable $e) {
+            Log::warning('OTP resend failed', ['user_id' => $user->id]);
+
+            return back()->withErrors([
+                'otp' => __('We could not send a new code right now. Please try again in a moment.'),
+            ]);
+        }
 
         return back()->with('status', __('A new code has been sent to your email.'));
     }

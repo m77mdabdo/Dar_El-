@@ -281,6 +281,8 @@ class CheckoutController extends Controller
      */
     private function dispatchSafely(Order $order, string $class, \Closure $action, array $context = []): void
     {
+        $startedAt = microtime(true);
+
         try {
             $action();
 
@@ -288,6 +290,7 @@ class CheckoutController extends Controller
                 'order_id' => $order->id,
                 'class' => $class,
                 'status' => 'success',
+                'duration_ms' => (int) ((microtime(true) - $startedAt) * 1000),
             ], $context));
         } catch (Throwable $e) {
             Log::error('Order post-commit dispatch failed (order already created successfully)', array_merge([
@@ -296,6 +299,7 @@ class CheckoutController extends Controller
                 'class' => $class,
                 'error' => $e->getMessage(),
                 'status' => 'failed',
+                'duration_ms' => (int) ((microtime(true) - $startedAt) * 1000),
             ], $context));
         }
     }
