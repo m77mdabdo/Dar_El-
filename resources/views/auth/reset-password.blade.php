@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ __('Reset Password') }} — Dar El-Jamila</title>
+    <title>{{ __('Reset Password') }} — Dar El Jamila</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="https://images.unsplash.com/photo-1772474528936-4f1187eb1611?w=1600&q=85&auto=format&fit=crop">
+    @include('partials.favicon-links')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="dj-login-page {{ app()->getLocale() === 'en' ? 'dj-en' : '' }}">
@@ -26,7 +27,7 @@
         </div>
 
         <div class="dj-login-brand">
-            <div class="dj-login-mark">{{ __('Dar El-Jamila') }}</div>
+            <x-brand-logo style="height:44px;width:auto;margin-inline:auto;" />
             <div class="dj-login-tagline">{{ __('Timeless Elegance. Crafted for You.') }}</div>
         </div>
 

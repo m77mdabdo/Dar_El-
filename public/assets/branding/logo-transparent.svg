@@ -1,0 +1,27 @@
+<svg width="520" height="200" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+<title>شعار دار الجميلة</title>
+<defs>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Cairo:wght@400;600;700&amp;display=swap');
+.at{font-family:'Amiri',serif;}
+.ac{font-family:'Cairo',sans-serif;}
+</style>
+</defs>
+
+<g transform="translate(460,100) scale(0.9)">
+<line x1="-30" y1="30" x2="16" y2="-18" stroke="#E2C59F" stroke-width="4.5" stroke-linecap="round"/>
+<ellipse cx="13" cy="-15" rx="2.6" ry="1.6" transform="rotate(-40 13 -15)" fill="#421C23" stroke="#E2C59F" stroke-width="0.6"/>
+<path d="M13,-15 C 28,-32 52,-24 48,-2 C 45,14 26,18 17,4" fill="none" stroke="#E2C59F" stroke-width="1.4" stroke-linecap="round"/>
+<path d="M15,-13 C 29,-28 48,-21 45,-3 C 42,11 27,14 19,3" fill="none" stroke="#E2C59F" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="18" cy="4" r="2.4" fill="#E2C59F"/>
+</g>
+
+<text x="400" y="82" text-anchor="end" class="at" font-size="42" font-weight="700" fill="#E2C59F">دار الجميلة</text>
+
+<path d="M300,100 Q325,93 350,100" fill="none" stroke="#E2C59F" stroke-width="0.75"/>
+<ellipse cx="364" cy="100" rx="2" ry="5" fill="#E2C59F" transform="rotate(20 364 100)"/>
+<path d="M378,100 Q388,96 400,100" fill="none" stroke="#E2C59F" stroke-width="0.75"/>
+
+<text x="400" y="128" text-anchor="end" class="ac" font-size="20" font-weight="600" fill="#E2C59F" style="letter-spacing:5px">DAR EL JAMILA</text>
+<text x="400" y="150" text-anchor="end" class="ac" font-size="10" fill="#c9a97e" style="letter-spacing:2.5px">COUTURE ABAYAS · RIYADH</text>
+</svg>

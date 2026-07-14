@@ -1,8 +1,8 @@
 @extends('layouts.storefront')
 
-@section('title', trans_field($product, 'name') . ' — Dar El-Jamila')
+@section('title', trans_field($product, 'name') . ' — Dar El Jamila')
 @section('meta_description', \Illuminate\Support\Str::limit(trans_field($product, 'description'), 150))
-@section('og_image', $product->cover_image_src ?? asset('favicon.ico'))
+@section('og_image', $product->cover_image_src ?? asset('assets/branding/favicon-512.png'))
 
 @section('content')
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">

@@ -7,7 +7,7 @@
 }
 
 /* =========================================================
-   Dar El-Jamila brand design system
+   Dar El Jamila brand design system
    All custom classes below are prefixed `dj-` to avoid any
    collision with Tailwind utilities or the admin panel, which
    shares this same compiled stylesheet.
@@ -57,6 +57,13 @@ body.dj-storefront.dj-en h1, body.dj-storefront.dj-en h2, body.dj-storefront.dj-
 .dj-tint-maroon.dj-strong::after {
     background: linear-gradient(180deg, rgba(60,11,23,.15), rgba(60,11,23,.85));
 }
+
+/* ===== BRAND LOGO ===== */
+/* Defensive default so <x-brand-logo> is never distorted regardless of the
+   container it's dropped into — callers set width/height via a utility
+   class (h-* or w-*), never both, and this guarantees the other axis
+   always scales proportionally instead of stretching. */
+.dj-brand-logo { max-width: 100%; height: auto; display: block; object-fit: contain; }
 
 /* ===== NAV ===== */
 .dj-nav {

@@ -1,7 +1,7 @@
 @extends('layouts.storefront')
 
-@section('title', __('Services') . ' — Dar El-Jamila')
-@section('meta_description', __('A range of services designed to make your Dar El-Jamila experience complete from start to finish'))
+@section('title', __('Services') . ' — Dar El Jamila')
+@section('meta_description', __('A range of services designed to make your Dar El Jamila experience complete from start to finish'))
 
 @section('content')
     <section class="dj-page-hero dj-photo-wrap dj-tint-maroon dj-strong">
@@ -11,7 +11,7 @@
         <div class="dj-lattice-bg"></div>
         <div class="dj-eyebrow">{{ __('Our Services') }}</div>
         <h1>{{ __('More Than Just Shopping') }}</h1>
-        <p>{{ __('A range of services designed to make your Dar El-Jamila experience complete from start to finish') }}</p>
+        <p>{{ __('A range of services designed to make your Dar El Jamila experience complete from start to finish') }}</p>
     </section>
 
     <div class="dj-services-grid">

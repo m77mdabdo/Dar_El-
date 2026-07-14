@@ -4,7 +4,7 @@ window.Alpine = Alpine;
 Alpine.start();
 
 /* =========================================================
-   Dar El-Jamila storefront behavior
+   Dar El Jamila storefront behavior
    Plain vanilla JS (mirrors the approved design prototype),
    wired to real fetch() calls against the existing cart routes
    instead of an in-memory fake cart.

@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', __('Get in Touch') . ' — Dar El-Jamila')
+@section('title', __('Get in Touch') . ' — Dar El Jamila')
 @section('meta_description', __("Have a question or a custom order? We're here to help"))
 
 @section('content')

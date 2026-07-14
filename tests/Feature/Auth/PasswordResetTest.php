@@ -87,7 +87,7 @@ class PasswordResetTest extends TestCase
 
         $html = (new ResetPassword('sample-token'))->toMail($user)->render();
 
-        $this->assertStringContainsString('Dar El-Jamila', $html);
+        $this->assertStringContainsString('Dar El Jamila', $html);
         $this->assertStringContainsString(__('emails.password_reset_button'), $html);
         $this->assertStringNotContainsString('You are receiving this email because we received a password reset request', $html);
     }
