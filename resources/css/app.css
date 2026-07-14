@@ -250,7 +250,7 @@ body.dj-en .dj-stat-num { font-family: 'Playfair Display'; }
 .dj-card:hover { transform: translateY(-6px); box-shadow: 0 25px 40px -18px rgba(60,11,23,.45); }
 .dj-card:hover .dj-swatch img { transform: scale(1.06); }
 .dj-swatch { aspect-ratio: 4 / 5; position: relative; overflow: hidden; cursor: pointer; }
-.dj-swatch img { transition: transform .5s ease; }
+.dj-swatch img { transition: transform .5s ease, opacity .35s ease; }
 .dj-tag { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,.9); color: var(--dj-maroon); font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: 700; z-index: 3; }
 body.dj-en .dj-tag { right: auto; left: 14px; }
 .dj-card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -659,6 +659,50 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 .dj-confirm-wrap h2 { font-size: clamp(21px, 5vw, 28px); color: var(--dj-maroon); margin-bottom: 12px; }
 .dj-confirm-wrap p { font-size: 14.5px; color: #8a6b70; line-height: 1.9; margin-bottom: 8px; }
 .dj-order-number { display: inline-block; background: var(--dj-cream-2); color: var(--dj-maroon); font-weight: 800; padding: 10px 24px; border-radius: 30px; margin: 18px 0 30px; font-size: 15px; letter-spacing: 1px; }
+
+/* ===== BREADCRUMB ===== */
+.dj-breadcrumb { margin-bottom: 20px; }
+.dj-breadcrumb ol { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; gap: 6px; }
+.dj-breadcrumb li { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #8a6b70; min-width: 0; }
+.dj-breadcrumb li:not(:last-child)::after { content: '/'; color: var(--dj-cream-2); }
+body.dj-en .dj-breadcrumb li:not(:last-child)::after { content: '›'; }
+.dj-breadcrumb a { color: #8a6b70; text-decoration: none; transition: color .15s; white-space: nowrap; }
+.dj-breadcrumb a:hover { color: var(--dj-maroon); text-decoration: underline; }
+.dj-breadcrumb li[aria-current="page"] { color: var(--dj-maroon); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+@media (max-width: 480px) {
+    .dj-breadcrumb li[aria-current="page"] { max-width: 140px; }
+    .dj-breadcrumb li:not(:last-child):not(:first-child) { display: none; }
+    .dj-breadcrumb li:not(:last-child):not(:first-child)::after { display: none; }
+}
+
+/* ===== PAGINATION =====
+   Reskins Laravel's default pagination view (resources/views/vendor/
+   pagination/tailwind.blade.php) to match the brand instead of the
+   generic gray/blue Tailwind defaults it ships with — those also carried
+   `dark:` variants that would flip just this one widget to a mismatched
+   dark palette under OS dark mode while the rest of the page stayed
+   light, since this site otherwise commits to a single light theme. */
+.dj-pagination-summary { font-size: 13px; color: #8a6b70; }
+.dj-page-link {
+    display: inline-flex; align-items: center; padding: 10px 20px; font-size: 13.5px; font-weight: 600;
+    color: var(--dj-maroon); background: var(--dj-cream); border: 1px solid var(--dj-cream-2); border-radius: 10px;
+    transition: background .15s, border-color .15s;
+}
+.dj-page-link:hover { background: var(--dj-cream-2); }
+.dj-page-link-disabled { color: #b79a85; cursor: not-allowed; opacity: .6; }
+.dj-pagination-group { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px -8px rgba(60,11,23,.25); border: 1px solid var(--dj-cream-2); }
+.dj-page-num {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 6px;
+    font-size: 13.5px; font-weight: 600; color: var(--dj-maroon); background: #fff; border-inline-start: 1px solid var(--dj-cream-2);
+    transition: background .15s, color .15s;
+}
+.dj-page-num-start { border-inline-start: none; }
+.dj-page-num:hover:not(.dj-page-num-disabled):not(.dj-page-num-current) { background: var(--dj-cream); }
+.dj-page-num-current { background: var(--dj-maroon); color: var(--dj-gold); cursor: default; }
+.dj-page-num-disabled { color: #d8c6c9; cursor: not-allowed; }
+@media (max-width: 480px) {
+    .dj-pagination-summary { font-size: 12px; }
+}
 
 /* ===== SKELETON LOADER ===== */
 .dj-skeleton { position: relative; overflow: hidden; background: var(--dj-cream-2); }

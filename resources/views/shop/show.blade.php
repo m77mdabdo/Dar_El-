@@ -6,6 +6,17 @@
 
 @section('content')
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <nav aria-label="{{ __('Breadcrumb') }}" class="dj-breadcrumb">
+            <ol>
+                <li><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
+                <li><a href="{{ route('shop.index') }}">{{ __('Shop') }}</a></li>
+                @if ($product->category)
+                    <li><a href="{{ route('shop.index', ['category' => $product->category->slug]) }}">{{ trans_field($product->category, 'name') }}</a></li>
+                @endif
+                <li aria-current="page">{{ trans_field($product, 'name') }}</li>
+            </ol>
+        </nav>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div class="dj-photo-wrap dj-tint-maroon" style="aspect-ratio:1; border-radius:20px; overflow:hidden;">
                 @if ($product->cover_image_src)

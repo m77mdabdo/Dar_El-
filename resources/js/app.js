@@ -352,6 +352,29 @@ document.addEventListener('click', (e) => {
     }
 });
 
+/* ===== PRODUCT IMAGE SKELETON =====
+   Uses the .dj-skeleton shimmer that already existed in app.css but had
+   nothing wiring it up. Deliberately fail-safe: an image only ever gets
+   hidden if JS confirms it isn't loaded yet (img.complete check), and
+   both the load AND error events restore it — so a slow connection or a
+   genuinely broken image can never leave a swatch permanently blank. No
+   change to what images are requested or how, purely how the wait looks. */
+function djInitImageSkeletons() {
+    document.querySelectorAll('.dj-swatch img').forEach((img) => {
+        if (img.complete) return;
+        const swatch = img.closest('.dj-swatch');
+        if (!swatch) return;
+        swatch.classList.add('dj-skeleton');
+        img.style.opacity = '0';
+        const reveal = () => {
+            swatch.classList.remove('dj-skeleton');
+            img.style.opacity = '';
+        };
+        img.addEventListener('load', reveal, { once: true });
+        img.addEventListener('error', reveal, { once: true });
+    });
+}
+
 /* ===== PARTICLES ===== */
 function djInitParticles() {
     document.querySelectorAll('[data-particles]').forEach(container => {
@@ -457,6 +480,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('DOMContentLoaded', () => {
+    djInitImageSkeletons();
     djInitParticles();
     djObserveReveals();
     document.querySelectorAll('.dj-stat-num').forEach(el => djStatObserver.observe(el));
