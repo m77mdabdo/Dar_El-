@@ -144,7 +144,7 @@
             @if ($whatsapp = \App\Models\Setting::get('whatsapp_number'))
                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsapp) }}" title="WhatsApp" target="_blank" rel="noopener">WA</a>
             @endif
-            <a href="mailto:{{ \App\Models\Setting::get('support_email', 'hello@dar-el-jamila.com') }}" title="Email">✉</a>
+            <a href="mailto:{{ \App\Models\Setting::get('support_email', 'info@dareljamila.com') }}" title="Email">✉</a>
         </div>
 
         <div class="dj-fine">&copy; {{ date('Y') }} {{ __('Dar El Jamila. All rights reserved.') }}</div>
