@@ -14,11 +14,11 @@
                 </p>
             @endif
             <div class="dj-qty">
-                <button type="button" onclick="djChangeCartQty('{{ route('cart.index') }}', '{{ $item['key'] }}', {{ $item['quantity'] - 1 }})">-</button>
+                <button type="button" aria-label="{{ __('Decrease quantity') }}" onclick="djChangeCartQty('{{ route('cart.index') }}', '{{ $item['key'] }}', {{ $item['quantity'] - 1 }}, this)">-</button>
                 <span>{{ $item['quantity'] }}</span>
-                <button type="button" onclick="djChangeCartQty('{{ route('cart.index') }}', '{{ $item['key'] }}', {{ $item['quantity'] + 1 }})">+</button>
+                <button type="button" aria-label="{{ __('Increase quantity') }}" onclick="djChangeCartQty('{{ route('cart.index') }}', '{{ $item['key'] }}', {{ $item['quantity'] + 1 }}, this)">+</button>
             </div>
-            <a class="dj-ci-remove" onclick="djRemoveFromCart('{{ route('cart.index') }}', '{{ $item['key'] }}')">{{ __('Remove') }}</a>
+            <a class="dj-ci-remove" role="button" tabindex="0" onclick="djRemoveFromCart('{{ route('cart.index') }}', '{{ $item['key'] }}', this)" onkeydown="if(event.key==='Enter'){djRemoveFromCart('{{ route('cart.index') }}', '{{ $item['key'] }}', this)}">{{ __('Remove') }}</a>
         </div>
     </div>
 @empty
