@@ -6,7 +6,7 @@
         primary brand mark for the same reason (renders correctly even
         with images blocked, which is the default in most mail clients).
     --}}
-    <img src="{{ asset('assets/branding/favicon-192.png') }}" width="64" height="64" alt="" style="display:block; width:64px; height:64px; margin:0 auto 14px; border-radius:50%; border:0;">
+    <img src="{{ asset('assets/branding/favicon-192.png') }}" width="52" height="52" alt="" style="display:block; margin:0 auto 14px; border-radius:50%; border:0;">
     <h1 style="margin:0; color:#F7EFE4; font-size:26px; font-weight:700; letter-spacing:2px; font-family: Georgia, 'Times New Roman', serif;">
         {{ __('Dar El Jamila') }}
     </h1>
