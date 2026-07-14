@@ -104,7 +104,7 @@ class InvoiceMpdfGenerationTest extends TestCase
 
     public function test_two_item_arabic_invoice_with_support_email_stays_on_one_page(): void
     {
-        \App\Models\Setting::set('support_email', 'support@dareljamila.com');
+        \App\Models\Setting::set('support_email', 'info@dareljamila.com');
         $order = $this->makeOrder(itemOverrides: ['count' => 2]);
 
         $invoice = app(InvoicePdfService::class)->generate($order, 'ar');

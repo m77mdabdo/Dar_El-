@@ -38,7 +38,7 @@
         <div class="dj-contact-info">
             <div class="dj-info-row">
                 <div class="dj-ic">✉</div>
-                <div><h4>{{ __('Email') }}</h4><p>{{ \App\Models\Setting::get('support_email', 'hello@dar-el-jamila.com') }}</p></div>
+                <div><h4>{{ __('Email') }}</h4><p>{{ \App\Models\Setting::get('support_email', 'info@dareljamila.com') }}</p></div>
             </div>
             <div class="dj-info-row">
                 <div class="dj-ic">📍</div>

@@ -14,7 +14,7 @@ class SettingSeeder extends Seeder
     {
         $defaults = [
             'store_name' => 'Dar El Jamila',
-            'support_email' => 'support@darel-jamila.com',
+            'support_email' => 'info@dareljamila.com',
             'whatsapp_number' => '+201000000000',
             'default_shipping_fee' => '75',
             'facebook_url' => '',
