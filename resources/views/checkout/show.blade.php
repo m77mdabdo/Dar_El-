@@ -24,31 +24,31 @@
 
                 <div class="dj-form-row">
                     <div>
-                        <input type="text" name="customer_name" value="{{ old('customer_name', auth()->user()->name ?? '') }}" placeholder="{{ __('Full Name') }}" aria-label="{{ __('Full Name') }}" required>
-                        @error('customer_name') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:-10px; margin-bottom:10px;">{{ $message }}</p> @enderror
+                        <input type="text" name="customer_name" class="{{ $errors->has('customer_name') ? 'dj-input-error' : '' }}" value="{{ old('customer_name', auth()->user()->name ?? '') }}" placeholder="{{ __('Full Name') }}" aria-label="{{ __('Full Name') }}" aria-invalid="{{ $errors->has('customer_name') ? 'true' : 'false' }}" required>
+                        @error('customer_name') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <input type="text" name="customer_phone" value="{{ old('customer_phone', auth()->user()->phone ?? '') }}" placeholder="{{ __('Phone Number') }}" aria-label="{{ __('Phone Number') }}" required>
-                        @error('customer_phone') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:-10px; margin-bottom:10px;">{{ $message }}</p> @enderror
+                        <input type="text" name="customer_phone" class="{{ $errors->has('customer_phone') ? 'dj-input-error' : '' }}" value="{{ old('customer_phone', auth()->user()->phone ?? '') }}" placeholder="{{ __('Phone Number') }}" aria-label="{{ __('Phone Number') }}" aria-invalid="{{ $errors->has('customer_phone') ? 'true' : 'false' }}" required>
+                        @error('customer_phone') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                <input type="email" name="customer_email" value="{{ old('customer_email', auth()->user()->email ?? '') }}" placeholder="{{ __('Email') }}" aria-label="{{ __('Email') }}" required>
-                @error('customer_email') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:-10px; margin-bottom:10px;">{{ $message }}</p> @enderror
+                <input type="email" name="customer_email" class="{{ $errors->has('customer_email') ? 'dj-input-error' : '' }}" value="{{ old('customer_email', auth()->user()->email ?? '') }}" placeholder="{{ __('Email') }}" aria-label="{{ __('Email') }}" aria-invalid="{{ $errors->has('customer_email') ? 'true' : 'false' }}" required>
+                @error('customer_email') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
 
                 <div class="dj-form-row">
                     <div>
-                        <input type="text" name="governorate" value="{{ old('governorate') }}" placeholder="{{ __('Governorate') }}" aria-label="{{ __('Governorate') }}" required>
-                        @error('governorate') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:-10px; margin-bottom:10px;">{{ $message }}</p> @enderror
+                        <input type="text" name="governorate" class="{{ $errors->has('governorate') ? 'dj-input-error' : '' }}" value="{{ old('governorate') }}" placeholder="{{ __('Governorate') }}" aria-label="{{ __('Governorate') }}" aria-invalid="{{ $errors->has('governorate') ? 'true' : 'false' }}" required>
+                        @error('governorate') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <input type="text" name="city" value="{{ old('city') }}" placeholder="{{ __('City / District') }}" aria-label="{{ __('City / District') }}" required>
-                        @error('city') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:-10px; margin-bottom:10px;">{{ $message }}</p> @enderror
+                        <input type="text" name="city" class="{{ $errors->has('city') ? 'dj-input-error' : '' }}" value="{{ old('city') }}" placeholder="{{ __('City / District') }}" aria-label="{{ __('City / District') }}" aria-invalid="{{ $errors->has('city') ? 'true' : 'false' }}" required>
+                        @error('city') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                <textarea name="address" rows="3" placeholder="{{ __('Full Address') }}" aria-label="{{ __('Full Address') }}" required>{{ old('address') }}</textarea>
-                @error('address') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:-10px; margin-bottom:10px;">{{ $message }}</p> @enderror
+                <textarea name="address" rows="3" class="{{ $errors->has('address') ? 'dj-input-error' : '' }}" placeholder="{{ __('Full Address') }}" aria-label="{{ __('Full Address') }}" aria-invalid="{{ $errors->has('address') ? 'true' : 'false' }}" required>{{ old('address') }}</textarea>
+                @error('address') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
 
                 <button type="button" id="dj-checkout-geolocate" style="display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--dj-maroon); font-size:12.5px; font-weight:600; text-decoration:underline; padding:0; margin:-6px 0 12px;">
                     {{ __('Use My Current Location') }}

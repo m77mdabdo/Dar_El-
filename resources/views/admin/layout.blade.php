@@ -16,6 +16,7 @@
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="dj-admin-shell antialiased overflow-x-hidden {{ app()->getLocale() === 'en' ? 'dj-en' : '' }}">
+    <div id="dj-nav-progress" aria-hidden="true"></div>
     @php $rtl = app()->getLocale() === 'ar'; @endphp
     <div
         class="flex min-h-screen"

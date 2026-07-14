@@ -148,6 +148,35 @@ window.djQueueToast = function (message, type = 'success') {
     }
 };
 
+/* ===== PAGE NAVIGATION LOADING BAR =====
+   Same purely-visual click acknowledgment as the storefront bundle — see
+   app.js for the full rationale. Real navigation is untouched. */
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (link.target && link.target !== '_self') return;
+    if (link.hasAttribute('download')) return;
+
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+
+    let url;
+    try { url = new URL(href, window.location.href); } catch { return; }
+    if (url.origin !== window.location.origin) return;
+    if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+
+    document.getElementById('dj-nav-progress')?.classList.add('dj-active');
+});
+
+document.addEventListener('submit', (e) => {
+    if (e.defaultPrevented || e.target.target) return;
+    document.getElementById('dj-nav-progress')?.classList.add('dj-active');
+});
+
+window.addEventListener('pageshow', () => {
+    document.getElementById('dj-nav-progress')?.classList.remove('dj-active');
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     initAdminCharts();
 

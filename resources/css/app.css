@@ -30,6 +30,43 @@ html { scroll-behavior: smooth; }
 html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
 img, video, canvas, svg { max-width: 100%; height: auto; }
 
+/* ===== FOCUS (keyboard navigation, applies storefront + admin) ===== */
+/* :focus-visible (not :focus) so mouse/touch clicks stay silent and only
+   real keyboard navigation shows the ring — the single consistent focus
+   treatment for every interactive element site-wide, filling the gap
+   where most buttons/links had no explicit focus style at all and a few
+   form inputs had stripped the native outline with nothing standing in
+   for it. Component-specific :focus-visible rules elsewhere in this file
+   (checkbox, OTP boxes, admin inputs) intentionally override this with a
+   tighter ring sized to their own shape. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--dj-gold-bright);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+.dj-admin-shell a:focus-visible, .dj-admin-shell button:focus-visible,
+.dj-admin-shell input:focus-visible, .dj-admin-shell select:focus-visible,
+.dj-admin-shell textarea:focus-visible, .dj-admin-shell [tabindex]:focus-visible {
+    outline-color: var(--dj-maroon);
+}
+
+/* ===== GENERIC BUTTON LOADING STATE ===== */
+/* Drop-in for any button mid-fetch: dims it, blocks re-clicks, and shows
+   a small spinner in place of the label (label stays in the DOM — just
+   visually hidden — so the button's width doesn't jump). Pairs with
+   `disabled` on the element itself; JS toggles both together. */
+.dj-btn-loading { position: relative; color: transparent !important; pointer-events: none; }
+.dj-btn-loading::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%;
+    animation: dj-spin .7s linear infinite;
+}
+@keyframes dj-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .dj-btn-loading::after { animation-duration: 1.6s; }
+}
+
 body.dj-storefront {
     font-family: 'Tajawal', sans-serif;
     background: var(--dj-cream);
@@ -222,8 +259,9 @@ body.dj-en .dj-card-body h3 { font-family: 'Poppins'; }
 .dj-card-body .dj-desc { font-size: 12.5px; color: #8a6b70; }
 .dj-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; }
 .dj-price { font-weight: 900; color: var(--dj-maroon); font-size: 16px; }
-.dj-add-btn { background: var(--dj-maroon); color: var(--dj-gold); font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 24px; transition: .2s; }
-.dj-add-btn:hover { background: var(--dj-maroon-dark); }
+.dj-add-btn { background: var(--dj-maroon); color: var(--dj-gold); font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 24px; transition: background .2s, transform .1s; }
+.dj-add-btn:hover:not(:disabled) { background: var(--dj-maroon-dark); }
+.dj-add-btn:active:not(:disabled) { transform: scale(.96); }
 .dj-add-btn:disabled { opacity: .5; cursor: not-allowed; }
 .dj-ribbon { position: absolute; top: 14px; left: 14px; z-index: 3; padding: 5px 14px; border-radius: 20px; font-size: 10.5px; font-weight: 800; letter-spacing: .5px; color: var(--dj-maroon-dark); }
 .dj-ribbon.dj-best { background: var(--dj-gold); }
@@ -337,6 +375,7 @@ body.dj-en .dj-blog-body h3 { font-family: 'Poppins'; }
     padding: 14px 16px; border: 1.5px solid var(--dj-cream-2); border-radius: 12px; font-family: inherit; font-size: 14px; background: var(--dj-cream); width: 100%;
 }
 .dj-contact-form input:focus, .dj-contact-form textarea:focus { outline: none; border-color: var(--dj-maroon); }
+.dj-contact-form input:focus-visible, .dj-contact-form textarea:focus-visible { box-shadow: 0 0 0 3px rgba(96,21,38,.18); }
 .dj-contact-form button { background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; padding: 15px; border-radius: 12px; font-size: 15px; }
 .dj-contact-info { display: flex; flex-direction: column; gap: 22px; }
 .dj-info-row { display: flex; align-items: flex-start; gap: 14px; }
@@ -377,16 +416,38 @@ body.dj-en .dj-drawer-head h3 { font-family: 'Poppins'; }
 .dj-ci-info h4 { font-size: 14px; font-weight: 700; overflow-wrap: break-word; word-break: break-word; }
 .dj-ci-info span { font-size: 12px; color: #a67b83; }
 .dj-qty { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-.dj-qty button { width: 28px; height: 28px; border-radius: 6px; background: var(--dj-cream-2); font-size: 13px; }
-.dj-ci-remove { font-size: 11px; color: var(--dj-rose-dust); text-decoration: underline; margin-top: 6px; display: inline-block; }
+.dj-qty button {
+    width: 36px; height: 36px; min-width: 36px; border-radius: 8px; background: var(--dj-cream-2);
+    font-size: 14px; font-weight: 700; color: var(--dj-maroon); transition: background .15s, transform .1s, opacity .15s;
+}
+.dj-qty button:hover:not(:disabled) { background: var(--dj-gold); }
+.dj-qty button:active:not(:disabled) { transform: scale(.92); }
+.dj-qty button:disabled { opacity: .4; cursor: not-allowed; }
+.dj-qty span { font-variant-numeric: tabular-nums; min-width: 18px; text-align: center; display: inline-block; }
+.dj-qty.dj-loading { opacity: .5; pointer-events: none; }
+.dj-ci-remove {
+    font-size: 11.5px; color: var(--dj-rose-dust); text-decoration: underline; text-underline-offset: 2px;
+    margin-top: 6px; display: inline-block; padding: 4px 2px; transition: color .15s;
+}
+.dj-ci-remove:hover { color: var(--dj-maroon); }
 .dj-drawer-foot { padding: 20px 22px 26px; border-top: 1px solid var(--dj-cream-2); }
 .dj-total-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--dj-maroon); }
 .dj-drawer-checkout-btn { width: 100%; display: block; text-align: center; background: var(--dj-gold); color: var(--dj-maroon-dark); font-weight: 700; font-size: 15px; padding: 15px; border-radius: 12px; }
 
 /* ===== MODAL ===== */
-.dj-modal-overlay { position: fixed; inset: 0; background: rgba(20,5,9,.6); z-index: 95; display: none; align-items: center; justify-content: center; padding: 20px; }
-.dj-modal-overlay.dj-show { display: flex; }
-.dj-modal { background: #fff; border-radius: 20px; max-width: 760px; width: 100%; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; max-height: 88vh; position: relative; }
+.dj-modal-overlay {
+    position: fixed; inset: 0; background: rgba(20,5,9,.6); z-index: 95; display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s ease;
+}
+.dj-modal-overlay.dj-show { opacity: 1; visibility: visible; pointer-events: auto; }
+.dj-modal {
+    background: #fff; border-radius: 20px; max-width: 760px; width: 100%; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; max-height: 88vh; position: relative;
+    transform: scale(.96) translateY(8px); transition: transform .28s cubic-bezier(.2,.9,.3,1);
+}
+.dj-modal-overlay.dj-show .dj-modal { transform: scale(1) translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+    .dj-modal-overlay, .dj-modal { transition: opacity .2s ease; transform: none !important; }
+}
 .dj-modal.dj-article { grid-template-columns: 1fr; max-width: 640px; overflow-y: auto; }
 @media (max-width: 700px) { .dj-modal { grid-template-columns: 1fr; overflow-y: auto; max-height: 92vh; } }
 .dj-modal-image { position: relative; overflow: hidden; min-height: 280px; aspect-ratio: 4 / 5; }
@@ -417,9 +478,12 @@ body.dj-en .dj-modal-info h2 { font-family: 'Playfair Display'; }
 .dj-comment-name { font-weight: 700; font-size: 13.5px; color: var(--dj-maroon); }
 .dj-comment-date { font-size: 11.5px; color: var(--dj-rose-dust); margin-inline-start: 8px; }
 .dj-comment-text { font-size: 13.5px; color: #5a4448; line-height: 1.8; margin-top: 4px; }
-.dj-modal-add { margin-top: auto; background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; font-size: 15px; padding: 16px; border-radius: 12px; width: 100%; }
+.dj-modal-add { margin-top: auto; background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; font-size: 15px; padding: 16px; border-radius: 12px; width: 100%; transition: background .2s, transform .1s; }
+.dj-modal-add:hover:not(:disabled) { background: var(--dj-maroon-dark); }
+.dj-modal-add:active:not(:disabled) { transform: scale(.98); }
 .dj-modal-add:disabled { opacity: .5; }
-.dj-modal-close { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,.55); color: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 18px; z-index: 6; }
+.dj-modal-close { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,.55); color: #fff; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 18px; z-index: 6; transition: background .2s; }
+.dj-modal-close:hover { background: rgba(0,0,0,.75); }
 .dj-article-cover { aspect-ratio: 16 / 9; max-height: 320px; position: relative; overflow: hidden; }
 .dj-article-body { padding: 30px 32px 40px; }
 .dj-article-body .dj-blog-date { margin-bottom: 10px; }
@@ -427,8 +491,11 @@ body.dj-en .dj-modal-info h2 { font-family: 'Playfair Display'; }
 body.dj-en .dj-article-body h2 { font-family: 'Playfair Display'; }
 .dj-article-body p { font-size: 14px; line-height: 2; color: #5a4448; margin-bottom: 14px; }
 .dj-qty-select { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-.dj-qty-select button { width: 38px; height: 38px; border-radius: 50%; background: var(--dj-cream-2); color: var(--dj-maroon); font-weight: 700; font-size: 15px; }
-.dj-qty-select span { font-weight: 700; font-size: 15px; min-width: 20px; text-align: center; }
+.dj-qty-select button { width: 40px; height: 40px; border-radius: 50%; background: var(--dj-cream-2); color: var(--dj-maroon); font-weight: 700; font-size: 15px; transition: background .15s, transform .1s; }
+.dj-qty-select button:hover:not(:disabled) { background: var(--dj-gold); }
+.dj-qty-select button:active:not(:disabled) { transform: scale(.92); }
+.dj-qty-select button:disabled { opacity: .35; cursor: not-allowed; }
+.dj-qty-select span { font-weight: 700; font-size: 15px; min-width: 20px; text-align: center; font-variant-numeric: tabular-nums; }
 .dj-modal-trust { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--dj-cream-2); }
 .dj-modal-trust span { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #8a6b70; }
 .dj-modal-trust svg { width: 16px; height: 16px; color: var(--dj-maroon); }
@@ -493,6 +560,25 @@ body.dj-en .dj-service-card h3 { font-family: 'Poppins'; }
 /* ===== SCROLL PROGRESS ===== */
 #dj-scroll-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--dj-gold-bright), var(--dj-gold)); width: 0%; z-index: 60; transition: width .1s ease; }
 
+/* ===== PAGE NAVIGATION LOADING BAR ===== */
+/* Purely perceptual — a brief top bar on internal link clicks / form
+   submits, same idea as the loading indicator on Linear/Stripe/GitHub.
+   Doesn't touch data fetching or navigation itself: the browser's real
+   page load happens exactly as before, this only gives the click instant
+   visual acknowledgement instead of the page appearing to do nothing for
+   the first few hundred ms. */
+#dj-nav-progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%; z-index: 9999; opacity: 0;
+    background: linear-gradient(90deg, var(--dj-gold-bright), var(--dj-gold));
+    transition: width .4s ease, opacity .2s ease;
+    pointer-events: none;
+}
+.dj-admin-shell #dj-nav-progress { background: linear-gradient(90deg, var(--dj-maroon-soft), var(--dj-maroon)); }
+#dj-nav-progress.dj-active { opacity: 1; width: 78%; }
+@media (prefers-reduced-motion: reduce) {
+    #dj-nav-progress { transition: opacity .2s ease; }
+}
+
 /* ===== BACK TO TOP ===== */
 #dj-back-to-top {
     position: fixed; bottom: 26px; right: 26px; width: 46px; height: 46px; border-radius: 50%; background: var(--dj-maroon);
@@ -528,6 +614,15 @@ body.dj-en .dj-checkout-form-box h3 { font-family: 'Poppins'; }
     width: 100%; padding: 13px 15px; border: 1.5px solid var(--dj-cream-2); border-radius: 10px; font-family: inherit; font-size: 13.5px; background: var(--dj-cream); margin-bottom: 14px;
 }
 .dj-checkout-form-box input:focus, .dj-checkout-form-box select:focus, .dj-checkout-form-box textarea:focus { outline: none; border-color: var(--dj-maroon); }
+.dj-checkout-form-box input:focus-visible, .dj-checkout-form-box select:focus-visible, .dj-checkout-form-box textarea:focus-visible { box-shadow: 0 0 0 3px rgba(96,21,38,.18); }
+/* Validation-error state — previously a failed field looked identical to a
+   valid one except for a small text line below it, easy to miss at a
+   glance. A red-tinted border makes which field needs fixing obvious
+   immediately, not just on close reading. */
+.dj-checkout-form-box input.dj-input-error, .dj-checkout-form-box select.dj-input-error, .dj-checkout-form-box textarea.dj-input-error {
+    border-color: #d64545; background: #fdf3f3;
+}
+.dj-checkout-form-box .dj-field-msg-error { color: #b83333; font-size: 12px; margin-top: -10px; margin-bottom: 10px; }
 .dj-pay-methods { display: flex; flex-direction: column; gap: 12px; margin: 18px 0 24px; }
 .dj-pay-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--dj-cream-2); border-radius: 12px; transition: .2s; }
 .dj-pay-option.dj-active { border-color: var(--dj-maroon); background: var(--dj-cream); }
@@ -547,8 +642,9 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 .dj-os-price { font-size: 13px; font-weight: 700; color: var(--dj-maroon); }
 .dj-os-row { display: flex; justify-content: space-between; font-size: 13.5px; color: #5a4448; margin-bottom: 10px; }
 .dj-os-row.dj-total { font-size: 16px; font-weight: 900; color: var(--dj-maroon); border-top: 1.5px solid rgba(60,11,23,.15); padding-top: 14px; margin-top: 14px; }
-.dj-place-order-btn { width: 100%; background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; font-size: 15px; padding: 16px; border-radius: 12px; margin-top: 20px; transition: .2s; }
-.dj-place-order-btn:hover { background: var(--dj-maroon-dark); }
+.dj-place-order-btn { width: 100%; background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; font-size: 15px; padding: 16px; border-radius: 12px; margin-top: 20px; transition: background .2s, transform .1s; }
+.dj-place-order-btn:hover:not(:disabled) { background: var(--dj-maroon-dark); }
+.dj-place-order-btn:active:not(:disabled) { transform: scale(.99); }
 .dj-place-order-btn:disabled { opacity: .6; cursor: not-allowed; }
 .dj-empty-checkout { text-align: center; padding: 80px 6%; }
 .dj-empty-checkout svg { width: 60px; height: 60px; color: var(--dj-rose-dust); margin-bottom: 18px; }
@@ -693,7 +789,8 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
     background: linear-gradient(120deg, transparent, rgba(255,255,255,.6), transparent);
     transform: skewX(-20deg); animation: dj-shimmer 3.2s ease-in-out infinite;
 }
-.dj-login-submit:hover { transform: translateY(-2px); box-shadow: 0 20px 36px -14px rgba(0,0,0,.6); }
+.dj-login-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 20px 36px -14px rgba(0,0,0,.6); }
+.dj-login-submit:active:not(:disabled) { transform: translateY(0) scale(.99); }
 .dj-login-submit:disabled { opacity: .85; cursor: not-allowed; transform: none; }
 .dj-login-spinner {
     display: inline-block; width: 16px; height: 16px; border-radius: 50%;
@@ -850,7 +947,7 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
    WISHLIST & STOCK STATUS
    ========================================================= */
 .dj-wishlist-btn {
-    position: absolute; bottom: 14px; right: 14px; z-index: 4; width: 38px; height: 38px; min-width: 38px; min-height: 38px;
+    position: absolute; bottom: 14px; right: 14px; z-index: 4; width: 40px; height: 40px; min-width: 40px; min-height: 40px;
     border-radius: 50%; background: rgba(255,255,255,.92); display: flex; align-items: center; justify-content: center;
     color: var(--dj-rose-dust); transition: transform .2s, color .2s, opacity .2s; box-shadow: 0 6px 16px -8px rgba(0,0,0,.4);
 }
@@ -898,7 +995,11 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
 .dj-wishlist-remove { flex-shrink: 0; }
 
 @media (max-width: 480px) {
-    .dj-wishlist-btn { width: 34px; height: 34px; min-width: 34px; min-height: 34px; }
+    /* Deliberately NOT shrinking .dj-wishlist-btn below its 40px base here
+       — this used to drop to 34px on exactly the phone widths where a
+       precise tap matters most, well under the ~40-44px touch-target
+       guideline. The icon alone shrinks slightly instead; the tappable
+       circle stays full size. */
     .dj-wishlist-btn svg { width: 16px; height: 16px; }
     .dj-wishlist-grid { grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 14px; }
     .dj-wishlist-actions { flex-wrap: wrap; }
@@ -1093,10 +1194,11 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
     box-shadow: 0 0 0 4px rgba(232,195,154,.25);
 }
 .dj-admin-icon-btn {
-    position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-    border-radius: 999px; color: var(--dj-maroon); transition: background .18s, color .18s;
+    position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    border-radius: 999px; color: var(--dj-maroon); transition: background .18s, color .18s, transform .1s;
 }
 .dj-admin-icon-btn:hover { background: var(--dj-cream); color: var(--dj-maroon-dark); }
+.dj-admin-icon-btn:active { transform: scale(.92); }
 .dj-admin-notif-badge {
     position: absolute; top: 4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
     background: linear-gradient(135deg, var(--dj-rose-dust), var(--dj-maroon)); color: #fff;
