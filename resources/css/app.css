@@ -1141,14 +1141,28 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
    it wins the cascade for `.dj-grid` at every width in 320–767px;
    tablet (768px+) and desktop are completely untouched — this block's
    own max-width caps at 767px, one pixel below the existing 768px
-   breakpoint used everywhere else in this file. */
+   breakpoint used everywhere else in this file. `.dj-wishlist-grid` (the
+   wishlist listing page) has the identical auto-fit/minmax floor problem
+   with its own minmax(240px)/minmax(160px) rules above — same fix, same
+   reasoning, folded into this block for one source of truth instead of a
+   second near-duplicate breakpoint. Card-internal rules below (h3 clamp,
+   .dj-card-bottom, .dj-price, .dj-add-btn, .dj-stock-badge) already apply
+   to wishlist cards too since they share those class names with the main
+   product card. */
 @media (max-width: 767px) {
-    .dj-grid {
+    .dj-grid, .dj-wishlist-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         column-gap: 14px;
         row-gap: 18px;
-        padding: 20px 14px 50px;
     }
+    .dj-grid { padding: 20px 14px 50px; }
+
+    /* The two wishlist actions (Move to Cart / Remove) sit side by side at
+       full card width; at ~half that width they no longer fit on one line
+       without truncating — stacked instead, same pattern as the price/
+       button stack below. */
+    .dj-wishlist-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+    .dj-wishlist-actions .dj-ci-remove { text-align: center; }
 
     /* Grid items stretch to equal row height by default; the title clamp
        below removes the remaining variance from short vs. long names. */
