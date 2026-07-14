@@ -35,7 +35,7 @@
         >
             <div class="dj-admin-brand-block sticky top-0 bg-transparent">
                 <a href="{{ route('admin.dashboard') }}" class="dj-admin-brand-mark">
-                    <x-brand-logo style="height:34px;width:auto;" />
+                    <x-brand-logo class="dj-admin-logo" />
                 </a>
             </div>
 

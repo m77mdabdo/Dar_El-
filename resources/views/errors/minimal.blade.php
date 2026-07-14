@@ -22,7 +22,7 @@
             color: #F7EFE4; text-align: center; padding: 24px;
         }
         .dj-error-wrap { max-width: 480px; }
-        .dj-error-logo { width: 220px; max-width: 60vw; height: auto; margin: 0 auto 32px; display: block; }
+        .dj-error-logo { width: clamp(150px, 18vw, 190px); max-width: 100%; height: auto; margin: 0 auto 32px; display: block; }
         .dj-error-code { font-size: 15px; letter-spacing: 4px; color: #E8C39A; text-transform: uppercase; margin: 0 0 14px; font-weight: 600; }
         .dj-error-title { font-family: {{ app()->getLocale() === 'ar' ? "'Aref Ruqaa', serif" : "'Playfair Display', serif" }}; font-size: 30px; margin: 0 0 14px; color: #F7EFE4; }
         .dj-error-message { font-size: 15px; line-height: 1.8; color: #E0C9C2; margin: 0 0 32px; }
