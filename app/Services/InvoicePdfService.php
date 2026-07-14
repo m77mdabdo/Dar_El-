@@ -45,7 +45,28 @@ class InvoicePdfService
             $finalPath = $existing?->pdf_path ?: 'invoices/'.Str::slug($invoiceNumber).'.pdf';
 
             $engine = config('invoice.pdf_engine', 'mpdf');
+            $template = $engine === 'dompdf' ? 'invoices.pdf' : 'invoices.pdf-mpdf';
             $viewData = $this->normalizeInvoiceData($order, $invoiceNumber, $locale);
+
+            // Proves, in the production log itself, exactly which engine
+            // is about to run and exactly what raw Arabic source strings
+            // it's being handed — if these three ever show up already
+            // reversed here, the bug is upstream of the renderer (a
+            // translation file or DB value), not the PDF engine. Logged
+            // once per generation, not per-request, so this stays cheap.
+            Log::info('Invoice PDF engine selected', [
+                'order_id' => $order->id,
+                'invoice_number' => $invoiceNumber,
+                'engine' => $engine,
+                'service_class' => static::class,
+                'template' => $template,
+            ]);
+            Log::info('Invoice Arabic source check', [
+                'order_id' => $order->id,
+                'invoice_label' => __('invoice.invoice', [], 'ar'),
+                'brand_name' => __('Dar El-Jamila', [], 'ar'),
+                'date_label' => __('invoice.date', [], 'ar'),
+            ]);
 
             // A queue worker has no HTTP-request locale context of its own,
             // so the invoice must explicitly render in the language the
@@ -66,12 +87,15 @@ class InvoicePdfService
                 ['invoice_number' => $invoiceNumber, 'pdf_path' => $finalPath, 'issued_at' => now()]
             );
 
-            Log::info('Invoice PDF generated', [
+            $absolutePath = Storage::disk('local')->path($finalPath);
+
+            Log::info('Invoice PDF file written', [
                 'order_id' => $order->id,
                 'invoice_number' => $invoiceNumber,
                 'engine' => $engine,
-                'path' => $finalPath,
-                'file_size' => strlen($pdfBytes),
+                'absolute_path' => $absolutePath,
+                'size' => filesize($absolutePath),
+                'modified_at' => date('Y-m-d H:i:s', filemtime($absolutePath)),
             ]);
 
             return $invoice;
