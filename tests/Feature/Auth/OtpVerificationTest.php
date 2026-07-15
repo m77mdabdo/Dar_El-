@@ -90,11 +90,16 @@ class OtpVerificationTest extends TestCase
         );
     }
 
-    public function test_login_alert_notification_uses_high_priority_queue(): void
+    public function test_login_alert_notification_is_sent_synchronously(): void
     {
-        $notification = new LoginAlertNotification('127.0.0.1', 'Desktop', 'Chrome', now());
-
-        $this->assertSame('high', $notification->queue);
+        // Previously ShouldQueue on a 'high' priority queue; now sent
+        // synchronously (same reasoning as OTP above) so a security-relevant
+        // login alert reaches the inbox immediately instead of waiting for
+        // the next cron-driven queue:work tick.
+        $this->assertFalse(
+            is_subclass_of(LoginAlertNotification::class, ShouldQueue::class),
+            'LoginAlertNotification must not implement ShouldQueue — it has to send synchronously so it is not delayed by the cron-driven queue worker.'
+        );
     }
 
     public function test_invoice_job_uses_invoices_queue_not_high_or_default(): void
