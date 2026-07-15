@@ -13,7 +13,9 @@ use App\Notifications\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -49,28 +51,59 @@ class OrderController extends Controller
             'note' => ['nullable', 'string'],
         ]);
 
-        $order->update(['status' => $validated['status']]);
+        // Status change + history + stock restoration are one atomic unit —
+        // either the whole cancellation succeeds together, or none of it
+        // does. Before this, each step committed independently: a failure
+        // partway through (e.g. restoreStock() failing) left the order
+        // permanently showing "cancelled" in its status/history/activity
+        // log while the stock was silently never returned to inventory,
+        // with nothing telling the admin that had happened.
+        //
+        // Notifications are deliberately NOT inside this transaction and
+        // run afterward in their own try/catch — a notification failure
+        // must never roll back a legitimate, already-decided status change
+        // (same lesson as StockAlertService/CartTrackingService).
+        $restoredCount = DB::transaction(function () use ($request, $order, $validated) {
+            $order->update(['status' => $validated['status']]);
 
-        OrderStatusHistory::create([
-            'order_id' => $order->id,
-            'status' => $validated['status'],
-            'note' => $validated['note'] ?? null,
-            'changed_by' => $request->user()->id,
-        ]);
+            OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'status' => $validated['status'],
+                'note' => $validated['note'] ?? null,
+                'changed_by' => $request->user()->id,
+            ]);
+
+            ActivityLog::record('updated', $order, "Updated order {$order->order_number} status to {$validated['status']}");
+
+            $restoredCount = null;
+
+            if ($validated['status'] === 'cancelled' && $order->stock_deducted_at && ! $order->stock_restored_at) {
+                $restoredCount = $this->restoreStock($order);
+            }
+
+            return $restoredCount;
+        });
 
         if ($order->user) {
-            $order->user->notify(new OrderStatusUpdated($order));
+            try {
+                $order->user->notify(new OrderStatusUpdated($order));
+            } catch (Throwable $e) {
+                Log::error('Order status notification failed (status change still proceeds)', [
+                    'order_id' => $order->id,
+                    'status' => $validated['status'],
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
-        ActivityLog::record('updated', $order, "Updated order {$order->order_number} status to {$validated['status']}");
-
-        $restoredCount = null;
-
         if ($validated['status'] === 'cancelled') {
-            Notification::send(User::admins(), new OrderCancelled($order));
-
-            if ($order->stock_deducted_at && ! $order->stock_restored_at) {
-                $restoredCount = $this->restoreStock($order);
+            try {
+                Notification::send(User::admins(), new OrderCancelled($order));
+            } catch (Throwable $e) {
+                Log::error('Order cancelled admin notification failed (status change still proceeds)', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
