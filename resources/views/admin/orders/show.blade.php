@@ -14,7 +14,7 @@
                 @foreach ($order->items as $item)
                     <div class="p-4 flex justify-between text-sm border-t border-[var(--dj-cream-2)] first:border-t-0">
                         <span>{{ $item->product ? trans_field($item->product, 'name') : $item->product_name }} ({{ $item->size ?? '-' }}) &times; {{ $item->quantity }}</span>
-                        <span class="font-semibold text-[var(--dj-maroon)]">{{ number_format($item->price * $item->quantity) }} EGP</span>
+                        <span class="font-semibold text-[var(--dj-maroon)]">{{ number_format($item->line_total) }} EGP</span>
                     </div>
                 @endforeach
             </div>

@@ -16,7 +16,7 @@
             @foreach ($order->items as $item)
                 <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:#5a4448;">
                     <span>{{ $item->product ? trans_field($item->product, 'name') : $item->product_name }} ({{ $item->size }}) &times; {{ $item->quantity }}</span>
-                    <span>{{ number_format($item->price * $item->quantity) }} EGP</span>
+                    <span>{{ number_format($item->line_total) }} EGP</span>
                 </div>
             @endforeach
             <div class="dj-os-row dj-total" style="margin-top:10px;">

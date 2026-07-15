@@ -27,7 +27,7 @@
                 $item->size ? __('emails.order_variant').': '.$item->size : null,
                 __('emails.order_qty').': '.$item->quantity,
             ]),
-            'price' => number_format($item->price * $item->quantity).' EGP',
+            'price' => number_format($item->line_total).' EGP',
         ])->all(),
     ])
 
