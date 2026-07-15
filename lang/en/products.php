@@ -46,6 +46,7 @@ return [
     'drag_to_reorder' => 'Drag images to reorder them.',
     'bulk_action_success' => ':count product(s) updated.',
     'bulk_action_error' => 'Something went wrong. Please try again.',
+    'bulk_delete_result' => ':deleted product(s) deleted, :skipped skipped (has pending orders or active carts).',
 
     'status' => 'Status',
     'all_statuses' => 'All statuses',

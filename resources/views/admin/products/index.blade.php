@@ -31,6 +31,7 @@
         data-confirm-archive="{{ __('products.confirm_bulk_archive') }}"
         data-toast-success="{{ __('products.bulk_action_success') }}"
         data-toast-error="{{ __('products.bulk_action_error') }}"
+        data-toast-bulk-delete-result="{{ __('products.bulk_delete_result') }}"
         data-shortcut-duplicate-table
     >
         <div class="dj-admin-bulk-bar" x-show="selected.length > 0" x-cloak>

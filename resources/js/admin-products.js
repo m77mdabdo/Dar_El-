@@ -223,7 +223,16 @@ document.addEventListener('alpine:init', () => {
 
             if (response.ok) {
                 const data = await response.json().catch(() => ({}));
-                window.djQueueToast?.((this.$el.dataset.toastSuccess ?? '').replace(':count', data.count ?? ''));
+
+                if (action === 'delete' && (data.skipped_count ?? 0) > 0) {
+                    const message = (this.$el.dataset.toastBulkDeleteResult ?? '')
+                        .replace(':deleted', data.deleted_count ?? 0)
+                        .replace(':skipped', data.skipped_count ?? 0);
+                    window.djQueueToast?.(message);
+                } else {
+                    window.djQueueToast?.((this.$el.dataset.toastSuccess ?? '').replace(':count', data.count ?? ''));
+                }
+
                 window.location.reload();
             } else {
                 window.djToast?.(this.$el.dataset.toastError, 'error');
