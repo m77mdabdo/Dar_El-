@@ -77,8 +77,22 @@ class OrderController extends Controller
 
             $restoredCount = null;
 
-            if ($validated['status'] === 'cancelled' && $order->stock_deducted_at && ! $order->stock_restored_at) {
-                $restoredCount = $this->restoreStock($order);
+            if ($validated['status'] === 'cancelled') {
+                // $order here was fetched via route-model-binding before
+                // this transaction started, so it can be stale: a
+                // concurrent cancellation request for the same order may
+                // have been running this same transaction and already
+                // restored stock in the moment between that fetch and now.
+                // Lock the row and re-read stock_restored_at fresh — a
+                // second request's lockForUpdate() blocks until the first
+                // commits, then sees the true, already-restored state,
+                // instead of trusting a stale copy and double-crediting
+                // inventory.
+                $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->first();
+
+                if ($lockedOrder->stock_deducted_at && ! $lockedOrder->stock_restored_at) {
+                    $restoredCount = $this->restoreStock($lockedOrder);
+                }
             }
 
             return $restoredCount;
