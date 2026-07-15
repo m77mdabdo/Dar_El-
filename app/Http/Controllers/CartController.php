@@ -17,12 +17,14 @@ class CartController extends Controller
     public function index(): View
     {
         $items = $this->cart->items();
+        $shippingFee = $this->cart->estimatedShippingFee();
 
         return view('cart.index', [
             'items' => $items,
             'subtotal' => $this->cart->subtotal(),
             'discount' => $this->cart->discount(),
-            'total' => $this->cart->totalIncludingShipping(),
+            'shippingFee' => $shippingFee,
+            'total' => $this->cart->totalIncludingShipping($shippingFee),
             'coupon' => $this->cart->appliedCoupon(),
             'hasStockIssues' => collect($items)->contains('exceeds_stock', true),
         ]);
@@ -113,10 +115,13 @@ class CartController extends Controller
     protected function cartJson(): JsonResponse
     {
         $items = $this->cart->items();
-        $total = $this->cart->totalIncludingShipping();
+        $shippingFee = $this->cart->estimatedShippingFee();
+        $total = $this->cart->totalIncludingShipping($shippingFee);
 
         return response()->json([
             'count' => $this->cart->count(),
+            'shipping_fee' => $shippingFee,
+            'shipping_formatted' => number_format($shippingFee).' EGP',
             'total_formatted' => number_format($total).' EGP',
             'html' => view('partials.cart-drawer-items', ['items' => $items])->render(),
         ]);

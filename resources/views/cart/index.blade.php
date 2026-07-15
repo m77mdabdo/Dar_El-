@@ -62,6 +62,9 @@
                 @if ($discount > 0)
                     <div class="dj-os-row" style="color:#2f7a4d;"><span>{{ __('Discount') }}</span><span>-{{ number_format($discount) }} EGP</span></div>
                 @endif
+                @if ($shippingFee > 0)
+                    <div class="dj-os-row"><span>{{ __('Shipping (estimated)') }}</span><span>{{ number_format($shippingFee) }} EGP</span></div>
+                @endif
                 <div class="dj-os-row dj-total"><span>{{ __('Total') }}</span><span>{{ number_format($total) }} EGP</span></div>
 
                 @if ($hasStockIssues)

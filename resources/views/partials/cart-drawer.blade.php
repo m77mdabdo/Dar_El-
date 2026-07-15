@@ -1,6 +1,7 @@
 @php
     $djCart = app(\App\Services\CartService::class);
-    $djCartTotal = $djCart->subtotal() - $djCart->discount();
+    $djCartShippingFee = $djCart->estimatedShippingFee();
+    $djCartTotal = $djCart->totalIncludingShipping($djCartShippingFee);
     $djCartHasIssues = ! $djCart->isValid();
 @endphp
 <div class="dj-drawer" id="dj-drawer">
@@ -12,6 +13,10 @@
         @include('partials.cart-drawer-items', ['items' => $djCart->items()])
     </div>
     <div class="dj-drawer-foot">
+        <div class="dj-total-row" id="dj-cart-shipping-row" style="{{ $djCartShippingFee > 0 ? '' : 'display:none;' }}">
+            <span>{{ __('Shipping (estimated)') }}</span>
+            <span id="dj-cart-shipping">{{ number_format($djCartShippingFee) }} EGP</span>
+        </div>
         <div class="dj-total-row">
             <span>{{ __('Total') }}</span>
             <span id="dj-cart-total">{{ number_format($djCartTotal) }} EGP</span>
