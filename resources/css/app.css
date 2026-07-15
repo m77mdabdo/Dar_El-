@@ -581,12 +581,31 @@ body.dj-en .dj-service-card h3 { font-family: 'Poppins'; }
 
 /* ===== BACK TO TOP ===== */
 #dj-back-to-top {
-    position: fixed; bottom: 26px; right: 26px; width: 46px; height: 46px; border-radius: 50%; background: var(--dj-maroon);
+    position: fixed; bottom: 92px; right: 26px; width: 46px; height: 46px; border-radius: 50%; background: var(--dj-maroon);
     color: var(--dj-gold); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: var(--dj-shadow);
     z-index: 80; opacity: 0; transform: translateY(14px) scale(.8); transition: .3s; pointer-events: none;
 }
 #dj-back-to-top.dj-show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 body.dj-en #dj-back-to-top { right: auto; left: 26px; }
+
+/* ===== WHATSAPP FLOAT ===== */
+#dj-whatsapp-float {
+    position: fixed; bottom: 26px; right: 26px; width: 56px; height: 56px; border-radius: 50%; background: var(--dj-maroon);
+    color: var(--dj-gold); display: flex; align-items: center; justify-content: center; box-shadow: var(--dj-shadow);
+    z-index: 85; transition: background .2s, transform .15s;
+}
+#dj-whatsapp-float:hover { background: var(--dj-maroon-dark); transform: scale(1.06); }
+#dj-whatsapp-float svg { width: 28px; height: 28px; }
+body.dj-en #dj-whatsapp-float { right: auto; left: 26px; }
+
+/* ===== ASK ABOUT THIS PRODUCT (WhatsApp) ===== */
+.dj-ask-whatsapp {
+    margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: transparent;
+    border: 1.5px solid var(--dj-maroon); color: var(--dj-maroon); font-weight: 700; font-size: 14px; padding: 14px;
+    border-radius: 12px; width: 100%; transition: background .2s, color .2s;
+}
+.dj-ask-whatsapp:hover { background: var(--dj-maroon); color: var(--dj-gold); }
+.dj-ask-whatsapp svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* ===== HERO STAGGERED ENTRANCE ===== */
 .dj-hero-eyebrow, .dj-hero h1, .dj-hero p, .dj-hero .dj-hero-cta { opacity: 0; animation: dj-heroUp .8s ease forwards; }

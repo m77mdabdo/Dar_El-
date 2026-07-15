@@ -5,6 +5,8 @@ return [
     'store_name' => 'Store Name',
     'support_email' => 'Support Email',
     'whatsapp_number' => 'WhatsApp Number',
+    'whatsapp_number_hint' => 'International format only — country code plus number, no + and no leading zeros (e.g. 201234567890 for an Egyptian number). This is what wa.me links require.',
+    'whatsapp_number_features_hint' => 'Leave empty to hide the site-wide floating WhatsApp button and the "Ask about this product" button on product pages — nothing breaks, they simply won\'t render.',
     'default_shipping_fee' => 'Default Shipping Fee (EGP)',
     'facebook_url' => 'Facebook URL',
     'instagram_url' => 'Instagram URL',
