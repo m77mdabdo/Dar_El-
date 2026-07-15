@@ -4,8 +4,6 @@ namespace App\Mail;
 
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -17,9 +15,9 @@ use Illuminate\Queue\SerializesModels;
  * subscription feature exists in this app today; ready for whenever that
  * feature (customers opting in to be notified) is built.
  */
-class ProductBackInStockMail extends Mailable implements ShouldQueue
+class ProductBackInStockMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(public User $user, public Product $product)
     {

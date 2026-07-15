@@ -4,17 +4,15 @@ namespace App\Mail;
 
 use App\Models\BlogComment;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewBlogCommentSubmittedMail extends Mailable implements ShouldQueue
+class NewBlogCommentSubmittedMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(public BlogComment $comment, public User $admin)
     {
