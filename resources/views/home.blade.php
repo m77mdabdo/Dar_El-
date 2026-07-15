@@ -66,7 +66,7 @@
         @foreach ($categories as $category)
             <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="dj-cat-tile dj-reveal">
                 <div class="dj-photo-wrap dj-tint-maroon" style="position:absolute; inset:0;">
-                    <img src="{{ $category->image ? asset('storage/'.$category->image) : $djShowcasePhotos[$loop->index % count($djShowcasePhotos)] }}" alt="{{ trans_field($category, 'name') }}">
+                    <img src="{{ $category->image_thumb ?? $djShowcasePhotos[$loop->index % count($djShowcasePhotos)] }}" alt="{{ trans_field($category, 'name') }}">
                 </div>
                 <span class="dj-arrow">{{ app()->getLocale() === 'ar' ? '←' : '→' }}</span>
                 <div class="dj-cap"><h3>{{ trans_field($category, 'name') }}</h3></div>

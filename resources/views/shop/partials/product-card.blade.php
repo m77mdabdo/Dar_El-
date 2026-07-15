@@ -40,7 +40,7 @@
 <div class="dj-card dj-reveal">
     <div class="dj-swatch dj-photo-wrap dj-tint-maroon" data-product='@json($djPayload)' onclick="djOpenProductModal(JSON.parse(this.dataset.product))">
         @if ($product->cover_image_src)
-            <img src="{{ $product->cover_image_src }}" alt="{{ trans_field($product, 'name') }}" loading="lazy">
+            <img src="{{ $product->cover_thumb_src }}" alt="{{ trans_field($product, 'name') }}" loading="lazy">
         @endif
         <span class="dj-tag">{{ trans_field($product->category, 'name') }}</span>
         @if ($product->badge === 'bestseller')

@@ -77,6 +77,11 @@ class CategoryController extends Controller
     {
         $this->authorize('delete', $category);
 
+        $productCount = $category->products()->count();
+        if ($productCount > 0) {
+            return back()->with('error', __('categories.cannot_delete_has_products', ['count' => $productCount]));
+        }
+
         $name = $category->name_en;
         $category->delete();
 

@@ -37,6 +37,16 @@ class Category extends Model
     }
 
     /**
+     * Smaller thumbnail variant of the category image, for grid views
+     * (homepage category showcase) — falls back to the full-size image
+     * when no thumbnail exists yet (uploaded before this feature shipped).
+     */
+    public function getImageThumbAttribute(): ?string
+    {
+        return $this->image ? app(ImageUploadService::class)->thumbnailUrl($this->image) : null;
+    }
+
+    /**
      * Falls back to the category's own name when no explicit SEO override
      * has been set for that locale — mirrors Product::seoTitle().
      */

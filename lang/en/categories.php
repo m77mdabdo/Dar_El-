@@ -20,4 +20,5 @@ return [
     'created' => 'Category created.',
     'updated' => 'Category updated.',
     'deleted' => 'Category deleted.',
+    'cannot_delete_has_products' => 'This category has :count product(s) and cannot be deleted. Move or delete them first.',
 ];
