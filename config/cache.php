@@ -129,8 +129,29 @@ return [
     | storage. By default, no PHP classes will be unserialized from your
     | cache to prevent gadget chain attacks if your APP_KEY is leaked.
     |
+    | We cache Eloquent collections in HomeController/ShopController
+    | (storefront.categories, storefront.home.data) and Admin\DashboardController
+    | (admin.dashboard.summary), so those specific model/collection classes are
+    | explicitly allowlisted here rather than disabling the protection outright —
+    | anything not in this list still falls back to __PHP_Incomplete_Class.
+    |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        \Illuminate\Support\Collection::class,
+        \Illuminate\Database\Eloquent\Collection::class,
+        \App\Models\Category::class,
+        \App\Models\Product::class,
+        \App\Models\ProductImage::class,
+        \App\Models\ProductSize::class,
+        \App\Models\Review::class,
+        \App\Models\Brand::class,
+        \App\Models\Collection::class,
+        \App\Models\Banner::class,
+        \App\Models\BlogPost::class,
+        \App\Models\Order::class,
+        \App\Models\User::class,
+        \App\Models\ContactMessage::class,
+    ],
 
 ];
