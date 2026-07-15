@@ -29,7 +29,7 @@
                                     {{ __('orders.item_qty', ['qty' => $item->quantity]) }}
                                 </p>
                             </div>
-                            <span class="font-medium shrink-0">{{ number_format($item->price * $item->quantity) }} EGP</span>
+                            <span class="font-medium shrink-0">{{ number_format($item->line_total) }} EGP</span>
                         </div>
                     @endforeach
                 </div>

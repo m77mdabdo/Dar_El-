@@ -377,7 +377,7 @@
                     <td class="text-start">{{ $item->size ?? '—' }}</td>
                     <td class="text-end">{{ $item->quantity }}</td>
                     <td class="text-end">{{ number_format($item->price) }} EGP</td>
-                    <td class="text-end" style="font-weight:700;">{{ number_format($item->price * $item->quantity) }} EGP</td>
+                    <td class="text-end" style="font-weight:700;">{{ number_format($item->line_total) }} EGP</td>
                 </tr>
             @endforeach
         </tbody>
