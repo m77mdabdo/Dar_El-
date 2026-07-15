@@ -177,4 +177,29 @@ class CheckoutFlowTest extends TestCase
         $this->actingAs($admin)->get(route('admin.orders.show', $order))->assertOk()->assertSee($order->order_number);
         $this->actingAs($user)->get(route('account.orders.index'))->assertOk()->assertSee($order->order_number);
     }
+
+    /**
+     * The empty-cart POST early-return: nothing was ever added to cart, so
+     * CheckoutController::store()'s `if (empty($items))` guard should fire
+     * before any Order is attempted. Confirms both the redirect target and
+     * that the flashed error message actually renders on the destination
+     * page — layouts.storefront.blade.php renders session('error') in a
+     * visible banner, and cart/index.blade.php separately shows its own
+     * "cart is empty" empty-state, so the customer sees a clear, doubly
+     * reinforced explanation rather than landing on a blank/confusing page.
+     */
+    public function test_empty_cart_checkout_post_redirects_with_a_clear_message_and_creates_no_order(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('checkout.store'), $this->checkoutPayload($user));
+
+        $response->assertRedirect(route('cart.index'));
+        $response->assertSessionHas('error', __('Your cart is empty.'));
+        $this->assertSame(0, Order::count());
+
+        $follow = $this->actingAs($user)->get(route('cart.index'));
+        $follow->assertOk();
+        $follow->assertSee(__('Your cart is empty.'));
+    }
 }

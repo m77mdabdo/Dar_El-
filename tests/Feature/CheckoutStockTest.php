@@ -181,4 +181,54 @@ class CheckoutStockTest extends TestCase
         // update() that precedes it.
         $this->assertSame('converted', $user->carts()->first()->status);
     }
+
+    /**
+     * Multi-item cart, item 1 has enough stock (decrements successfully
+     * inside the loop) and item 2 does not (throws the RuntimeException
+     * stock-shortage check) — the whole DB::transaction() must roll back,
+     * so item 1's already-applied decrement is undone too. Same rollback-
+     * verification style as items 9/10: assert the actual stock value
+     * afterward, not just that an error was shown.
+     */
+    public function test_multi_item_checkout_rolls_back_item_ones_decrement_when_item_two_fails_stock_check(): void
+    {
+        $user = User::factory()->create();
+        $productA = $this->makeProduct(5);
+
+        // Not reusing makeProduct() for the second product — it hardcodes
+        // its category slug (fine when a test only calls it once, which
+        // every other test in this file does), so a second call here
+        // would collide on a unique constraint.
+        $categoryB = Category::create([
+            'name_ar' => 'فئة ب', 'name_en' => 'Category B', 'slug' => 'category-b-'.uniqid(), 'is_active' => true, 'sort_order' => 1,
+        ]);
+        $productB = Product::create([
+            'category_id' => $categoryB->id,
+            'name_ar' => 'عباية ب', 'name_en' => 'Abaya B', 'slug' => 'abaya-b-'.uniqid(),
+            'price' => 1000, 'is_active' => true, 'is_featured' => false,
+        ]);
+        $productB->sizes()->create(['size' => 'M', 'stock' => 2]);
+
+        $shippingMethod = ShippingMethod::create(['name_ar' => 'شحن', 'name_en' => 'Shipping', 'fee' => 50, 'estimated_days' => '2-3', 'is_active' => true]);
+
+        // Item A: quantity 2, well within its 5-unit stock — will decrement
+        // successfully first, since it was added to the cart first.
+        $this->actingAs($user)->postJson(route('cart.add', $productA), ['size' => 'M', 'quantity' => 2])->assertOk();
+
+        // Item B: quantity 2, starts with enough stock to pass cart.add's
+        // own validation (which independently rejects over-stock adds) —
+        // then stock drops to 1 afterward (another order, or an admin
+        // correction), so checkout's own re-check is what fails, after
+        // item A's decrement already ran.
+        $this->actingAs($user)->postJson(route('cart.add', $productB), ['size' => 'M', 'quantity' => 2])->assertOk();
+        $productB->sizes()->where('size', 'M')->update(['stock' => 1]);
+
+        $response = $this->actingAs($user)->post(route('checkout.store'), $this->checkoutPayload($shippingMethod, $user));
+
+        $response->assertSessionHasErrors('stock');
+        $this->assertSame(0, Order::count(), 'An order was created despite item 2 failing its stock check.');
+
+        $this->assertSame(5, $productA->sizes()->where('size', 'M')->value('stock'), "Item 1's stock decrement was not rolled back even though item 2's stock check failed — the exact bug this test guards against.");
+        $this->assertSame(1, $productB->sizes()->where('size', 'M')->value('stock'));
+    }
 }
