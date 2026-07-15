@@ -10,6 +10,8 @@ use App\Notifications\BlogCommentStatusUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class BlogCommentController extends Controller
 {
@@ -60,7 +62,15 @@ class BlogCommentController extends Controller
             'rejection_reason' => null,
         ]);
 
-        $comment->user?->notify(new BlogCommentStatusUpdated($comment));
+        try {
+            $comment->user?->notify(new BlogCommentStatusUpdated($comment));
+        } catch (Throwable $e) {
+            Log::error('Blog comment status notification failed (status change still proceeds)', [
+                'comment_id' => $comment->id,
+                'status' => 'approved',
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         ActivityLog::record('approved', $comment, "Approved blog comment #{$comment->id}");
 
@@ -84,7 +94,15 @@ class BlogCommentController extends Controller
             'approved_by' => null,
         ]);
 
-        $comment->user?->notify(new BlogCommentStatusUpdated($comment));
+        try {
+            $comment->user?->notify(new BlogCommentStatusUpdated($comment));
+        } catch (Throwable $e) {
+            Log::error('Blog comment status notification failed (status change still proceeds)', [
+                'comment_id' => $comment->id,
+                'status' => 'rejected',
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         ActivityLog::record('rejected', $comment, "Rejected blog comment #{$comment->id}");
 
