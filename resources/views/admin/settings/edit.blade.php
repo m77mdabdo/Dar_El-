@@ -18,7 +18,9 @@
             </div>
             <div>
                 <label class="dj-admin-label">{{ __('settings.whatsapp_number') }}</label>
-                <input type="text" name="whatsapp_number" value="{{ old('whatsapp_number', $settings['whatsapp_number'] ?? '') }}" class="dj-admin-input">
+                <input type="text" name="whatsapp_number" value="{{ old('whatsapp_number', $settings['whatsapp_number'] ?? '') }}" class="dj-admin-input" placeholder="201234567890">
+                <p class="dj-admin-hint">{{ __('settings.whatsapp_number_hint') }}</p>
+                <p class="dj-admin-hint">{{ __('settings.whatsapp_number_features_hint') }}</p>
             </div>
             <div>
                 <label class="dj-admin-label">{{ __('settings.default_shipping_fee') }}</label>
