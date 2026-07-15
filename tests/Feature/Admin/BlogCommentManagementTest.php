@@ -63,6 +63,29 @@ class BlogCommentManagementTest extends TestCase
         $this->assertDatabaseHas('activity_logs', ['action' => 'approved', 'subject_type' => BlogComment::class, 'subject_id' => $comment->id]);
     }
 
+    /**
+     * Same failure shape and same fix as ReviewManagementTest::
+     * test_approving_a_review_still_succeeds_when_the_status_notification_throws
+     * — BlogCommentController::approve()'s notify() call was unguarded
+     * between the status update() and ActivityLog::record().
+     */
+    public function test_approving_a_comment_still_succeeds_when_the_status_notification_throws(): void
+    {
+        Notification::shouldReceive('send')->andThrow(new \RuntimeException('Simulated notification transport failure'));
+
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create();
+        $post = $this->makePost();
+        $comment = BlogComment::create(['blog_post_id' => $post->id, 'user_id' => $user->id, 'name' => $user->name, 'comment' => 'A comment of sufficient length.', 'status' => 'pending']);
+
+        $response = $this->actingAs($admin)->patch(route('admin.blog-comments.approve', $comment));
+
+        $response->assertRedirect();
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertSame('approved', $comment->fresh()->status, 'Comment status was rolled back or the request failed when the status notification failed — the exact bug this fix addresses.');
+        $this->assertDatabaseHas('activity_logs', ['action' => 'approved', 'subject_type' => BlogComment::class, 'subject_id' => $comment->id]);
+    }
+
     public function test_admin_can_reject_with_a_reason(): void
     {
         Notification::fake();
