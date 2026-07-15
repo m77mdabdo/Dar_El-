@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductSize;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Session;
 
 class CartService
@@ -180,5 +181,28 @@ class CartService
         $coupon = $this->appliedCoupon();
 
         return $coupon ? $coupon->discountFor($this->subtotal()) : 0;
+    }
+
+    /**
+     * The single source of truth for "what would this cart actually cost,
+     * including shipping" — matches exactly what CheckoutController
+     * charges: subtotal + shipping - discount, floored at 0.
+     *
+     * $shippingFee is optional because most callers of this method (cart
+     * page, cart-drawer widget, abandoned-cart reminder emails) run
+     * BEFORE checkout, when no ShippingMethod has been selected yet — for
+     * those, it falls back to the same 'default_shipping_fee' Setting
+     * CheckoutController itself falls back to when nothing is selected.
+     * That fallback is an estimate, not a guarantee: if the customer
+     * eventually picks a shipping method with a different fee at
+     * checkout, the real charge can differ from what was shown here.
+     * CheckoutController passes the actual selected fee explicitly once
+     * one exists, so its own total is always exact.
+     */
+    public function totalIncludingShipping(?int $shippingFee = null): int
+    {
+        $shippingFee ??= (int) Setting::get('default_shipping_fee', 0);
+
+        return max(0, $this->subtotal() + $shippingFee - $this->discount());
     }
 }

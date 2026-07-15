@@ -60,7 +60,7 @@ class CartTrackingService
         $dbCart->update([
             'status' => 'active',
             'subtotal' => $subtotal,
-            'total' => max(0, $subtotal - $cart->discount()),
+            'total' => $cart->totalIncludingShipping(),
             'items_count' => $cart->count(),
             'last_activity_at' => now(),
         ]);

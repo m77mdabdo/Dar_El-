@@ -62,7 +62,7 @@
                 @if ($discount > 0)
                     <div class="dj-os-row" style="color:#2f7a4d;"><span>{{ __('Discount') }}</span><span>-{{ number_format($discount) }} EGP</span></div>
                 @endif
-                <div class="dj-os-row dj-total"><span>{{ __('Total') }}</span><span>{{ number_format($subtotal - $discount) }} EGP</span></div>
+                <div class="dj-os-row dj-total"><span>{{ __('Total') }}</span><span>{{ number_format($total) }} EGP</span></div>
 
                 @if ($hasStockIssues)
                     <p style="font-size:12.5px; color:var(--dj-rose-dust); font-weight:700; margin-bottom:12px; text-align:center;">

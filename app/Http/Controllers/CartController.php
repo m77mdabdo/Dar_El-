@@ -22,6 +22,7 @@ class CartController extends Controller
             'items' => $items,
             'subtotal' => $this->cart->subtotal(),
             'discount' => $this->cart->discount(),
+            'total' => $this->cart->totalIncludingShipping(),
             'coupon' => $this->cart->appliedCoupon(),
             'hasStockIssues' => collect($items)->contains('exceeds_stock', true),
         ]);
@@ -112,7 +113,7 @@ class CartController extends Controller
     protected function cartJson(): JsonResponse
     {
         $items = $this->cart->items();
-        $total = $this->cart->subtotal() - $this->cart->discount();
+        $total = $this->cart->totalIncludingShipping();
 
         return response()->json([
             'count' => $this->cart->count(),
