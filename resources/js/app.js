@@ -58,10 +58,14 @@ window.djFetch = djFetch;
 function djUpdateCartFromResponse(data) {
     const countEl = document.getElementById('dj-cart-count');
     const totalEl = document.getElementById('dj-cart-total');
+    const shippingRowEl = document.getElementById('dj-cart-shipping-row');
+    const shippingEl = document.getElementById('dj-cart-shipping');
     const itemsEl = document.getElementById('dj-drawer-items');
 
     if (countEl) countEl.textContent = data.count ?? 0;
     if (totalEl && data.total_formatted) totalEl.textContent = data.total_formatted;
+    if (shippingEl && data.shipping_formatted) shippingEl.textContent = data.shipping_formatted;
+    if (shippingRowEl) shippingRowEl.style.display = (data.shipping_fee ?? 0) > 0 ? '' : 'none';
     if (itemsEl && typeof data.html === 'string') itemsEl.innerHTML = data.html;
 
     const checkoutBtn = document.querySelector('.dj-drawer-checkout-btn');
