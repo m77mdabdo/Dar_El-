@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class Product extends Model
@@ -34,6 +35,13 @@ class Product extends Model
         static::deleting(function (Product $product) {
             app(ImageUploadService::class)->delete($product->image_url);
         });
+
+        // Busts the storefront home-page cache (HomeController::index())
+        // on every product write, regardless of which code path performs
+        // it — single CRUD, bulk publish/archive/delete, anything. saved()
+        // fires after both create and update.
+        static::saved(fn () => Cache::forget('storefront.home.data'));
+        static::deleted(fn () => Cache::forget('storefront.home.data'));
     }
 
     protected function casts(): array

@@ -6,11 +6,16 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        // Deliberately NOT cached: the filter/sort/pagination combinations
+        // this query can take make a single cache key wrong (would serve
+        // one filter's results for another) and a per-combination key
+        // impractical.
         $products = Product::with(['images', 'category', 'sizes', 'approvedReviews'])
             ->where('is_active', true)
             ->when($request->category, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $request->category)))
@@ -23,7 +28,10 @@ class ShopController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $categories = Category::where('is_active', true)->orderBy('sort_order')->get();
+        // Shared with HomeController — same query, same cache key.
+        $categories = Cache::remember('storefront.categories', now()->addMinutes(10), fn () =>
+            Category::where('is_active', true)->orderBy('sort_order')->get()
+        );
 
         $heroImage = Setting::get('shop_hero_image', 'https://images.unsplash.com/photo-1532370436137-d9aaea5dab36?w=1600&q=80&auto=format&fit=crop');
 
