@@ -157,6 +157,10 @@ class ProductController extends Controller
     {
         $this->authorize('delete', $product);
 
+        if ($reason = $this->productDeleter->blockingReason($product)) {
+            return back()->with('error', $reason);
+        }
+
         $name = $product->name_en;
 
         $this->productDeleter->delete($product);

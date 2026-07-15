@@ -36,6 +36,8 @@ return [
     'created' => 'Product created.',
     'updated' => 'Product updated.',
     'deleted' => 'Product deleted.',
+    'cannot_delete_has_pending_orders' => 'This product is on :count pending order(s) and cannot be deleted.',
+    'cannot_delete_in_active_carts' => 'This product is in :count customer(s) active cart and cannot be deleted.',
     'image_removed' => 'Image removed.',
     'image_order_updated' => 'Image order updated.',
     'image_order_error' => 'Could not update image order. Please try again.',
