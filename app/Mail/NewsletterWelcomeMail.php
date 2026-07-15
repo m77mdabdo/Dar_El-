@@ -3,8 +3,6 @@
 namespace App\Mail;
 
 use App\Models\NewsletterSubscriber;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -16,9 +14,9 @@ use Illuminate\Queue\SerializesModels;
  * NewsletterSubscribed only notifies admins; the subscriber themselves
  * never receives an email. Ready for whenever that's wired in.
  */
-class NewsletterWelcomeMail extends Mailable implements ShouldQueue
+class NewsletterWelcomeMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(public NewsletterSubscriber $subscriber)
     {

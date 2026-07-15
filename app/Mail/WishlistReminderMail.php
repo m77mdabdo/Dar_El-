@@ -3,8 +3,6 @@
 namespace App\Mail;
 
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -17,9 +15,9 @@ use Illuminate\Support\Collection;
  * exists in this app today; ready for whenever that scheduled feature is
  * built (mirroring the abandoned-cart-reminder pattern).
  */
-class WishlistReminderMail extends Mailable implements ShouldQueue
+class WishlistReminderMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(public User $user, public Collection $wishlists)
     {

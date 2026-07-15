@@ -3,8 +3,6 @@
 namespace App\Mail;
 
 use App\Models\Order;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -16,9 +14,9 @@ use Illuminate\Queue\SerializesModels;
  * COD-only with no payment gateway integrated, so nothing dispatches this
  * Mailable today. Ready for whenever online payment is added.
  */
-class PaymentFailedMail extends Mailable implements ShouldQueue
+class PaymentFailedMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(public Order $order, public ?string $reason = null)
     {

@@ -13,6 +13,16 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Unlike the other 18 Mailables in this app, this one is dispatched
+ * directly via Mail::to()->send() (CheckoutController, GenerateAndSendInvoice)
+ * rather than through a Notification's toMail(). Illuminate\Mail\Mailer::
+ * sendMailable() explicitly checks `$mailable instanceof ShouldQueue` and
+ * auto-redirects to queuing when true — unlike the Notification/MailChannel
+ * path, which always calls the Mailable's own send() synchronously
+ * regardless of this interface. So ShouldQueue here is load-bearing, not
+ * dead code — confirmed by 8 real test failures when it was removed.
+ */
 class InvoiceMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
