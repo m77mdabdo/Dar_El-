@@ -234,6 +234,19 @@ class Product extends Model
         return Str::startsWith($path, ['http://', 'https://']) ? $path : asset('storage/'.$path);
     }
 
+    /**
+     * Smaller thumbnail variant of the cover photo, for list/grid views
+     * (product cards, category grids) — falls back to the full-size image
+     * when no thumbnail exists yet (legacy external URLs, or images
+     * uploaded before this thumbnail feature shipped).
+     */
+    public function getCoverThumbSrcAttribute(): ?string
+    {
+        $path = $this->image_url ?: $this->images->first()?->path;
+
+        return $path ? app(ImageUploadService::class)->thumbnailUrl($path) : null;
+    }
+
     public function getAverageRatingAttribute(): float
     {
         return round($this->approvedReviews->avg('rating') ?? 0, 1);
