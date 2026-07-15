@@ -36,6 +36,8 @@ return [
     'created' => 'تم إنشاء المنتج.',
     'updated' => 'تم تحديث المنتج.',
     'deleted' => 'تم حذف المنتج.',
+    'cannot_delete_has_pending_orders' => 'هذا المنتج ضمن :count طلب قيد التنفيذ ولا يمكن حذفه.',
+    'cannot_delete_in_active_carts' => 'هذا المنتج موجود في سلة :count عميل نشطة ولا يمكن حذفه.',
     'image_removed' => 'تم حذف الصورة.',
     'image_order_updated' => 'تم تحديث ترتيب الصورة.',
     'image_order_error' => 'تعذر تحديث ترتيب الصور. حاول مرة أخرى.',
