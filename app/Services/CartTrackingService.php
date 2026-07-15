@@ -6,7 +6,9 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\User;
 use App\Notifications\CartConvertedAdminNotification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 /**
  * Mirrors the session-backed CartService into a persisted Cart/CartItem pair
@@ -66,7 +68,12 @@ class CartTrackingService
 
     /**
      * Close out the user's open cart as converted into the given order —
-     * called right before CartService::clear() in the checkout flow.
+     * called right after CheckoutController's order-creation transaction
+     * has already committed, and NOT wrapped in that controller's own
+     * dispatchSafely() helper. A notification failure here must not
+     * surface as a failed checkout response for an order that's already
+     * been placed successfully — same log-and-swallow philosophy as
+     * StockAlertService::checkThreshold().
      */
     public function markConverted(User $user, Order $order): void
     {
@@ -82,6 +89,14 @@ class CartTrackingService
             'order_id' => $order->id,
         ]);
 
-        Notification::send(User::admins(), new CartConvertedAdminNotification($dbCart));
+        try {
+            Notification::send(User::admins(), new CartConvertedAdminNotification($dbCart));
+        } catch (Throwable $e) {
+            Log::error('Cart-converted admin notification failed (order still proceeds)', [
+                'cart_id' => $dbCart->id,
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

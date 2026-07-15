@@ -141,4 +141,44 @@ class CheckoutStockTest extends TestCase
         $this->assertSame(0, $product->sizes()->where('size', 'M')->value('stock'));
         $this->assertNotNull($order->stock_deducted_at);
     }
+
+    /**
+     * Same failure shape and same fix pattern as the stock-alert test
+     * above, for a different call site: CartTrackingService::markConverted()
+     * runs right after the order-creation transaction has already
+     * committed, directly from CheckoutController (not wrapped in that
+     * controller's own dispatchSafely() helper). Before the fix, a
+     * Notification::send(CartConvertedAdminNotification) failure there
+     * would surface as a failed checkout response even though the order
+     * was already placed successfully. Scoped to only throw for
+     * CartConvertedAdminNotification so this test isn't confounded by the
+     * OrderPlaced/NewOrderPlaced notifications also fired in this flow
+     * (which are safely wrapped and irrelevant to what's under test here).
+     */
+    public function test_checkout_still_succeeds_when_the_cart_converted_admin_notification_throws(): void
+    {
+        Notification::shouldReceive('send')->andReturnUsing(function ($notifiable, $notification) {
+            if ($notification instanceof \App\Notifications\CartConvertedAdminNotification) {
+                throw new \RuntimeException('Simulated notification transport failure');
+            }
+        });
+
+        $user = User::factory()->create();
+        $product = $this->makeProduct(5);
+        $shippingMethod = ShippingMethod::create(['name_ar' => 'شحن', 'name_en' => 'Shipping', 'fee' => 50, 'estimated_days' => '2-3', 'is_active' => true]);
+
+        $this->actingAs($user)->postJson(route('cart.add', $product), ['size' => 'M', 'quantity' => 1])->assertOk();
+
+        $response = $this->actingAs($user)->post(route('checkout.store'), $this->checkoutPayload($shippingMethod, $user));
+
+        $order = Order::first();
+        $this->assertNotNull($order, 'Order was rolled back or the response failed when the cart-converted admin notification failed — the exact bug this fix addresses.');
+        $response->assertRedirect(route('checkout.success', $order));
+        $response->assertSessionDoesntHaveErrors();
+
+        // The cart must still be marked converted despite the notification
+        // failure — the fix only isolates the notification call, not the
+        // update() that precedes it.
+        $this->assertSame('converted', $user->carts()->first()->status);
+    }
 }
