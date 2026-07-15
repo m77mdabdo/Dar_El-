@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -126,6 +127,13 @@ class CustomerManagementTest extends TestCase
 
     public function test_re_enabling_a_customer_allows_login_again(): void
     {
+        // The login below is real (the customer is no longer disabled) and
+        // now sends LoginAlertNotification synchronously instead of
+        // deferring it to the queue — this test is about re-enabling
+        // access, not the alert email, so fake it here rather than build a
+        // real Mailable as a side effect.
+        Notification::fake();
+
         $admin = $this->admin();
         $customer = $this->customer();
 

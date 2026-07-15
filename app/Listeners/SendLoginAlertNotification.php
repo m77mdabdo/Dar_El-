@@ -6,7 +6,9 @@ use App\Models\Setting;
 use App\Notifications\LoginAlertNotification;
 use App\Support\UserAgentParser;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
+use Throwable;
 
 class SendLoginAlertNotification
 {
@@ -37,12 +39,25 @@ class SendLoginAlertNotification
         // never leaks into a later, unrelated login in the same session.
         $provider = session()->pull('login_via_provider');
 
-        $event->user->notify(new LoginAlertNotification(
-            ip: Request::ip(),
-            device: UserAgentParser::device($userAgent),
-            browser: UserAgentParser::browser($userAgent),
-            time: now(),
-            provider: $provider,
-        ));
+        // Sent synchronously (LoginAlertNotification is no longer
+        // ShouldQueue), so a transport failure here happens inside the
+        // login/register request itself — must degrade to "alert not sent"
+        // rather than fail the request, same philosophy as the try/catch
+        // already around OTP sending (OtpService::send).
+        try {
+            $event->user->notify(new LoginAlertNotification(
+                ip: Request::ip(),
+                device: UserAgentParser::device($userAgent),
+                browser: UserAgentParser::browser($userAgent),
+                time: now(),
+                provider: $provider,
+            ));
+        } catch (Throwable $e) {
+            Log::warning('Login alert notification failed', [
+                'user_id' => $event->user->id,
+                'exception' => $e::class,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
