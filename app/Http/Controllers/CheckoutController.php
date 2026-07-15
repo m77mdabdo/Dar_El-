@@ -88,7 +88,7 @@ class CheckoutController extends Controller
         $subtotal = $this->cart->subtotal();
         $coupon = $this->cart->appliedCoupon();
         $discount = $this->cart->discount();
-        $total = max(0, $subtotal + $shippingFee - $discount);
+        $total = $this->cart->totalIncludingShipping($shippingFee);
 
         // Snapshots of the shipping method actually chosen — survive a later
         // edit/deactivation of the ShippingMethod row, same pattern as
