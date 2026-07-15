@@ -6,6 +6,7 @@ use App\Services\ImageUploadService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Category extends Model
 {
@@ -29,6 +30,12 @@ class Category extends Model
         static::deleting(function (Category $category) {
             app(ImageUploadService::class)->delete($category->image);
         });
+
+        // Busts the shared storefront category-list cache (used by both
+        // HomeController and ShopController) on every category write,
+        // regardless of which code path performs it.
+        static::saved(fn () => Cache::forget('storefront.categories'));
+        static::deleted(fn () => Cache::forget('storefront.categories'));
     }
 
     public function products(): HasMany
