@@ -66,7 +66,7 @@
 
     @if ($invoice?->pdf_path)
         @include('emails.partials.button', [
-            'href' => \Illuminate\Support\Facades\URL::temporarySignedRoute('invoice.download', now()->addYear(), ['order' => $order->id]),
+            'href' => \Illuminate\Support\Facades\URL::temporarySignedRoute('invoice.download', now()->addDays(90), ['order' => $order->id]),
             'label' => __('emails.order_download_invoice_button'),
         ])
     @endif
