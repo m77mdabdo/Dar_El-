@@ -203,7 +203,7 @@ class InvoicePdfService
                 'size' => $item->size ?: '—',
                 'quantity' => $item->quantity,
                 'price' => $item->price,
-                'lineTotal' => $item->price * $item->quantity,
+                'lineTotal' => $item->line_total,
                 'localImagePath' => $this->resolveLocalImagePath($item->product?->cover_image_src, $order->id, $item->id),
             ])->all(),
         ];
