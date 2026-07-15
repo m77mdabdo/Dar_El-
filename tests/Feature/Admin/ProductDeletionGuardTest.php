@@ -149,4 +149,32 @@ class ProductDeletionGuardTest extends TestCase
         $response->assertSessionHas('status');
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
     }
+
+    /**
+     * Bulk-delete found bypassing blockingReason() entirely while
+     * confirming item 15 — ProductBulkActionController::delete() called
+     * ProductDeleter::delete() directly. A batch with one deletable and
+     * one blocked product must delete exactly the deletable one, leave
+     * the blocked one intact, and report both counts explicitly rather
+     * than a single blanket "ok" that would leave the admin thinking the
+     * whole batch succeeded.
+     */
+    public function test_bulk_delete_skips_blocked_products_and_reports_both_counts(): void
+    {
+        $admin = $this->admin();
+        $deletable = $this->product();
+        $blocked = $this->product();
+        $this->orderWithItem($blocked, 'processing');
+
+        $response = $this->actingAs($admin)->postJson(route('admin.products.bulk-action'), [
+            'action' => 'delete',
+            'ids' => [$deletable->id, $blocked->id],
+        ]);
+
+        $response->assertOk();
+        $response->assertJson(['deleted_count' => 1, 'skipped_count' => 1]);
+
+        $this->assertDatabaseMissing('products', ['id' => $deletable->id]);
+        $this->assertDatabaseHas('products', ['id' => $blocked->id]);
+    }
 }

@@ -45,15 +45,27 @@ class ProductBulkActionController extends Controller
 
         $products = Product::whereIn('id', $validated['ids'])->get();
 
+        $deletedCount = 0;
+        $skippedCount = 0;
+
         foreach ($products as $product) {
             $this->authorize($validated['action'] === 'delete' ? 'delete' : 'update', $product);
 
             match ($validated['action']) {
                 'publish' => $this->publish($product),
                 'archive' => $this->archive($product),
-                'delete' => $this->delete($product),
+                'delete' => $this->delete($product) ? $deletedCount += 1 : $skippedCount += 1,
                 'duplicate' => $this->duplicateProduct($product),
             };
+        }
+
+        if ($validated['action'] === 'delete') {
+            return response()->json([
+                'status' => 'ok',
+                'count' => $deletedCount,
+                'deleted_count' => $deletedCount,
+                'skipped_count' => $skippedCount,
+            ]);
         }
 
         return response()->json(['status' => 'ok', 'count' => $products->count()]);
@@ -71,11 +83,21 @@ class ProductBulkActionController extends Controller
         ActivityLog::record('archived', $product, "Archived product {$product->name_en}");
     }
 
-    protected function delete(Product $product): void
+    /**
+     * @return bool true if the product was deleted, false if it was
+     *     skipped (blockingReason() — pending order or active cart)
+     */
+    protected function delete(Product $product): bool
     {
+        if ($this->productDeleter->blockingReason($product)) {
+            return false;
+        }
+
         $name = $product->name_en;
         $this->productDeleter->delete($product);
         ActivityLog::record('deleted', $product, "Deleted product {$name}");
+
+        return true;
     }
 
     protected function duplicateProduct(Product $product): void

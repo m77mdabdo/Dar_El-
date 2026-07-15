@@ -46,6 +46,7 @@ return [
     'drag_to_reorder' => 'اسحب الصور لإعادة ترتيبها.',
     'bulk_action_success' => 'تم تحديث :count منتج.',
     'bulk_action_error' => 'حدث خطأ ما. حاول مرة أخرى.',
+    'bulk_delete_result' => 'تم حذف :deleted منتج، وتخطي :skipped (لديه طلبات قيد التنفيذ أو سلات نشطة).',
 
     'status' => 'الحالة',
     'all_statuses' => 'كل الحالات',
