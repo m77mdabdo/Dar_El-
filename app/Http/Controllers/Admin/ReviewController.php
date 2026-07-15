@@ -10,6 +10,8 @@ use App\Notifications\ReviewStatusUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ReviewController extends Controller
 {
@@ -63,7 +65,15 @@ class ReviewController extends Controller
             'rejection_reason' => null,
         ]);
 
-        $review->user?->notify(new ReviewStatusUpdated($review));
+        try {
+            $review->user?->notify(new ReviewStatusUpdated($review));
+        } catch (Throwable $e) {
+            Log::error('Review status notification failed (status change still proceeds)', [
+                'review_id' => $review->id,
+                'status' => 'approved',
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         ActivityLog::record('approved', $review, "Approved review #{$review->id}");
 
@@ -87,7 +97,15 @@ class ReviewController extends Controller
             'approved_by' => null,
         ]);
 
-        $review->user?->notify(new ReviewStatusUpdated($review));
+        try {
+            $review->user?->notify(new ReviewStatusUpdated($review));
+        } catch (Throwable $e) {
+            Log::error('Review status notification failed (status change still proceeds)', [
+                'review_id' => $review->id,
+                'status' => 'rejected',
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         ActivityLog::record('rejected', $review, "Rejected review #{$review->id}");
 

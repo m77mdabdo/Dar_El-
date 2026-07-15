@@ -68,6 +68,35 @@ class ReviewManagementTest extends TestCase
         $this->assertDatabaseHas('activity_logs', ['action' => 'approved', 'subject_type' => Review::class, 'subject_id' => $review->id]);
     }
 
+    /**
+     * Before the fix, ReviewController::approve()'s
+     * $review->user?->notify(new ReviewStatusUpdated($review)) call was
+     * unguarded, sitting between the status update() and
+     * ActivityLog::record() — a notification failure would 500 the admin's
+     * approve action after the status had already changed, and skip the
+     * activity log entry. Deliberately does NOT use Notification::fake();
+     * that would swallow the call before it could throw. $model->notify()
+     * (Illuminate\Notifications\RoutesNotifications) resolves the same
+     * underlying ChannelManager singleton the Notification facade's
+     * accessor points to, so mocking the facade here also intercepts it.
+     */
+    public function test_approving_a_review_still_succeeds_when_the_status_notification_throws(): void
+    {
+        Notification::shouldReceive('send')->andThrow(new \RuntimeException('Simulated notification transport failure'));
+
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create();
+        $product = $this->makeProduct();
+        $review = Review::create(['product_id' => $product->id, 'user_id' => $user->id, 'name' => $user->name, 'rating' => 4, 'comment' => 'A comment of sufficient length.', 'status' => 'pending']);
+
+        $response = $this->actingAs($admin)->patch(route('admin.reviews.approve', $review));
+
+        $response->assertRedirect();
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertSame('approved', $review->fresh()->status, 'Review status was rolled back or the request failed when the status notification failed — the exact bug this fix addresses.');
+        $this->assertDatabaseHas('activity_logs', ['action' => 'approved', 'subject_type' => Review::class, 'subject_id' => $review->id]);
+    }
+
     public function test_admin_can_reject_with_a_reason(): void
     {
         Notification::fake();
