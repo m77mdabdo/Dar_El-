@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Http\Controllers\Admin\OrderController;
 use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\Order;
@@ -12,6 +13,7 @@ use App\Models\User;
 use App\Notifications\OrderCancelled;
 use App\Notifications\OrderStatusUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -198,5 +200,51 @@ class OrderManagementTest extends TestCase
 
         Notification::assertSentTo($user, OrderStatusUpdated::class);
         Notification::assertSentTo($admin, OrderCancelled::class);
+    }
+
+    protected function makeStatusRequest(array $data, User $admin): Request
+    {
+        $request = Request::create('/admin/orders/status', 'PATCH', $data);
+        $request->setUserResolver(fn () => $admin);
+
+        return $request;
+    }
+
+    /**
+     * ITEM 10: two concurrent cancellation requests for the same order
+     * must not both restore stock. This test suite's DB is single-
+     * connection SQLite (see phpunit.xml), so a real second connection
+     * genuinely blocking on lockForUpdate() isn't reproducible here — but
+     * the actual bug is "trusts a stale in-memory $order instead of a
+     * fresh locked re-read," not OS thread scheduling. Invoking the real
+     * controller method twice, each with its own independently-fetched
+     * Order instance (exactly what route-model-binding does once per
+     * request), reproduces that exact mechanism: both instances were
+     * fetched before either request did any work, so neither one's
+     * in-memory stock_restored_at reflects the other's changes — the
+     * precise window the race condition lives in.
+     */
+    public function test_concurrent_cancellations_do_not_double_credit_stock(): void
+    {
+        Notification::fake();
+        [$order, $sizeA, $sizeB] = $this->makeCancellableOrderWithTwoItems(stockA: 3, stockB: 5);
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin);
+
+        $orderForRequestA = Order::findOrFail($order->id);
+        $orderForRequestB = Order::findOrFail($order->id);
+
+        $controller = app(OrderController::class);
+
+        $controller->updateStatus($this->makeStatusRequest(['status' => 'cancelled'], $admin), $orderForRequestA);
+        $controller->updateStatus($this->makeStatusRequest(['status' => 'cancelled'], $admin), $orderForRequestB);
+
+        $sizeA->refresh();
+        $sizeB->refresh();
+        $order->refresh();
+
+        $this->assertSame(5, $sizeA->stock, 'Stock was double-credited by the second, concurrent cancellation request (3 + 2, not 3 + 2 + 2) — the exact bug this fix addresses.');
+        $this->assertSame(6, $sizeB->stock, 'Stock was double-credited by the second, concurrent cancellation request (5 + 1, not 5 + 1 + 1) — the exact bug this fix addresses.');
+        $this->assertNotNull($order->stock_restored_at);
     }
 }
