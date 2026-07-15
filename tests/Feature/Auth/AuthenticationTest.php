@@ -4,11 +4,23 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Login now sends LoginAlertNotification synchronously (no longer
+        // ShouldQueue) instead of deferring it — these tests exercise the
+        // login flow itself, not the alert email, so fake it rather than
+        // let every real POST /login build and "send" a real Mailable.
+        Notification::fake();
+    }
 
     public function test_login_screen_can_be_rendered(): void
     {
