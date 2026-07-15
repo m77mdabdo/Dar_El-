@@ -89,4 +89,56 @@ class CheckoutStockTest extends TestCase
         $this->assertSame(0, Order::count());
         $this->assertSame(0, $product->sizes()->where('size', 'M')->value('stock'));
     }
+
+    /**
+     * Reproduces the exact failure this fix addresses: StockAlertService::
+     * checkThreshold() runs inside CheckoutController's order-creation
+     * DB::transaction(). Before the fix, a Notification::send() failure
+     * there (e.g. a transient mail/queue problem while notifying admins
+     * the item just sold out) would propagate out of the transaction,
+     * rolling back an entire valid, already-stock-checked customer order.
+     * Deliberately does NOT use Notification::fake() — that would swallow
+     * the call before it could throw, and never actually exercise the
+     * try/catch. Mocking the facade directly lets the real
+     * StockAlertService code run and really throw.
+     *
+     * The mock only throws for ProductOutOfStock/ProductLowStock, not for
+     * every notification indiscriminately: a real, logged-in checkout also
+     * fires OrderPlaced/NewOrderPlaced (safely wrapped in dispatchSafely)
+     * and, separately, CartTrackingService::markConverted()'s own
+     * Notification::send(CartConvertedAdminNotification) call — which is
+     * NOT wrapped in any try/catch and is a distinct bug from the one this
+     * test targets. Throwing indiscriminately here would conflate the two;
+     * scoping the throw to only the classes under test keeps this test
+     * about the one thing it's meant to verify.
+     */
+    public function test_checkout_still_succeeds_when_the_stock_alert_notification_throws(): void
+    {
+        Notification::shouldReceive('send')->andReturnUsing(function ($notifiable, $notification) {
+            if ($notification instanceof \App\Notifications\ProductOutOfStock || $notification instanceof \App\Notifications\ProductLowStock) {
+                throw new \RuntimeException('Simulated notification transport failure');
+            }
+        });
+
+        $user = User::factory()->create();
+        // Stock 1, buying the last unit: before=1, after=0 — crosses into
+        // out-of-stock, triggering the ProductOutOfStock admin alert that's
+        // now mocked to throw.
+        $product = $this->makeProduct(1);
+        $shippingMethod = ShippingMethod::create(['name_ar' => 'شحن', 'name_en' => 'Shipping', 'fee' => 50, 'estimated_days' => '2-3', 'is_active' => true]);
+
+        $this->actingAs($user)->postJson(route('cart.add', $product), ['size' => 'M', 'quantity' => 1])->assertOk();
+
+        $response = $this->actingAs($user)->post(route('checkout.store'), $this->checkoutPayload($shippingMethod, $user));
+
+        // The order must be created and committed despite the notification
+        // failure — not rolled back, not a generic "something went wrong" error.
+        $order = Order::first();
+        $this->assertNotNull($order, 'Order was rolled back when the stock-alert notification failed — the exact bug this fix addresses.');
+        $response->assertRedirect(route('checkout.success', $order));
+        $response->assertSessionDoesntHaveErrors();
+
+        $this->assertSame(0, $product->sizes()->where('size', 'M')->value('stock'));
+        $this->assertNotNull($order->stock_deducted_at);
+    }
 }
