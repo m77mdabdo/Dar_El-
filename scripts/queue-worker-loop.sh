@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Replacement for the plain `php artisan queue:work database --stop-when-empty
-# --max-time=50 --timeout=45 --tries=3` cron line documented in the README —
-# NOT an addition alongside it. Point the cron entry at this script instead:
+# Replacement for the plain `php artisan queue:work database
+# --queue=invoices,default --stop-when-empty --max-time=50 --timeout=45
+# --tries=3` cron line — NOT an addition alongside it. Point the cron entry
+# at this script instead:
 #
 #   * * * * *   /bin/bash /path/to/project/scripts/queue-worker-loop.sh
 #
@@ -57,7 +58,7 @@ while true; do
 
     # `|| true`: one failed cycle (e.g. a transient DB hiccup) must not kill
     # the loop — the next cycle should still get a chance to run.
-    "$PHP_BIN" artisan queue:work database --stop-when-empty --max-time=10 --timeout=45 --tries=3 || true
+    "$PHP_BIN" artisan queue:work database --queue=invoices,default --stop-when-empty --max-time=10 --timeout=45 --tries=3 || true
 
     NOW=$(date +%s)
     ELAPSED=$((NOW - START_TIME))
