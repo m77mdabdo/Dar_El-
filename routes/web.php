@@ -38,11 +38,11 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/services', [PageController::class, 'services'])->name('services');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:10,1')->name('contact.store');
 
-Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store');
+Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('throttle:10,1')->name('newsletter.store');
 
-Route::post('/reviews/{review}/helpful', [ReviewController::class, 'markHelpful'])->name('reviews.helpful');
+Route::post('/reviews/{review}/helpful', [ReviewController::class, 'markHelpful'])->middleware('throttle:10,1')->name('reviews.helpful');
 
 Route::get('/lang/{locale}', function (string $locale) {
     if (in_array($locale, ['en', 'ar'], true)) {
@@ -57,7 +57,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::post('/{product:slug}', [CartController::class, 'add'])->name('add');
     Route::patch('/{key}', [CartController::class, 'update'])->name('update');
     Route::delete('/{key}', [CartController::class, 'remove'])->name('remove');
-    Route::post('/coupon/apply', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+    Route::post('/coupon/apply', [CartController::class, 'applyCoupon'])->middleware('throttle:10,1')->name('coupon.apply');
     Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
 });
 
