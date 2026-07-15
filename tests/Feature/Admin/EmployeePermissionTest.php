@@ -59,6 +59,14 @@ class EmployeePermissionTest extends TestCase
         ]);
     }
 
+    protected function makeCustomer(): User
+    {
+        $customer = User::factory()->create();
+        $customer->assignRole(Role::findOrCreate('customer', 'web'));
+
+        return $customer;
+    }
+
     public function test_employee_without_products_create_permission_is_blocked_from_the_create_form(): void
     {
         $employee = $this->makeEmployee();
@@ -139,5 +147,141 @@ class EmployeePermissionTest extends TestCase
         $response->assertSee('href="'.route('admin.products.index').'"', false);
         $response->assertDontSee('href="'.route('admin.customers.index').'"', false);
         $response->assertDontSee('href="'.route('admin.coupons.index').'"', false);
+    }
+
+    public function test_employee_without_customers_carts_view_permission_is_blocked(): void
+    {
+        $employee = $this->makeEmployee();
+        $customer = $this->makeCustomer();
+
+        $this->actingAs($employee)->get(route('admin.customers.carts', $customer))->assertForbidden();
+    }
+
+    public function test_employee_granted_customers_carts_view_permission_can_view_carts(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'customers.carts_view');
+        $customer = $this->makeCustomer();
+
+        $this->actingAs($employee)->get(route('admin.customers.carts', $customer))->assertOk();
+    }
+
+    public function test_employee_without_customers_wishlist_view_permission_is_blocked(): void
+    {
+        $employee = $this->makeEmployee();
+        $customer = $this->makeCustomer();
+
+        $this->actingAs($employee)->get(route('admin.customers.wishlist', $customer))->assertForbidden();
+    }
+
+    public function test_employee_granted_customers_wishlist_view_permission_can_view_wishlist(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'customers.wishlist_view');
+        $customer = $this->makeCustomer();
+
+        $this->actingAs($employee)->get(route('admin.customers.wishlist', $customer))->assertOk();
+    }
+
+    public function test_employee_without_customers_notes_permission_is_blocked(): void
+    {
+        $employee = $this->makeEmployee();
+        $customer = $this->makeCustomer();
+
+        $response = $this->actingAs($employee)->post(route('admin.customers.notes.store', $customer), [
+            'note' => 'Called about a delayed order.',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseCount('customer_notes', 0);
+    }
+
+    public function test_employee_granted_customers_notes_permission_can_add_a_note(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'customers.notes');
+        $customer = $this->makeCustomer();
+
+        $response = $this->actingAs($employee)->post(route('admin.customers.notes.store', $customer), [
+            'note' => 'Called about a delayed order.',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('customer_notes', [
+            'user_id' => $customer->id,
+            'admin_id' => $employee->id,
+            'note' => 'Called about a delayed order.',
+        ]);
+    }
+
+    public function test_employee_without_customers_disable_permission_is_blocked(): void
+    {
+        $employee = $this->makeEmployee();
+        $customer = $this->makeCustomer();
+
+        $response = $this->actingAs($employee)->patch(route('admin.customers.toggle-disabled', $customer));
+
+        $response->assertForbidden();
+        $this->assertFalse($customer->fresh()->isDisabled());
+    }
+
+    public function test_employee_granted_customers_disable_permission_can_toggle_disabled(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'customers.disable');
+        $customer = $this->makeCustomer();
+
+        $response = $this->actingAs($employee)->patch(route('admin.customers.toggle-disabled', $customer));
+
+        $response->assertRedirect();
+        $this->assertTrue($customer->fresh()->isDisabled());
+    }
+
+    public function test_employee_without_customers_send_reminder_permission_is_blocked(): void
+    {
+        $employee = $this->makeEmployee();
+        $customer = $this->makeCustomer();
+
+        $this->actingAs($employee)->post(route('admin.customers.send-reminder', $customer))->assertForbidden();
+    }
+
+    public function test_employee_granted_customers_send_reminder_permission_can_trigger_a_reminder(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'customers.send_reminder');
+        $customer = $this->makeCustomer();
+
+        // No cart exists for this customer, so the controller's own "no
+        // cart to remind" business logic returns a redirect with a
+        // session error — this test is only about the permission gate,
+        // not the full reminder-sending flow. A non-403 redirect is
+        // sufficient proof the permission check passed.
+        $response = $this->actingAs($employee)->post(route('admin.customers.send-reminder', $customer));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+    }
+
+    public function test_employee_without_customers_delete_permission_is_blocked(): void
+    {
+        $employee = $this->makeEmployee();
+        $customer = $this->makeCustomer();
+
+        $response = $this->actingAs($employee)->delete(route('admin.customers.destroy', $customer));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('users', ['id' => $customer->id]);
+    }
+
+    public function test_employee_granted_customers_delete_permission_can_delete_a_customer(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'customers.delete');
+        $customer = $this->makeCustomer();
+
+        $response = $this->actingAs($employee)->delete(route('admin.customers.destroy', $customer));
+
+        $response->assertRedirect(route('admin.customers.index'));
+        $this->assertDatabaseMissing('users', ['id' => $customer->id]);
     }
 }
