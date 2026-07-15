@@ -25,15 +25,19 @@ class DashboardController extends Controller
             return [
                 'summary' => $this->summary(),
                 'charts' => $this->charts(),
+                'recentOrders' => Order::latest()->take(8)->get(),
+                'recentCustomers' => User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))->latest()->take(5)->get(),
+                'recentMessages' => ContactMessage::latest()->take(5)->get(),
+                'lowStockProducts' => $this->lowStockProducts(),
             ];
         });
 
         return view('admin.dashboard', $data + [
-            'recentOrders' => Order::latest()->take(8)->get(),
-            'recentCustomers' => User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))->latest()->take(5)->get(),
-            'recentMessages' => ContactMessage::latest()->take(5)->get(),
+            // Per-admin-user data — must stay outside the shared cache key
+            // above, or the first admin to hit a cache miss would have
+            // their own notifications served to every other admin for the
+            // next 60s.
             'recentNotifications' => $request->user()->notifications()->latest()->take(5)->get(),
-            'lowStockProducts' => $this->lowStockProducts(),
         ]);
     }
 
