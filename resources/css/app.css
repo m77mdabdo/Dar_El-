@@ -240,38 +240,14 @@ body.dj-en .dj-stat-num { font-family: 'Playfair Display'; }
 .dj-chip { padding: 11px 26px; border-radius: 30px; font-size: 14px; font-weight: 500; background: var(--dj-cream-2); color: var(--dj-maroon); transition: .2s; }
 .dj-chip.dj-active, .dj-chip:hover { background: var(--dj-maroon); color: var(--dj-gold); }
 
-/* ===== SHOP FILTERS ===== */
-.dj-filters-toggle {
-    display: none; margin: 0 auto 4px; padding: 10px 20px; border-radius: 30px; background: var(--dj-cream-2);
-    color: var(--dj-maroon); font-size: 13.5px; font-weight: 600; align-items: center; gap: 8px;
-}
-.dj-filters-toggle svg { width: 16px; height: 16px; transition: transform .2s; }
-.dj-filters-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-
-.dj-filters-panel {
-    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; max-width: 1100px;
-    margin: 0 auto 10px; padding: 18px 6%;
-}
-.dj-filters-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 130px; min-width: 110px; }
-.dj-filters-field label { font-size: 11.5px; color: var(--dj-rose-dust); text-transform: uppercase; letter-spacing: .5px; }
-.dj-filters-field input, .dj-filters-field select {
-    padding: 12px 14px; border: 1.5px solid var(--dj-cream-2); border-radius: 12px; font-family: inherit;
-    font-size: 14px; background: var(--dj-cream); color: var(--dj-ink); width: 100%;
-}
-.dj-filters-field input:focus, .dj-filters-field select:focus { outline: none; border-color: var(--dj-maroon); }
-
-.dj-filters-sizes { display: flex; flex-wrap: wrap; gap: 8px; }
-.dj-filters-size-chip {
-    position: relative; padding: 9px 18px; border-radius: 30px; font-size: 13px; font-weight: 500;
-    background: var(--dj-cream-2); color: var(--dj-maroon); cursor: pointer; transition: .2s;
-}
-.dj-filters-size-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-.dj-filters-size-chip:has(input:checked) { background: var(--dj-maroon); color: var(--dj-gold); }
-
-.dj-filters-actions { display: flex; align-items: center; gap: 16px; flex: 1 1 auto; }
-.dj-filters-apply { background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; padding: 12px 26px; border-radius: 12px; font-size: 14px; }
-.dj-filters-apply:hover { background: var(--dj-maroon-dark); }
-.dj-filters-clear { color: var(--dj-rose-dust); font-size: 13px; text-decoration: underline; }
+/* .dj-filters-* styling (and its mobile accordion collapse) lives inline in
+   shop/index.blade.php instead of here — this project's deploy process has
+   twice now been observed serving a stale compiled bundle that predates a
+   feature's CSS/JS by a full commit (see the WhatsApp button fix and this
+   shop-filters size-chip fix), so anything customer-facing and non-trivial
+   ships inline in the Blade file that uses it, reaching production on a
+   plain git pull with no dependency on npm run build. See that file before
+   editing shop filter/size-chip styling. */
 
 .dj-section-title { text-align: center; padding: 10px 6% 6px; }
 .dj-section-title h2 { font-size: clamp(24px, 5.5vw, 34px); color: var(--dj-maroon); }
@@ -1197,18 +1173,6 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
     }
     .dj-wishlist-actions { flex-direction: column; align-items: stretch; gap: 8px; }
     .dj-wishlist-actions .dj-ci-remove { text-align: center; }
-
-    /* Shop filters collapse into an accordion on mobile instead of a
-       permanently-open bar, so they don't compete with the 2-column grid
-       above for vertical space. Same max-height/JS-set-scrollHeight
-       technique as the existing FAQ accordion (djToggleFaq in app.js). */
-    .dj-filters-toggle { display: flex; }
-    .dj-filters-panel {
-        max-height: 0; overflow: hidden; padding: 0 6%; margin-bottom: 0;
-        transition: max-height .3s ease, padding .3s ease;
-    }
-    .dj-filters-panel.dj-open { padding: 16px 6%; }
-    .dj-filters-field, .dj-filters-actions { flex-basis: 100% !important; }
 }
 
 /* =========================================================
