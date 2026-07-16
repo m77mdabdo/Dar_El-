@@ -83,6 +83,19 @@
                     </button>
 
                     @if ($whatsapp = \App\Models\Setting::get('whatsapp_number'))
+                        {{-- Inline (not resources/css/app.css) so correct sizing ships the moment
+                             this Blade file reaches production via a plain git pull — it doesn't
+                             depend on npm run build + redeploying the compiled asset bundle. --}}
+                        <style>
+                            .dj-ask-whatsapp {
+                                margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+                                background: transparent; border: 1.5px solid var(--dj-maroon); color: var(--dj-maroon);
+                                font-weight: 700; font-size: 14px; padding: 14px; border-radius: 12px; width: 100%;
+                                transition: background .2s, color .2s;
+                            }
+                            .dj-ask-whatsapp:hover { background: var(--dj-maroon); color: var(--dj-gold); }
+                            .dj-ask-whatsapp svg { width: 18px; height: 18px; flex-shrink: 0; }
+                        </style>
                         <a class="dj-ask-whatsapp"
                            href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsapp) }}?text={{ rawurlencode('مهتمة بالمنتج: '.trans_field($product, 'name').' - '.route('shop.show', $product)) }}"
                            target="_blank" rel="noopener">
