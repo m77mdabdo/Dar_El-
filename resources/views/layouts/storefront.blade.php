@@ -41,6 +41,8 @@
         </div>
 
         <div class="dj-nav-right">
+            @include('partials.global-search')
+
             @auth
                 <a href="{{ route('wishlist.index') }}" class="dj-cart-btn" aria-label="{{ __('Wishlist') }}">
                     ♡ <span>{{ __('Wishlist') }}</span> <span class="dj-cart-count" id="dj-wishlist-count">{{ $wishlistCount ?? 0 }}</span>

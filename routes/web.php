@@ -15,6 +15,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,11 @@ Route::get('/invoice/{order}/download', [InvoiceDownloadController::class, 'show
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
+
+// Navbar live-search preview. Higher throttle ceiling than the site's other
+// throttled endpoints (contact/newsletter/reviews at 10/min) — this is a
+// read-only, debounced-as-you-type endpoint, not an infrequent form submit.
+Route::get('/search/live', [SearchController::class, 'live'])->middleware('throttle:60,1')->name('search.live');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
