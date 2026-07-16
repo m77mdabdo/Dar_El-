@@ -347,6 +347,23 @@ window.djToggleFaq = function (questionEl) {
     }
 };
 
+/* ===== SHOP FILTERS ACCORDION (mobile) ===== */
+window.djToggleShopFilters = function (toggleEl) {
+    const panel = document.getElementById('dj-shop-filters');
+    if (!panel) return;
+    const wasOpen = panel.classList.contains('dj-open');
+
+    if (wasOpen) {
+        panel.classList.remove('dj-open');
+        panel.style.maxHeight = null;
+        toggleEl.setAttribute('aria-expanded', 'false');
+    } else {
+        panel.classList.add('dj-open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        toggleEl.setAttribute('aria-expanded', 'true');
+    }
+};
+
 /* ===== CATEGORY CHIP ACTIVE STATE (visual only; navigation is a real link) ===== */
 document.addEventListener('click', (e) => {
     const chip = e.target.closest('.dj-chip[data-chip-group]');
