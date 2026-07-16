@@ -1,4 +1,17 @@
 @if ($whatsapp = \App\Models\Setting::get('whatsapp_number'))
+    {{-- Inline (not resources/css/app.css) so correct sizing ships the moment
+         this Blade file reaches production via a plain git pull — it doesn't
+         depend on npm run build + redeploying the compiled asset bundle. --}}
+    <style>
+        #dj-whatsapp-float {
+            position: fixed; bottom: 26px; right: 26px; width: 56px; height: 56px; border-radius: 50%;
+            background: var(--dj-maroon); color: var(--dj-gold); display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--dj-shadow); z-index: 85; transition: background .2s, transform .15s;
+        }
+        #dj-whatsapp-float:hover { background: var(--dj-maroon-dark); transform: scale(1.06); }
+        #dj-whatsapp-float svg { width: 28px; height: 28px; }
+        body.dj-en #dj-whatsapp-float { right: auto; left: 26px; }
+    </style>
     <a id="dj-whatsapp-float"
        href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsapp) }}?text={{ rawurlencode('مرحبًا، عندي سؤال عن موقع دار الجميلة.') }}"
        target="_blank" rel="noopener" aria-label="{{ __('Message Us on WhatsApp 💬') }}">
