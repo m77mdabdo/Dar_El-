@@ -13,8 +13,6 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $search = trim((string) $request->q);
-
         // Deliberately NOT cached: the filter/sort/pagination combinations
         // this query can take make a single cache key wrong (would serve
         // one filter's results for another) and a per-combination key
@@ -23,13 +21,7 @@ class ShopController extends Controller
             ->where('is_active', true)
             ->when($request->category, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $request->category)))
             ->when($request->collection, fn ($q) => $q->whereHas('collections', fn ($c) => $c->where('slug', $request->collection)))
-            ->when($search !== '', function ($q) use ($search) {
-                $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
-
-                $q->where(fn ($sq) => $sq
-                    ->where('name_en', 'like', "%{$escaped}%")
-                    ->orWhere('name_ar', 'like', "%{$escaped}%"));
-            })
+            ->searchByName($request->q)
             ->when($request->min_price, fn ($q) => $q->where('price', '>=', (int) $request->min_price))
             ->when($request->max_price, fn ($q) => $q->where('price', '<=', (int) $request->max_price))
             ->when($request->size, fn ($q) => $q->whereHas('sizes', fn ($s) => $s->where('size', $request->size)))
