@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductSize;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -12,6 +13,8 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        $search = trim((string) $request->q);
+
         // Deliberately NOT cached: the filter/sort/pagination combinations
         // this query can take make a single cache key wrong (would serve
         // one filter's results for another) and a per-combination key
@@ -20,8 +23,16 @@ class ShopController extends Controller
             ->where('is_active', true)
             ->when($request->category, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $request->category)))
             ->when($request->collection, fn ($q) => $q->whereHas('collections', fn ($c) => $c->where('slug', $request->collection)))
+            ->when($search !== '', function ($q) use ($search) {
+                $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
+
+                $q->where(fn ($sq) => $sq
+                    ->where('name_en', 'like', "%{$escaped}%")
+                    ->orWhere('name_ar', 'like', "%{$escaped}%"));
+            })
             ->when($request->min_price, fn ($q) => $q->where('price', '>=', (int) $request->min_price))
             ->when($request->max_price, fn ($q) => $q->where('price', '<=', (int) $request->max_price))
+            ->when($request->size, fn ($q) => $q->whereHas('sizes', fn ($s) => $s->where('size', $request->size)))
             ->when($request->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
             ->when($request->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
             ->when(! $request->sort, fn ($q) => $q->latest())
@@ -33,9 +44,20 @@ class ShopController extends Controller
             Category::where('is_active', true)->orderBy('sort_order')->get()
         );
 
+        // The storefront's live stock system is ProductSize (used throughout
+        // cart/checkout/product-detail) — NOT the newer ProductVariant engine,
+        // which exists in the schema but isn't wired into the storefront yet.
+        // Only sizes with in-stock, active products are offered as filter
+        // options, so the filter never leads a customer to a dead end.
+        $availableSizes = ProductSize::where('stock', '>', 0)
+            ->whereHas('product', fn ($q) => $q->where('is_active', true))
+            ->distinct()
+            ->orderBy('size')
+            ->pluck('size');
+
         $heroImage = Setting::get('shop_hero_image', 'https://images.unsplash.com/photo-1532370436137-d9aaea5dab36?w=1600&q=80&auto=format&fit=crop');
 
-        return view('shop.index', compact('products', 'categories', 'heroImage'));
+        return view('shop.index', compact('products', 'categories', 'availableSizes', 'heroImage'));
     }
 
     public function show(Product $product)
