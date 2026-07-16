@@ -127,6 +127,29 @@ class Product extends Model
         );
     }
 
+    /**
+     * Customer-facing search — name only (name_en/name_ar), never SKU, and
+     * LIKE-escaped so a literal % or _ in a search term is matched literally
+     * rather than acting as a SQL wildcard. Deliberately separate from the
+     * admin-only scopeSearch() above (which also matches SKU and isn't
+     * escaped) — shared by ShopController's filtered listing and the
+     * navbar's live-search endpoint so the matching logic lives in one place.
+     */
+    public function scopeSearchByName($query, ?string $term)
+    {
+        $term = trim((string) $term);
+
+        if ($term === '') {
+            return $query;
+        }
+
+        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $term);
+
+        return $query->where(fn ($q) => $q
+            ->where('name_en', 'like', "%{$escaped}%")
+            ->orWhere('name_ar', 'like', "%{$escaped}%"));
+    }
+
     public function scopeOfStatus($query, ?string $status)
     {
         return $status ? $query->where('status', $status) : $query;
