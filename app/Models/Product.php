@@ -134,6 +134,13 @@ class Product extends Model
      * admin-only scopeSearch() above (which also matches SKU and isn't
      * escaped) — shared by ShopController's filtered listing and the
      * navbar's live-search endpoint so the matching logic lives in one place.
+     *
+     * name_ar is compared after Arabic normalization (both sides — the
+     * column via a raw SQL REPLACE() chain, the term via normalizeArabicTerm())
+     * so common spelling variations customers actually type (hamza placement,
+     * alef maksura vs yaa, taa marbuta vs haa, diacritics, tatweel) don't
+     * cause an otherwise-matching product to be missed. name_en isn't
+     * normalized — this is specifically an Arabic input-variation problem.
      */
     public function scopeSearchByName($query, ?string $term)
     {
@@ -144,10 +151,69 @@ class Product extends Model
         }
 
         $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $term);
+        $normalizedTerm = static::normalizeArabicTerm($escaped);
+        $normalizedNameArSql = static::normalizedNameArSql();
 
-        return $query->where(fn ($q) => $q
-            ->where('name_en', 'like', "%{$escaped}%")
-            ->orWhere('name_ar', 'like', "%{$escaped}%"));
+        return $query->where(function ($q) use ($escaped, $normalizedTerm, $normalizedNameArSql) {
+            $q->where('name_en', 'like', "%{$escaped}%")
+                ->orWhereRaw("{$normalizedNameArSql} LIKE ?", ["%{$normalizedTerm}%"]);
+        });
+    }
+
+    /**
+     * Single source of truth for Arabic spelling-variation normalization —
+     * used to build both the raw SQL REPLACE() chain against the name_ar
+     * column (normalizedNameArSql()) and the PHP-side term normalization
+     * (normalizeArabicTerm()), so the two can never drift apart. Values are
+     * plain literals (no quotes/backslashes), safe to embed directly in the
+     * SQL built from this map.
+     */
+    protected static function arabicNormalizationMap(): array
+    {
+        return [
+            // Hamza-bearing alef forms, and bare hamza, all fold to plain alef.
+            'أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ء' => 'ا',
+            // Alef maksura -> yaa.
+            'ى' => 'ي',
+            // Taa marbuta -> haa.
+            'ة' => 'ه',
+            // Tashkeel: tanween (fath/damm/kasr), fatha, damma, kasra, shadda, sukun.
+            "\u{064B}" => '', "\u{064C}" => '', "\u{064D}" => '',
+            "\u{064E}" => '', "\u{064F}" => '', "\u{0650}" => '',
+            "\u{0651}" => '', "\u{0652}" => '',
+            // Tatweel/kashida.
+            "\u{0640}" => '',
+        ];
+    }
+
+    public static function normalizeArabicTerm(string $text): string
+    {
+        $text = strtr($text, static::arabicNormalizationMap());
+
+        return trim(preg_replace('/\s+/', ' ', $text));
+    }
+
+    /**
+     * A raw SQL expression normalizing the name_ar column the same way
+     * normalizeArabicTerm() normalizes the search term. Built from chained
+     * REPLACE() calls (not REGEXP_REPLACE()) specifically because this
+     * project's tests run on SQLite while production runs on MySQL —
+     * REPLACE() is the one substitution function both support identically.
+     * Whitespace collapsing gets two REPLACE('  ',' ') passes rather than
+     * regex, for the same portability reason; that only handles up to a
+     * handful of consecutive spaces, unlike the term-side preg_replace,
+     * which is an accepted tradeoff since stored product names aren't
+     * expected to contain long runs of whitespace to begin with.
+     */
+    protected static function normalizedNameArSql(): string
+    {
+        $expr = 'name_ar';
+
+        foreach (static::arabicNormalizationMap() as $search => $replace) {
+            $expr = "REPLACE({$expr}, '{$search}', '{$replace}')";
+        }
+
+        return "REPLACE(REPLACE({$expr}, '  ', ' '), '  ', ' ')";
     }
 
     public function scopeOfStatus($query, ?string $status)
