@@ -55,6 +55,8 @@ return [
     'status_published' => 'Published',
     'status_archived' => 'Archived',
     'scheduled_publish_at' => 'Publish at',
+    'offer_ends_at' => 'Offer Ends At',
+    'offer_ends_at_hint' => 'Leave empty (or set it in the past) to disable — shows a countdown on this product\'s own page and a small "ends in" badge on its shop-listing card, taking priority over the site-wide countdown offer if both are active.',
 
     'selected' => 'selected',
     'bulk_publish' => 'Publish',

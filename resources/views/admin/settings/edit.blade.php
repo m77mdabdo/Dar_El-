@@ -94,6 +94,24 @@
             </div>
 
             <div class="border-t border-[var(--dj-cream-2)] pt-4">
+                <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.sitewide_offer') }}</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.sitewide_offer_label') }}</label>
+                        <input type="text" name="sitewide_offer_label" value="{{ old('sitewide_offer_label', $settings['sitewide_offer_label'] ?? '') }}" class="dj-admin-input" placeholder="عرض نهاية الأسبوع">
+                        @error('sitewide_offer_label') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.sitewide_offer_end_at') }}</label>
+                        <input type="datetime-local" name="sitewide_offer_end_at" value="{{ old('sitewide_offer_end_at', $settings['sitewide_offer_end_at'] ?? '') }}" class="dj-admin-input">
+                        @error('sitewide_offer_end_at') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <p class="dj-admin-hint">{{ __('settings.sitewide_offer_hint') }}</p>
+            </div>
+
+            <div class="border-t border-[var(--dj-cream-2)] pt-4">
                 <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.marketing_tracking') }}</h2>
 
                 <div class="space-y-4">

@@ -28,6 +28,12 @@
         <svg class="dj-thread" viewBox="0 0 1200 70" preserveAspectRatio="none"><path d="M0,35 C150,5 300,65 450,35 C600,5 750,65 900,35 C1000,15 1100,50 1200,35" /></svg>
     </section>
 
+    @php
+        $djSitewideOfferEndsAt = \App\Models\Setting::get('sitewide_offer_end_at');
+        $djSitewideOfferEndsAt = $djSitewideOfferEndsAt ? \Illuminate\Support\Carbon::parse($djSitewideOfferEndsAt) : null;
+    @endphp
+    @include('partials.offer-countdown', ['endsAt' => $djSitewideOfferEndsAt, 'label' => \App\Models\Setting::get('sitewide_offer_label')])
+
     <section class="dj-stats">
         <div class="dj-stat-item"><span class="dj-stat-num" data-count="15700" data-suffix="+">0</span><p>{{ __('Instagram Followers') }}</p></div>
         <div class="dj-stat-item"><span class="dj-stat-num" data-count="88" data-suffix="">0</span><p>{{ __('Exclusive Designs') }}</p></div>

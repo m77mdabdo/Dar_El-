@@ -66,6 +66,23 @@
                     <div class="dj-rating" style="margin-bottom:10px;">★★★★★ <span class="dj-rn">{{ $product->average_rating }} · {{ __('Customer Rating') }}</span></div>
                 @endif
                 <p class="dj-price" style="font-size:22px; margin-bottom:18px;">{{ number_format($product->price) }} EGP</p>
+
+                @php
+                    // A product's own offer_ends_at takes precedence over the
+                    // site-wide countdown on its own page — showing both at
+                    // once would be confusing, so this resolves to exactly
+                    // one banner (or none).
+                    if ($product->hasActiveOffer()) {
+                        $djOfferEndsAt = $product->offer_ends_at;
+                        $djOfferLabel = __('Limited-Time Offer on This Item');
+                    } else {
+                        $djOfferEndsAt = \App\Models\Setting::get('sitewide_offer_end_at');
+                        $djOfferEndsAt = $djOfferEndsAt ? \Illuminate\Support\Carbon::parse($djOfferEndsAt) : null;
+                        $djOfferLabel = \App\Models\Setting::get('sitewide_offer_label');
+                    }
+                @endphp
+                @include('partials.offer-countdown', ['endsAt' => $djOfferEndsAt, 'label' => $djOfferLabel])
+
                 <p style="font-size:14px; color:#8a6b70; line-height:1.9; margin-bottom:24px;">{{ trans_field($product, 'description') }}</p>
 
                 @php
