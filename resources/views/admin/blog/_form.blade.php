@@ -47,6 +47,33 @@
     </label>
 </div>
 
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_title_en') }}</label>
+        <input type="text" name="meta_title_en" value="{{ old('meta_title_en', $post->meta_title_en ?? '') }}" maxlength="255" class="dj-admin-input">
+        @error('meta_title_en') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_title_ar') }}</label>
+        <input type="text" name="meta_title_ar" value="{{ old('meta_title_ar', $post->meta_title_ar ?? '') }}" dir="rtl" maxlength="255" class="dj-admin-input">
+        @error('meta_title_ar') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_description_en') }}</label>
+        <textarea name="meta_description_en" maxlength="500" rows="3" class="dj-admin-input">{{ old('meta_description_en', $post->meta_description_en ?? '') }}</textarea>
+        @error('meta_description_en') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_description_ar') }}</label>
+        <textarea name="meta_description_ar" dir="rtl" maxlength="500" rows="3" class="dj-admin-input">{{ old('meta_description_ar', $post->meta_description_ar ?? '') }}</textarea>
+        @error('meta_description_ar') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+</div>
+<p class="dj-admin-hint">{{ __('product_options.seo_hint') }}</p>
+
 <div>
     <label class="dj-admin-label">{{ __('blog.cover_image') }}</label>
     @isset($post)

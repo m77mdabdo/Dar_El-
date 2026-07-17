@@ -101,6 +101,10 @@ class BlogPostController extends Controller
             'body_en' => ['required', 'string'],
             'is_published' => ['boolean'],
             'published_at' => ['nullable', 'date'],
+            'meta_title_ar' => ['nullable', 'string', 'max:255'],
+            'meta_title_en' => ['nullable', 'string', 'max:255'],
+            'meta_description_ar' => ['nullable', 'string', 'max:500'],
+            'meta_description_en' => ['nullable', 'string', 'max:500'],
             'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ], [
             'cover_image.image' => __('Please upload a valid image file.'),
