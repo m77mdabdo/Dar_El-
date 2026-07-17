@@ -247,4 +247,40 @@ class OfferCountdownTest extends TestCase
 
         $this->assertNull($product->fresh()->offer_ends_at);
     }
+
+    /**
+     * Same nullable-datetime-admin-field pattern as offer_ends_at above,
+     * confirmed to have the identical bug: an empty datetime-local
+     * submission isn't coerced to null before Eloquent's datetime cast
+     * hands it to the query builder, so "clear the schedule" silently
+     * no-ops. See [[carbon3_and_nullable_date_gotchas]] memory.
+     */
+    public function test_admin_can_clear_a_products_scheduled_publish_at(): void
+    {
+        $admin = $this->admin();
+        $product = $this->makeProduct('Editable Schedule Product');
+
+        // Set it while status=scheduled — required_if makes it mandatory
+        // in that state.
+        $this->actingAs($admin)->put(route('admin.products.update', $product), [
+            'category_id' => $product->category_id,
+            'name_ar' => $product->name_ar, 'name_en' => $product->name_en,
+            'price' => $product->price, 'status' => 'scheduled',
+            'scheduled_publish_at' => '2027-06-01T12:00',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('2027-06-01 12:00:00', $product->fresh()->scheduled_publish_at->format('Y-m-d H:i:s'));
+
+        $product = $product->fresh();
+
+        // Switch to published (no longer required) and clear the field.
+        $this->actingAs($admin)->put(route('admin.products.update', $product), [
+            'category_id' => $product->category_id,
+            'name_ar' => $product->name_ar, 'name_en' => $product->name_en,
+            'price' => $product->price, 'status' => 'published',
+            'scheduled_publish_at' => '',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull($product->fresh()->scheduled_publish_at);
+    }
 }
