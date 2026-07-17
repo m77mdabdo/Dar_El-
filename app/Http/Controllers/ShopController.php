@@ -24,7 +24,11 @@ class ShopController extends Controller
             ->searchByName($request->q)
             ->when($request->min_price, fn ($q) => $q->where('price', '>=', (int) $request->min_price))
             ->when($request->max_price, fn ($q) => $q->where('price', '<=', (int) $request->max_price))
-            ->when($request->size, fn ($q) => $q->whereHas('sizes', fn ($s) => $s->where('size', $request->size)))
+            // (array) accepts both the new multi-select size[]=M&size[]=L
+            // format and a plain legacy size=M query string — either way
+            // this matches a product carrying ANY of the selected sizes.
+            ->when(array_filter((array) $request->size), fn ($q, $sizes) => $q->whereHas('sizes', fn ($s) => $s->whereIn('size', $sizes)))
+            ->when($request->boolean('in_stock'), fn ($q) => $q->whereHas('sizes', fn ($s) => $s->where('stock', '>', 0)))
             ->when($request->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
             ->when($request->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
             ->when(! $request->sort, fn ($q) => $q->latest())

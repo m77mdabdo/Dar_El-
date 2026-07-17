@@ -13,6 +13,7 @@ class SettingController extends Controller
 {
     protected const KEYS = [
         'store_name', 'support_email', 'whatsapp_number',
+        'business_address', 'business_hours',
         'default_shipping_fee', 'facebook_url', 'instagram_url', 'tiktok_url',
         'cart_reminder_first_delay_hours', 'cart_reminder_interval_hours', 'cart_max_reminders',
         'meta_pixel_id', 'tiktok_pixel_id', 'ga4_measurement_id',
@@ -44,6 +45,8 @@ class SettingController extends Controller
             'store_name' => ['nullable', 'string', 'max:255'],
             'support_email' => ['nullable', 'email', 'max:255'],
             'whatsapp_number' => ['nullable', 'string', 'max:30'],
+            'business_address' => ['nullable', 'string', 'max:500'],
+            'business_hours' => ['nullable', 'string', 'max:255'],
             'default_shipping_fee' => ['nullable', 'integer', 'min:0'],
             'facebook_url' => ['nullable', 'url', 'max:255'],
             'instagram_url' => ['nullable', 'url', 'max:255'],

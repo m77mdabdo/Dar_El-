@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -233,6 +234,94 @@ class SeoTest extends TestCase
         $schema = $this->extractJsonLd($response->getContent(), 'Organization');
         $this->assertNotNull($schema);
         $this->assertSame([], $schema['sameAs']);
+    }
+
+    // ---------------------------------------------------------------
+    // LocalBusiness (Store) structured data
+    // ---------------------------------------------------------------
+
+    public function test_local_business_schema_renders_with_only_the_non_empty_fields(): void
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $schema = $this->extractJsonLd($response->getContent(), 'Store');
+
+        $this->assertNotNull($schema, 'LocalBusiness (Store) JSON-LD schema not found or not valid JSON.');
+        $this->assertSame(url('/'), $schema['url']);
+        $this->assertSame([], $schema['sameAs']);
+        // No business_address/whatsapp_number/business_hours Settings exist
+        // in a fresh test database, so these must be entirely absent rather
+        // than present-but-empty/null — an incomplete schema is fine, an
+        // invalid one is not.
+        $this->assertArrayNotHasKey('address', $schema);
+        $this->assertArrayNotHasKey('telephone', $schema);
+        $this->assertArrayNotHasKey('openingHours', $schema);
+    }
+
+    public function test_local_business_schema_includes_address_phone_and_hours_once_settings_are_set(): void
+    {
+        Setting::set('business_address', '123 Tahrir Street, Cairo, Egypt');
+        Setting::set('whatsapp_number', '201234567890');
+        Setting::set('business_hours', 'Mo-Sa 10:00-22:00');
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $schema = $this->extractJsonLd($response->getContent(), 'Store');
+
+        $this->assertSame('123 Tahrir Street, Cairo, Egypt', $schema['address']);
+        // telephone reuses the existing whatsapp_number Setting rather than
+        // a separate phone field.
+        $this->assertSame('201234567890', $schema['telephone']);
+        $this->assertSame('Mo-Sa 10:00-22:00', $schema['openingHours']);
+    }
+
+    // ---------------------------------------------------------------
+    // BreadcrumbList structured data
+    // ---------------------------------------------------------------
+
+    public function test_product_page_breadcrumb_schema_has_the_correct_hierarchy(): void
+    {
+        $product = $this->makeProduct('Breadcrumb Product');
+
+        $response = $this->get(route('shop.show', $product));
+
+        $response->assertOk();
+        $schema = $this->extractJsonLd($response->getContent(), 'BreadcrumbList');
+
+        $this->assertNotNull($schema, 'BreadcrumbList JSON-LD schema not found or not valid JSON.');
+        // Default storefront locale is Arabic, so __('Home')/__('Shop')
+        // resolve to their Arabic strings — this test is about hierarchy
+        // and URLs, not AR/EN rendering, so assert against what's actually
+        // rendered rather than the English source strings.
+        $names = array_column($schema['itemListElement'], 'name');
+        $this->assertSame([__('Home'), __('Shop'), 'General', 'Breadcrumb Product'], $names);
+
+        $positions = array_column($schema['itemListElement'], 'position');
+        $this->assertSame([1, 2, 3, 4], $positions);
+
+        $last = $schema['itemListElement'][3];
+        $this->assertSame(route('shop.show', $product), $last['item']);
+    }
+
+    public function test_blog_post_breadcrumb_schema_has_the_correct_hierarchy(): void
+    {
+        $post = BlogPost::create([
+            'title_ar' => 'منشور', 'title_en' => 'Breadcrumb Post', 'slug' => 'breadcrumb-post-'.uniqid(),
+            'excerpt_ar' => 'e', 'excerpt_en' => 'e', 'body_ar' => 'b', 'body_en' => 'b',
+            'is_published' => true, 'published_at' => now(),
+        ]);
+
+        $response = $this->get(route('blog.show', $post));
+
+        $response->assertOk();
+        $schema = $this->extractJsonLd($response->getContent(), 'BreadcrumbList');
+
+        $this->assertNotNull($schema, 'BreadcrumbList JSON-LD schema not found or not valid JSON.');
+        $names = array_column($schema['itemListElement'], 'name');
+        $this->assertSame([__('Home'), __('Blog'), 'منشور'], $names);
+        $this->assertSame(route('blog.show', $post), $schema['itemListElement'][2]['item']);
     }
 
     // ---------------------------------------------------------------

@@ -23,6 +23,18 @@
                 <p class="dj-admin-hint">{{ __('settings.whatsapp_number_features_hint') }}</p>
             </div>
             <div>
+                <label class="dj-admin-label">{{ __('settings.business_address') }}</label>
+                <textarea name="business_address" rows="2" class="dj-admin-input">{{ old('business_address', $settings['business_address'] ?? '') }}</textarea>
+                @error('business_address') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                <p class="dj-admin-hint">{{ __('settings.business_address_hint') }}</p>
+            </div>
+            <div>
+                <label class="dj-admin-label">{{ __('settings.business_hours') }}</label>
+                <input type="text" name="business_hours" value="{{ old('business_hours', $settings['business_hours'] ?? '') }}" class="dj-admin-input" placeholder="Mo-Sa 10:00-22:00">
+                @error('business_hours') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                <p class="dj-admin-hint">{{ __('settings.business_hours_hint') }}</p>
+            </div>
+            <div>
                 <label class="dj-admin-label">{{ __('settings.default_shipping_fee') }}</label>
                 <input type="number" name="default_shipping_fee" value="{{ old('default_shipping_fee', $settings['default_shipping_fee'] ?? '') }}" class="dj-admin-input">
             </div>
