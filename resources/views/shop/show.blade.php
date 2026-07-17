@@ -7,6 +7,12 @@
 @section('canonical', route('shop.show', $product))
 @section('structured_data')
     @include('partials.product-schema', ['product' => $product])
+    @include('partials.breadcrumb-schema', ['breadcrumbs' => [
+        ['name' => __('Home'), 'url' => route('home')],
+        ['name' => __('Shop'), 'url' => route('shop.index')],
+        $product->category ? ['name' => trans_field($product->category, 'name'), 'url' => route('shop.index', ['category' => $product->category->slug])] : null,
+        ['name' => trans_field($product, 'name'), 'url' => route('shop.show', $product)],
+    ]])
 @endsection
 
 @section('content')

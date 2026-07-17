@@ -7,6 +7,14 @@
 @section('canonical', route('blog.show', $post))
 @section('structured_data')
     @include('partials.article-schema', ['post' => $post])
+    {{-- No visible breadcrumb UI exists on this page (just the "Back to
+         Journal" link above) — schema-only per the SEO task's scope, since
+         adding visible breadcrumbs here is a separate design decision. --}}
+    @include('partials.breadcrumb-schema', ['breadcrumbs' => [
+        ['name' => __('Home'), 'url' => route('home')],
+        ['name' => __('Blog'), 'url' => route('blog.index')],
+        ['name' => trans_field($post, 'title'), 'url' => route('blog.show', $post)],
+    ]])
 @endsection
 
 @section('content')
