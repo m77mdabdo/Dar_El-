@@ -293,6 +293,11 @@
         </div>
     @endif
 
+    {{-- Guarded: #dj-pdp-form only renders when the product isn't in the
+         whole-product-out-of-stock state (see the @if above) — dereferencing
+         it unconditionally here would throw on that branch and break every
+         script in this block, including the size/quantity selector. --}}
+    @if (! $wholeProductOutOfStock)
     <script>
         let djPdpQty = 1;
         const djPdpForm = document.getElementById('dj-pdp-form');
@@ -354,7 +359,11 @@
             addBtn.disabled = true;
             addBtn.classList.add('dj-btn-loading');
             try {
-                await djAddToCart(djPdpForm.dataset.addUrl, selected.dataset.size, djPdpQty, '{{ __('Added to cart ✓') }}', '{{ __('Could not add this item.') }}');
+                await djAddToCart(
+                    djPdpForm.dataset.addUrl, selected.dataset.size, djPdpQty,
+                    '{{ __('Added to cart ✓') }}', '{{ __('Could not add this item.') }}',
+                    { id: {{ $product->id }}, name: @json(trans_field($product, 'name')), price: {{ $product->price }} }
+                );
             } finally {
                 addBtn.classList.remove('dj-btn-loading');
                 djPdpRefreshStockUi();
@@ -362,5 +371,14 @@
         }
 
         djPdpRefreshStockUi();
+    </script>
+    @endif
+
+    <script>
+        window.djTrack && window.djTrack('view_item', {
+            id: {{ $product->id }},
+            name: @json(trans_field($product, 'name')),
+            price: {{ $product->price }},
+        });
     </script>
 @endsection

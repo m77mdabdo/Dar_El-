@@ -82,6 +82,28 @@
             </div>
 
             <div class="border-t border-[var(--dj-cream-2)] pt-4">
+                <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.marketing_tracking') }}</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.meta_pixel_id') }}</label>
+                        <input type="text" name="meta_pixel_id" value="{{ old('meta_pixel_id', $settings['meta_pixel_id'] ?? '') }}" class="dj-admin-input" placeholder="123456789012345">
+                        <p class="dj-admin-hint">{{ __('settings.tracking_id_hint') }}</p>
+                    </div>
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.tiktok_pixel_id') }}</label>
+                        <input type="text" name="tiktok_pixel_id" value="{{ old('tiktok_pixel_id', $settings['tiktok_pixel_id'] ?? '') }}" class="dj-admin-input" placeholder="C4A1B2C3D4E5F6G7H8I9">
+                        <p class="dj-admin-hint">{{ __('settings.tracking_id_hint') }}</p>
+                    </div>
+                    <div>
+                        <label class="dj-admin-label">{{ __('settings.ga4_measurement_id') }}</label>
+                        <input type="text" name="ga4_measurement_id" value="{{ old('ga4_measurement_id', $settings['ga4_measurement_id'] ?? '') }}" class="dj-admin-input" placeholder="G-XXXXXXXXXX">
+                        <p class="dj-admin-hint">{{ __('settings.tracking_id_hint') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-[var(--dj-cream-2)] pt-4">
                 <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.site_images') }}</h2>
 
                 @php

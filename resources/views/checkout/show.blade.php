@@ -200,5 +200,22 @@
                 }
             );
         });
+
+        @php
+            // Built in a @php block, not inline inside @json() — Blade's
+            // directive-argument parser gets confused by a multi-line
+            // expression containing a nested trans_field(...) call and
+            // silently truncates the compiled output mid-array.
+            $djCheckoutTrackingItems = collect($items)->map(fn ($i) => [
+                'id' => $i['product']->id,
+                'name' => trans_field($i['product'], 'name'),
+                'price' => $i['product']->price,
+                'quantity' => $i['quantity'],
+            ])->values();
+        @endphp
+        window.djTrack && window.djTrack('begin_checkout', {
+            value: djCheckoutSubtotal,
+            items: @json($djCheckoutTrackingItems),
+        });
     </script>
 @endsection
