@@ -1,8 +1,13 @@
 @extends('layouts.storefront')
 
-@section('title', trans_field($product, 'name') . ' — Dar El Jamila')
-@section('meta_description', \Illuminate\Support\Str::limit(trans_field($product, 'description'), 150))
+@section('title', $product->seoTitle(app()->getLocale()) . ' — Dar El Jamila')
+@section('meta_description', \Illuminate\Support\Str::limit($product->seoDescription(app()->getLocale()), 150))
 @section('og_image', $product->cover_image_src ?? asset('assets/branding/favicon-512.png'))
+@section('og_type', 'product')
+@section('canonical', route('shop.show', $product))
+@section('structured_data')
+    @include('partials.product-schema', ['product' => $product])
+@endsection
 
 @section('content')
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">

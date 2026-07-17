@@ -49,7 +49,23 @@ class ShopController extends Controller
 
         $heroImage = Setting::get('shop_hero_image', 'https://images.unsplash.com/photo-1532370436137-d9aaea5dab36?w=1600&q=80&auto=format&fit=crop');
 
-        return view('shop.index', compact('products', 'categories', 'availableSizes', 'heroImage'));
+        // A category filter is the one dimension worth its own indexable,
+        // canonical URL — every other combination (search, price range,
+        // size, sort, pagination), with or without a category alongside it,
+        // canonicalizes down to either this category's URL or the plain
+        // /shop page, so Google never sees dozens of near-duplicate pages
+        // for what's really one collection. currentCategory is also reused
+        // below to surface the category's own SEO title/description instead
+        // of the generic "Shop" copy when one is active.
+        $currentCategory = $request->category
+            ? Category::where('slug', $request->category)->where('is_active', true)->first()
+            : null;
+
+        $canonicalUrl = $currentCategory
+            ? route('shop.index', ['category' => $currentCategory->slug])
+            : route('shop.index');
+
+        return view('shop.index', compact('products', 'categories', 'availableSizes', 'heroImage', 'currentCategory', 'canonicalUrl'));
     }
 
     public function show(Product $product)

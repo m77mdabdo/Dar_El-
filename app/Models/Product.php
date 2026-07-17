@@ -40,8 +40,27 @@ class Product extends Model
         // on every product write, regardless of which code path performs
         // it — single CRUD, bulk publish/archive/delete, anything. saved()
         // fires after both create and update.
-        static::saved(fn () => Cache::forget('storefront.home.data'));
-        static::deleted(fn () => Cache::forget('storefront.home.data'));
+        //
+        // These must NOT be arrow functions: Cache::forget() returns false
+        // when the key was already absent, and Laravel's event dispatcher
+        // treats a listener returning literal false as a signal to halt all
+        // further listeners for that event — an arrow function silently
+        // leaks that boolean as its return value, which would stop the
+        // sitemap.xml listeners below from ever running whenever this cache
+        // key happened to already be empty.
+        static::saved(function () {
+            Cache::forget('storefront.home.data');
+        });
+        static::deleted(function () {
+            Cache::forget('storefront.home.data');
+        });
+
+        static::saved(function () {
+            Cache::forget('sitemap.xml');
+        });
+        static::deleted(function () {
+            Cache::forget('sitemap.xml');
+        });
     }
 
     protected function casts(): array
