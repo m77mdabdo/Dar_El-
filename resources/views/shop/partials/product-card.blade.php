@@ -11,6 +11,7 @@
         'image' => $product->cover_image_src,
         'name' => trans_field($product, 'name'),
         'description' => trans_field($product, 'description'),
+        'price' => $product->price,
         'priceFormatted' => number_format($product->price).' EGP',
         'rating' => $product->reviews_count > 0 ? $product->average_rating : null,
         'ratingLabel' => __('Customer Rating'),
@@ -76,7 +77,7 @@
         <div class="dj-card-bottom">
             <span class="dj-price">{{ number_format($product->price) }} EGP</span>
             <button type="button" class="dj-add-btn" {{ $djInStock ? '' : 'disabled' }}
-                onclick="event.stopPropagation(); djAddToCart('{{ route('cart.add', $product) }}', '{{ $djQuickAddSize }}', 1, '{{ __('Added to cart ✓') }}', '{{ __('Could not add this item.') }}')">
+                onclick='event.stopPropagation(); djAddToCart(@json(route('cart.add', $product)), @json($djQuickAddSize), 1, @json(__('Added to cart ✓')), @json(__('Could not add this item.')), { id: {{ $product->id }}, name: @json(trans_field($product, 'name')), price: {{ $product->price }} })'>
                 {{ $djInStock ? __('Add to Cart') : __('Out of Stock') }}
             </button>
         </div>

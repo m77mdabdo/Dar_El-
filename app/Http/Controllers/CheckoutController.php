@@ -269,7 +269,18 @@ class CheckoutController extends Controller
 
     public function success(Order $order): View
     {
-        return view('checkout.success', compact('order'));
+        // Atomic compare-and-set: this UPDATE only affects a row where
+        // purchase_event_fired_at is still null, so two concurrent requests
+        // (or a refresh racing the first load) can't both "win" — exactly
+        // one caller ever sees affected-rows === 1 and renders the purchase
+        // tracking event. Same stock_deducted_at-style timestamp-guard
+        // convention used elsewhere on this model, just single-query since
+        // there's no related data to restore alongside it.
+        $shouldTrackPurchase = Order::whereKey($order->id)
+            ->whereNull('purchase_event_fired_at')
+            ->update(['purchase_event_fired_at' => now()]) === 1;
+
+        return view('checkout.success', compact('order', 'shouldTrackPurchase'));
     }
 
     /**

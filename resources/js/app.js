@@ -154,11 +154,21 @@ window.djToggleWishlist = async function (btn, productId) {
     }
 };
 
-window.djAddToCart = async function (addUrl, size, quantity, successMessage, errorMessage) {
+// productData ({ id, name, price }) is optional and purely for marketing
+// tracking — a generic custom-event dispatch, not tracking logic itself,
+// which stays out of this compiled bundle and lives inline in
+// partials/tracking-base.blade.php (see that file's listener for
+// 'dj:cart-add'). Callers that don't pass it just don't fire the event.
+window.djAddToCart = async function (addUrl, size, quantity, successMessage, errorMessage, productData) {
     try {
         const data = await djFetch(addUrl, 'POST', { size, quantity: quantity || 1 });
         djUpdateCartFromResponse(data);
         djShowToast(successMessage);
+        if (productData) {
+            document.dispatchEvent(new CustomEvent('dj:cart-add', {
+                detail: { id: productData.id, name: productData.name, price: productData.price, quantity: quantity || 1 },
+            }));
+        }
         return true;
     } catch (e) {
         djShowToast(e.data?.error || errorMessage);
@@ -229,7 +239,10 @@ window.djConfirmModalAdd = async function (event) {
     btn?.classList.add('dj-btn-loading');
     btn && (btn.disabled = true);
     try {
-        const ok = await djAddToCart(djModalProduct.addUrl, djModalSize, djModalQty, djModalProduct.addedMessage, djModalProduct.errorMessage);
+        const ok = await djAddToCart(
+            djModalProduct.addUrl, djModalSize, djModalQty, djModalProduct.addedMessage, djModalProduct.errorMessage,
+            { id: djModalProduct.id, name: djModalProduct.name, price: djModalProduct.price }
+        );
         if (ok) djCloseModal();
     } finally {
         // No need to reset on success — the modal is about to close; on

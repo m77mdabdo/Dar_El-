@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>window.djI18n = { close: @json(__('Close')) };</script>
+    @include('partials.tracking-base')
     <meta name="description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
     <meta property="og:title" content="@yield('title', config('app.name', 'Dar El Jamila'))">
     <meta property="og:description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">

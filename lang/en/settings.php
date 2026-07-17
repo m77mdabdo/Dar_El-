@@ -23,6 +23,12 @@ return [
     'cart_max_reminders' => 'Maximum Reminders',
     'cart_reminders_hint' => 'A cart becomes eligible for its first reminder after sitting inactive for the delay above, then again every interval, up to the maximum — checked every 30 minutes by the scheduler. The admin "Send Reminder" button always works regardless of these settings.',
 
+    'marketing_tracking' => 'Marketing Tracking',
+    'meta_pixel_id' => 'Meta Pixel ID',
+    'tiktok_pixel_id' => 'TikTok Pixel ID',
+    'ga4_measurement_id' => 'GA4 Measurement ID',
+    'tracking_id_hint' => 'Leave empty to disable — no tracking code renders at all until an ID is set here.',
+
     'site_images' => 'Site Images',
     'images_hint' => 'JPG, PNG, or WEBP. Max 4MB each. Uploading a new image replaces the current one.',
     'save_settings' => 'Save Settings',
