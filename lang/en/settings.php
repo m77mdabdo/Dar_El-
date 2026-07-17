@@ -33,6 +33,11 @@ return [
     'ga4_measurement_id' => 'GA4 Measurement ID',
     'tracking_id_hint' => 'Leave empty to disable — no tracking code renders at all until an ID is set here.',
 
+    'sitewide_offer' => 'Site-wide Countdown Offer',
+    'sitewide_offer_label' => 'Offer Headline',
+    'sitewide_offer_end_at' => 'Offer Ends At',
+    'sitewide_offer_hint' => 'Leave the end date empty (or set it in the past) to disable — the countdown banner then stops appearing everywhere on the site. Shown on the homepage, the shop page, and on any product page that doesn\'t have its own offer_ends_at set.',
+
     'site_images' => 'Site Images',
     'images_hint' => 'JPG, PNG, or WEBP. Max 4MB each. Uploading a new image replaces the current one.',
     'save_settings' => 'Save Settings',

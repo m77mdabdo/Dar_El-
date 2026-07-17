@@ -19,6 +19,12 @@
     </section>
 
     @php
+        $djSitewideOfferEndsAt = \App\Models\Setting::get('sitewide_offer_end_at');
+        $djSitewideOfferEndsAt = $djSitewideOfferEndsAt ? \Illuminate\Support\Carbon::parse($djSitewideOfferEndsAt) : null;
+    @endphp
+    @include('partials.offer-countdown', ['endsAt' => $djSitewideOfferEndsAt, 'label' => \App\Models\Setting::get('sitewide_offer_label')])
+
+    @php
         // Every current query param except `category`/`page` — merged into
         // each category chip's link so switching category never silently
         // drops a search/price/size/sort the customer already set.

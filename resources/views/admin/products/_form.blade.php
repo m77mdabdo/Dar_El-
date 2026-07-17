@@ -66,6 +66,13 @@
     <input type="text" name="badge" value="{{ old('badge', $product->badge ?? '') }}" placeholder="{{ __('products.badge_placeholder') }}" class="dj-admin-input">
 </div>
 
+<div>
+    <label class="dj-admin-label">{{ __('products.offer_ends_at') }}</label>
+    <input type="datetime-local" name="offer_ends_at" value="{{ old('offer_ends_at', isset($product) ? $product->offer_ends_at?->format('Y-m-d\TH:i') : '') }}" class="dj-admin-input">
+    @error('offer_ends_at') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    <p class="dj-admin-hint">{{ __('products.offer_ends_at_hint') }}</p>
+</div>
+
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-data="{ status: '{{ old('status', $product->status ?? 'published') }}' }">
     <div>
         <label class="dj-admin-label">{{ __('products.status') }}</label>
