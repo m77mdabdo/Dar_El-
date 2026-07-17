@@ -7,16 +7,20 @@
     <script>window.djI18n = { close: @json(__('Close')) };</script>
     @include('partials.tracking-base')
     <meta name="description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
+    <link rel="canonical" href="@yield('canonical', url()->current())">
     <meta property="og:title" content="@yield('title', config('app.name', 'Dar El Jamila'))">
     <meta property="og:description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
     <meta property="og:image" content="@yield('og_image', asset('assets/branding/favicon-512.png'))">
-    <meta property="og:type" content="website">
+    <meta property="og:url" content="@yield('canonical', url()->current())">
+    <meta property="og:type" content="@yield('og_type', 'website')">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', config('app.name', 'Dar El Jamila'))">
     <meta name="twitter:description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
     <meta name="twitter:image" content="@yield('og_image', asset('assets/branding/favicon-512.png'))">
     <title>@yield('title', config('app.name', 'Dar El Jamila'))</title>
     @include('partials.favicon-links')
+    @include('partials.organization-schema')
+    @yield('structured_data')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
