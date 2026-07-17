@@ -1,8 +1,13 @@
 @extends('layouts.storefront')
 
-@section('title', trans_field($post, 'title') . ' — Dar El Jamila')
-@section('meta_description', \Illuminate\Support\Str::limit(trans_field($post, 'excerpt'), 150))
+@section('title', $post->seoTitle(app()->getLocale()) . ' — Dar El Jamila')
+@section('meta_description', \Illuminate\Support\Str::limit($post->seoDescription(app()->getLocale()), 150))
 @section('og_image', $post->cover_image ? setting_image_url($post->cover_image) : asset('assets/branding/favicon-512.png'))
+@section('og_type', 'article')
+@section('canonical', route('blog.show', $post))
+@section('structured_data')
+    @include('partials.article-schema', ['post' => $post])
+@endsection
 
 @section('content')
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-12">

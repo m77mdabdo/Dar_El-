@@ -1,7 +1,11 @@
 @extends('layouts.storefront')
 
-@section('title', __('Shop') . ' — Dar El Jamila')
-@section('meta_description', __("Abayas, evening dresses, isdal and accessories, all hand-picked with care"))
+@section('title', ($currentCategory ? $currentCategory->seoTitle(app()->getLocale()) : __('Shop')) . ' — Dar El Jamila')
+@section('meta_description', \Illuminate\Support\Str::limit(
+    $currentCategory ? $currentCategory->seoDescription(app()->getLocale()) : __("Abayas, evening dresses, isdal and accessories, all hand-picked with care"),
+    150
+))
+@section('canonical', $canonicalUrl)
 
 @section('content')
     <section class="dj-page-hero dj-photo-wrap dj-tint-maroon dj-strong">
