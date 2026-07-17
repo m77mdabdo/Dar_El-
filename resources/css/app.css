@@ -148,7 +148,11 @@ body.dj-en .dj-nav-logo .dj-mark { font-family: 'Playfair Display', serif; }
     .dj-lang-btn { padding: 8px; }
 }
 .dj-mobile-menu { display: flex; flex-direction: column; background: var(--dj-maroon-dark); padding: 10px 5% 20px; gap: 14px; }
-.dj-mobile-menu a { color: var(--dj-cream-2); font-size: 15px; padding: 6px 0; display: block; }
+/* Also covers the "Log Out" <button> (it can't be an <a> since logout is a
+   POST form) — without this it inherited body.dj-storefront's near-black
+   --dj-ink text color instead of this cream tone, making it functionally
+   invisible against this same dark maroon background. */
+.dj-mobile-menu a, .dj-mobile-menu button { color: var(--dj-cream-2); font-size: 15px; padding: 6px 0; display: block; background: none; border: none; text-align: start; font-family: inherit; }
 
 .dj-page-enter { animation: dj-fadeIn .5s ease; }
 @keyframes dj-fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
