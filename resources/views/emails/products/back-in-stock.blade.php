@@ -7,11 +7,11 @@
 
 @section('content')
     <h2 style="font-size:20px; color:#601526; margin:0 0 4px; font-family: Georgia, 'Times New Roman', serif; text-align:center;">
-        {{ __('emails.back_in_stock_greeting', ['name' => $user->name]) }}
+        {{ __('emails.back_in_stock_greeting') }}
     </h2>
 
     <p style="font-size:14px; line-height:1.8; color:#5a4448; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:0 0 22px;">
-        {{ __('emails.back_in_stock_intro', ['product' => trans_field($product, 'name')]) }}
+        {{ $size ? __('emails.back_in_stock_intro_with_size', ['product' => trans_field($product, 'name'), 'size' => $size->size]) : __('emails.back_in_stock_intro', ['product' => trans_field($product, 'name')]) }}
     </p>
 
     @if ($product->cover_image_src)
@@ -21,4 +21,8 @@
     @endif
 
     @include('emails.partials.button', ['href' => route('shop.show', $product), 'label' => __('emails.back_in_stock_button')])
+
+    <p style="font-size:11.5px; line-height:1.8; color:#8a6b70; font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align:center; margin:26px 0 0;">
+        <a href="{{ $unsubscribeUrl }}" style="color:#8a6b70; text-decoration:underline;">{{ __('emails.back_in_stock_unsubscribe') }}</a>
+    </p>
 @endsection

@@ -57,63 +57,86 @@
                 <p class="dj-price" style="font-size:22px; margin-bottom:18px;">{{ number_format($product->price) }} EGP</p>
                 <p style="font-size:14px; color:#8a6b70; line-height:1.9; margin-bottom:24px;">{{ trans_field($product, 'description') }}</p>
 
-                <form id="dj-pdp-form" data-add-url="{{ route('cart.add', $product) }}"
-                      data-sizes='@json($product->sizes->map(fn ($s) => ["size" => $s->size, "stock" => $s->stock]))'
-                      data-low-stock-threshold="{{ \App\Models\Product::LOW_STOCK_THRESHOLD }}"
-                      data-in-stock-label="{{ __('In Stock') }}" data-low-stock-label="{{ __('Only :count left') }}" data-out-of-stock-label="{{ __('Out of Stock') }}">
-                    @csrf
-                    <div class="dj-sizes" style="margin-bottom:12px;">
-                        @foreach ($product->sizes as $size)
-                            <div class="dj-size-opt {{ $loop->first && $size->stock > 0 ? 'dj-active' : '' }} {{ $size->stock <= 0 ? 'dj-disabled' : '' }}"
-                                 data-size="{{ $size->size }}" onclick="{{ $size->stock > 0 ? 'djPdpSelectSize(this)' : '' }}">{{ $size->size }}</div>
-                        @endforeach
-                    </div>
+                @php
+                    // A product with 0 or 1 size rows has no meaningful size
+                    // choice for the customer to make — its "notify me" is
+                    // whole-product-level, replacing Add to Cart entirely,
+                    // rather than a per-size trigger in a selector that would
+                    // only ever show one (already-disabled) option.
+                    $hasMultipleSizes = $product->sizes->count() > 1;
+                    $wholeProductOutOfStock = ! $hasMultipleSizes && $product->totalStock() <= 0;
+                @endphp
 
-                    <div id="dj-pdp-stock" class="dj-stock-badge" style="margin-bottom:16px;"></div>
+                @if (! $wholeProductOutOfStock)
+                    <form id="dj-pdp-form" data-add-url="{{ route('cart.add', $product) }}"
+                          data-sizes='@json($product->sizes->map(fn ($s) => ["size" => $s->size, "stock" => $s->stock]))'
+                          data-low-stock-threshold="{{ \App\Models\Product::LOW_STOCK_THRESHOLD }}"
+                          data-in-stock-label="{{ __('In Stock') }}" data-low-stock-label="{{ __('Only :count left') }}" data-out-of-stock-label="{{ __('Out of Stock') }}">
+                        @csrf
+                        <div class="dj-sizes" style="margin-bottom:12px;">
+                            @foreach ($product->sizes as $size)
+                                <div class="dj-size-wrap">
+                                    <div class="dj-size-opt {{ $loop->first && $size->stock > 0 ? 'dj-active' : '' }} {{ $size->stock <= 0 ? 'dj-disabled' : '' }}"
+                                         data-size="{{ $size->size }}" onclick="{{ $size->stock > 0 ? 'djPdpSelectSize(this)' : '' }}">{{ $size->size }}</div>
+                                    @if ($hasMultipleSizes && $size->stock <= 0)
+                                        <button type="button" class="dj-size-bell" onclick='djOpenNotifyMe({{ $size->id }}, @json($size->size))' aria-label="{{ __('Notify me') }}" title="{{ __('Notify me') }}">🔔</button>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
 
-                    <div class="dj-qty-select">
-                        <span style="font-size:12.5px; color:#8a6b70;">{{ __('Quantity') }}</span>
-                        <button type="button" id="dj-pdp-qty-minus" onclick="djPdpChangeQty(-1)">-</button>
-                        <span id="dj-pdp-qty">1</span>
-                        <button type="button" id="dj-pdp-qty-plus" onclick="djPdpChangeQty(1)">+</button>
-                    </div>
+                        <div id="dj-pdp-stock" class="dj-stock-badge" style="margin-bottom:16px;"></div>
 
-                    <button type="button" onclick="djPdpAddToCart()" id="dj-pdp-add-btn" class="dj-modal-add">
-                        {{ __('Add to Cart') }}
+                        <div class="dj-qty-select">
+                            <span style="font-size:12.5px; color:#8a6b70;">{{ __('Quantity') }}</span>
+                            <button type="button" id="dj-pdp-qty-minus" onclick="djPdpChangeQty(-1)">-</button>
+                            <span id="dj-pdp-qty">1</span>
+                            <button type="button" id="dj-pdp-qty-plus" onclick="djPdpChangeQty(1)">+</button>
+                        </div>
+
+                        <button type="button" onclick="djPdpAddToCart()" id="dj-pdp-add-btn" class="dj-modal-add">
+                            {{ __('Add to Cart') }}
+                        </button>
+                    </form>
+                @else
+                    <button type="button" class="dj-modal-add" onclick="djOpenNotifyMe(null, null)">
+                        🔔 {{ __('Notify me when back in stock') }}
                     </button>
+                @endif
 
-                    @if ($whatsapp = \App\Models\Setting::get('whatsapp_number'))
-                        {{-- Inline (not resources/css/app.css) so correct sizing ships the moment
-                             this Blade file reaches production via a plain git pull — it doesn't
-                             depend on npm run build + redeploying the compiled asset bundle. --}}
-                        <style>
-                            .dj-ask-whatsapp {
-                                margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
-                                background: transparent; border: 1.5px solid var(--dj-maroon); color: var(--dj-maroon);
-                                font-weight: 700; font-size: 14px; padding: 14px; border-radius: 12px; width: 100%;
-                                transition: background .2s, color .2s;
-                            }
-                            .dj-ask-whatsapp:hover { background: var(--dj-maroon); color: var(--dj-gold); }
-                            .dj-ask-whatsapp svg { width: 18px; height: 18px; flex-shrink: 0; }
-                        </style>
-                        <a class="dj-ask-whatsapp"
-                           href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsapp) }}?text={{ rawurlencode('مهتمة بالمنتج: '.trans_field($product, 'name').' - '.route('shop.show', $product)) }}"
-                           target="_blank" rel="noopener">
-                            <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-                                <path d="M16.001 3C9.096 3 3.5 8.596 3.5 15.5c0 2.348.646 4.54 1.767 6.417L3 29l7.27-2.217A12.42 12.42 0 0 0 16 28.5c6.905 0 12.5-5.596 12.5-12.5S22.906 3 16.001 3Zm7.32 17.688c-.312.878-1.552 1.61-2.532 1.816-.673.14-1.552.253-4.51-.968-3.786-1.564-6.223-5.402-6.412-5.652-.182-.25-1.532-2.038-1.532-3.888 0-1.85.973-2.756 1.32-3.135.312-.34.68-.425.907-.425.227 0 .454.002.652.013.21.011.492-.08.769.586.312.75 1.061 2.6 1.153 2.79.091.19.152.412.03.663-.12.25-.182.406-.363.625-.182.219-.383.489-.546.657-.182.19-.372.396-.16.774.212.378.941 1.552 2.02 2.514 1.388 1.24 2.56 1.623 2.938 1.805.379.181.6.152.82-.091.222-.242.95-1.106 1.204-1.485.253-.379.505-.31.85-.19.348.121 2.196 1.036 2.573 1.224.379.19.63.284.72.442.091.16.091.923-.222 1.8Z"/>
-                            </svg>
-                            {{ __('Ask about this product') }}
-                        </a>
-                    @endif
+                @if ($whatsapp = \App\Models\Setting::get('whatsapp_number'))
+                    {{-- Inline (not resources/css/app.css) so correct sizing ships the moment
+                         this Blade file reaches production via a plain git pull — it doesn't
+                         depend on npm run build + redeploying the compiled asset bundle. --}}
+                    <style>
+                        .dj-ask-whatsapp {
+                            margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+                            background: transparent; border: 1.5px solid var(--dj-maroon); color: var(--dj-maroon);
+                            font-weight: 700; font-size: 14px; padding: 14px; border-radius: 12px; width: 100%;
+                            transition: background .2s, color .2s;
+                        }
+                        .dj-ask-whatsapp:hover { background: var(--dj-maroon); color: var(--dj-gold); }
+                        .dj-ask-whatsapp svg { width: 18px; height: 18px; flex-shrink: 0; }
+                    </style>
+                    <a class="dj-ask-whatsapp"
+                       href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsapp) }}?text={{ rawurlencode('مهتمة بالمنتج: '.trans_field($product, 'name').' - '.route('shop.show', $product)) }}"
+                       target="_blank" rel="noopener">
+                        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                            <path d="M16.001 3C9.096 3 3.5 8.596 3.5 15.5c0 2.348.646 4.54 1.767 6.417L3 29l7.27-2.217A12.42 12.42 0 0 0 16 28.5c6.905 0 12.5-5.596 12.5-12.5S22.906 3 16.001 3Zm7.32 17.688c-.312.878-1.552 1.61-2.532 1.816-.673.14-1.552.253-4.51-.968-3.786-1.564-6.223-5.402-6.412-5.652-.182-.25-1.532-2.038-1.532-3.888 0-1.85.973-2.756 1.32-3.135.312-.34.68-.425.907-.425.227 0 .454.002.652.013.21.011.492-.08.769.586.312.75 1.061 2.6 1.153 2.79.091.19.152.412.03.663-.12.25-.182.406-.363.625-.182.219-.383.489-.546.657-.182.19-.372.396-.16.774.212.378.941 1.552 2.02 2.514 1.388 1.24 2.56 1.623 2.938 1.805.379.181.6.152.82-.091.222-.242.95-1.106 1.204-1.485.253-.379.505-.31.85-.19.348.121 2.196 1.036 2.573 1.224.379.19.63.284.72.442.091.16.091.923-.222 1.8Z"/>
+                        </svg>
+                        {{ __('Ask about this product') }}
+                    </a>
+                @endif
 
-                    <div class="dj-modal-trust">
-                        <span>{{ __('Secure Order') }}</span>
-                        <span>{{ __('Nationwide Delivery') }}</span>
-                        <span>{{ __('3-Day Exchange') }}</span>
-                    </div>
-                </form>
+                <div class="dj-modal-trust">
+                    <span>{{ __('Secure Order') }}</span>
+                    <span>{{ __('Nationwide Delivery') }}</span>
+                    <span>{{ __('3-Day Exchange') }}</span>
+                </div>
             </div>
         </div>
+
+        @include('partials.back-in-stock-notify', ['product' => $product])
 
         <div style="margin-top:70px; max-width:640px;">
             <div class="dj-section-title" style="text-align:left; padding:0 0 20px;">
