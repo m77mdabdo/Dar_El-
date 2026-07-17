@@ -101,6 +101,10 @@ class CategoryController extends Controller
             'description_en' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer'],
             'is_active' => ['boolean'],
+            'meta_title_ar' => ['nullable', 'string', 'max:255'],
+            'meta_title_en' => ['nullable', 'string', 'max:255'],
+            'meta_description_ar' => ['nullable', 'string', 'max:500'],
+            'meta_description_en' => ['nullable', 'string', 'max:500'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ], [
             'image.image' => __('Please upload a valid image file.'),

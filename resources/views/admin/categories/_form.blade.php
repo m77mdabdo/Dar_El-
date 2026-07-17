@@ -25,6 +25,33 @@
     <label class="dj-admin-label">{{ __('categories.sort_order') }}</label>
     <input type="number" name="sort_order" value="{{ old('sort_order', $category->sort_order ?? 0) }}" class="dj-admin-input w-32">
 </div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_title_en') }}</label>
+        <input type="text" name="meta_title_en" value="{{ old('meta_title_en', $category->meta_title_en ?? '') }}" maxlength="255" class="dj-admin-input">
+        @error('meta_title_en') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_title_ar') }}</label>
+        <input type="text" name="meta_title_ar" value="{{ old('meta_title_ar', $category->meta_title_ar ?? '') }}" dir="rtl" maxlength="255" class="dj-admin-input">
+        @error('meta_title_ar') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_description_en') }}</label>
+        <textarea name="meta_description_en" maxlength="500" rows="3" class="dj-admin-input">{{ old('meta_description_en', $category->meta_description_en ?? '') }}</textarea>
+        @error('meta_description_en') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+    <div>
+        <label class="dj-admin-label">{{ __('product_options.meta_description_ar') }}</label>
+        <textarea name="meta_description_ar" dir="rtl" maxlength="500" rows="3" class="dj-admin-input">{{ old('meta_description_ar', $category->meta_description_ar ?? '') }}</textarea>
+        @error('meta_description_ar') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    </div>
+</div>
+<p class="dj-admin-hint">{{ __('product_options.seo_hint') }}</p>
+
 <div>
     <label class="dj-admin-label">{{ __('categories.image') }}</label>
     @isset($category)
