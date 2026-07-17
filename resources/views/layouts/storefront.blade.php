@@ -20,6 +20,7 @@
     <title>@yield('title', config('app.name', 'Dar El Jamila'))</title>
     @include('partials.favicon-links')
     @include('partials.organization-schema')
+    @include('partials.local-business-schema')
     @yield('structured_data')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">

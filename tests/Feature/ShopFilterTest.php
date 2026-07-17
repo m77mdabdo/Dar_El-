@@ -151,6 +151,103 @@ class ShopFilterTest extends TestCase
         $response->assertDontSee('value="XL"', false);
     }
 
+    public function test_multi_select_size_filter_matches_any_selected_size(): void
+    {
+        $this->makeProduct('Product Size M', 500, size: 'M', stock: 5);
+        $this->makeProduct('Product Size L', 500, size: 'L', stock: 5);
+        $this->makeProduct('Product Size XL', 500, size: 'XL', stock: 5);
+
+        $response = $this->get(route('shop.index', ['size' => ['M', 'L']]));
+
+        $response->assertOk();
+        $response->assertSee('Product Size M');
+        $response->assertSee('Product Size L');
+        $response->assertDontSee('Product Size XL');
+    }
+
+    public function test_size_filter_with_no_sizes_selected_returns_everything(): void
+    {
+        $this->makeProduct('Product Size M', 500, size: 'M', stock: 5);
+        $this->makeProduct('Product Size L', 500, size: 'L', stock: 5);
+
+        $response = $this->get(route('shop.index'));
+
+        $response->assertOk();
+        $response->assertSee('Product Size M');
+        $response->assertSee('Product Size L');
+    }
+
+    public function test_legacy_single_size_query_string_still_works_under_the_new_multi_select_format(): void
+    {
+        $this->makeProduct('Product Size M', 500, size: 'M', stock: 5);
+        $this->makeProduct('Product Size L', 500, size: 'L', stock: 5);
+
+        $response = $this->get(route('shop.index', ['size' => 'M']));
+
+        $response->assertOk();
+        $response->assertSee('Product Size M');
+        $response->assertDontSee('Product Size L');
+    }
+
+    public function test_in_stock_only_filter_excludes_zero_stock_products(): void
+    {
+        $this->makeProduct('Available Product', 500, size: 'M', stock: 5);
+        $this->makeProduct('Sold Out Product', 500, size: 'M', stock: 0);
+
+        $response = $this->get(route('shop.index', ['in_stock' => '1']));
+
+        $response->assertOk();
+        $response->assertSee('Available Product');
+        $response->assertDontSee('Sold Out Product');
+    }
+
+    public function test_in_stock_only_filter_excludes_products_with_no_sizes_at_all(): void
+    {
+        $this->makeProduct('Available Product', 500, size: 'M', stock: 5);
+        // No sizes()->create() call at all — a genuinely sizeless product,
+        // which totalStock()/stockStatus() already treat as out of stock.
+        Product::create([
+            'category_id' => $this->defaultCategory()->id,
+            'name_ar' => 'Sizeless Product', 'name_en' => 'Sizeless Product',
+            'slug' => 'sizeless-product-'.uniqid(), 'price' => 500, 'is_active' => true, 'is_featured' => false,
+        ]);
+
+        $response = $this->get(route('shop.index', ['in_stock' => '1']));
+
+        $response->assertOk();
+        $response->assertSee('Available Product');
+        $response->assertDontSee('Sizeless Product');
+    }
+
+    public function test_in_stock_only_filter_combines_with_size_and_category_filters(): void
+    {
+        $category = $this->makeCategory('In Stock Combined Category');
+
+        // Matches everything: right category, right size, in stock.
+        $this->makeProduct('Matches Everything', 500, $category, size: 'M', stock: 5);
+        // Right category and size, but out of stock — must be excluded.
+        $this->makeProduct('Right Size But Sold Out', 500, $category, size: 'M', stock: 0);
+        // In stock and right category, but wrong size — must be excluded.
+        $this->makeProduct('Wrong Size', 500, $category, size: 'L', stock: 5);
+
+        $response = $this->get(route('shop.index', [
+            'category' => $category->slug, 'size' => ['M'], 'in_stock' => '1',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Matches Everything');
+        $response->assertDontSee('Right Size But Sold Out');
+        $response->assertDontSee('Wrong Size');
+    }
+
+    public function test_in_stock_only_checkbox_reflects_current_filter_state(): void
+    {
+        $response = $this->get(route('shop.index', ['in_stock' => '1']));
+
+        $response->assertOk();
+        $response->assertSee('name="in_stock" value="1" onchange="this.form.submit()" checked', false);
+    }
+
     public function test_sort_price_low_to_high(): void
     {
         $this->makeProduct('Expensive First', 2000);

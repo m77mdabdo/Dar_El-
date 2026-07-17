@@ -73,9 +73,14 @@
         .dj-filters-size-chip {
             position: relative; padding: 9px 18px; border-radius: 30px; font-size: 13px; font-weight: 500;
             background: var(--dj-cream-2); color: var(--dj-maroon); cursor: pointer; transition: .2s;
+            display: inline-flex; align-items: center; text-decoration: none;
         }
         .dj-filters-size-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-        .dj-filters-size-chip:has(input:checked) { background: var(--dj-maroon); color: var(--dj-gold); }
+        /* :has(input:checked) covers the checkbox chips (size options, the
+           in-stock toggle); .dj-active covers the "All Sizes" chip, which is
+           a plain link with no input of its own — same selected look either
+           way. */
+        .dj-filters-size-chip:has(input:checked), .dj-filters-size-chip.dj-active { background: var(--dj-maroon); color: var(--dj-gold); }
 
         .dj-filters-actions { display: flex; align-items: center; gap: 16px; flex: 1 1 auto; }
         .dj-filters-apply { background: var(--dj-maroon); color: var(--dj-gold); font-weight: 700; padding: 12px 26px; border-radius: 12px; font-size: 14px; }
@@ -138,23 +143,41 @@
             <input type="number" min="0" id="dj-filter-max" name="max_price" value="{{ request('max_price') }}">
         </div>
 
+        @php
+            // Accepts both the new size[]=M&size[]=L array format and a
+            // plain legacy size=M string, matching ShopController's own
+            // (array) cast — so a bookmarked single-size link still shows
+            // the right chip as checked.
+            $selectedSizes = array_filter((array) request('size'));
+        @endphp
+
         @if ($availableSizes->isNotEmpty())
             <div class="dj-filters-field" style="flex-basis:100%;">
                 <label>{{ __('Size') }}</label>
                 <div class="dj-filters-sizes">
-                    <label class="dj-filters-size-chip">
-                        <input type="radio" name="size" value="" onchange="this.form.submit()" @checked(! request('size'))>
+                    <a href="{{ route('shop.index', array_filter(request()->except(['size', 'page']))) }}"
+                       class="dj-filters-size-chip {{ empty($selectedSizes) ? 'dj-active' : '' }}">
                         <span>{{ __('All Sizes') }}</span>
-                    </label>
+                    </a>
                     @foreach ($availableSizes as $sizeOption)
                         <label class="dj-filters-size-chip">
-                            <input type="radio" name="size" value="{{ $sizeOption }}" onchange="this.form.submit()" @checked(request('size') === $sizeOption)>
+                            <input type="checkbox" name="size[]" value="{{ $sizeOption }}" onchange="this.form.submit()" @checked(in_array($sizeOption, $selectedSizes, true))>
                             <span>{{ $sizeOption }}</span>
                         </label>
                     @endforeach
                 </div>
             </div>
         @endif
+
+        <div class="dj-filters-field" style="flex-basis:auto;">
+            <label>{{ __('Availability') }}</label>
+            <div class="dj-filters-sizes">
+                <label class="dj-filters-size-chip">
+                    <input type="checkbox" name="in_stock" value="1" onchange="this.form.submit()" @checked(request()->boolean('in_stock'))>
+                    <span>{{ __('In Stock Only') }}</span>
+                </label>
+            </div>
+        </div>
 
         <div class="dj-filters-field">
             <label for="dj-filter-sort">{{ __('Sort by') }}</label>
@@ -167,7 +190,7 @@
 
         <div class="dj-filters-actions">
             <button type="submit" class="dj-filters-apply">{{ __('Apply Filters') }}</button>
-            @if (request()->hasAny(['q', 'min_price', 'max_price', 'size']))
+            @if (request()->hasAny(['q', 'min_price', 'max_price', 'size', 'in_stock']))
                 <a href="{{ route('shop.index', array_filter(request()->only(['category', 'collection']))) }}" class="dj-filters-clear">{{ __('Clear Filters') }}</a>
             @endif
         </div>
