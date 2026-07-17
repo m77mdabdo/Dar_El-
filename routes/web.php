@@ -13,6 +13,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceDownloadController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -31,6 +32,19 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 // auth+ownership-gated account.orders.invoice route.
 Route::get('/invoice/{order}/download', [InvoiceDownloadController::class, 'show'])
     ->name('invoice.download')
+    ->middleware('signed');
+
+// Public order tracking. lookup() verifies order_number + email/phone and
+// mints the signed URL to show() — same guest-safe, signature-is-the-only-
+// security convention as invoice.download above. The logged-in customer's
+// own equivalent (account.orders.track, ownership-checked via OrderPolicy
+// instead of a signature) lives in the account.* group further down.
+Route::get('/track-order', [OrderTrackingController::class, 'form'])->name('track-order.form');
+Route::post('/track-order', [OrderTrackingController::class, 'lookup'])
+    ->middleware('throttle:10,1')
+    ->name('track-order.lookup');
+Route::get('/track-order/{order}', [OrderTrackingController::class, 'show'])
+    ->name('track-order.show')
     ->middleware('signed');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
@@ -117,6 +131,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('account')->name('account.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [AccountOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AccountOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/track', [AccountOrderController::class, 'track'])->name('orders.track');
     Route::get('/orders/{order}/invoice', [AccountOrderController::class, 'invoice'])->name('orders.invoice');
 
     Route::get('/reviews', [AccountReviewController::class, 'index'])->name('reviews.index');

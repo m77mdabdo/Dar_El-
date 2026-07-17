@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class OrderTrackingController extends Controller
+{
+    public function form(): View
+    {
+        return view('orders.track-form');
+    }
+
+    /**
+     * Order number + a second verification field (email or phone,
+     * whichever the customer remembers — both are always captured at
+     * checkout, so either matching is a genuine identity check on the
+     * order). A single query combining both conditions means there's
+     * nothing here that could distinguish "wrong order number" from
+     * "wrong contact info" for the caller — the not-found branch below is
+     * the same regardless of which part was actually wrong, so a brute
+     * -force attempt can't learn which valid order numbers exist.
+     */
+    public function lookup(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'order_number' => ['required', 'string', 'max:50'],
+            'contact' => ['required', 'string', 'max:255'],
+        ], [], [
+            'order_number' => __('orders.track_order_number'),
+            'contact' => __('orders.track_contact'),
+        ]);
+
+        $order = Order::where('order_number', $validated['order_number'])
+            ->where(function ($query) use ($validated) {
+                $query->where('customer_email', $validated['contact'])
+                    ->orWhere('customer_phone', $validated['contact']);
+            })
+            ->first();
+
+        if (! $order) {
+            // Not back() — a direct POST (no prior GET to the form in this
+            // request cycle, e.g. a test, or a bookmarked/retried submit)
+            // has no referer to fall back to, which would otherwise send a
+            // guest to the homepage instead of back to the form with their
+            // error.
+            return redirect()->route('track-order.form')
+                ->withInput(['order_number' => $validated['order_number']])
+                ->with('error', __('orders.track_not_found'));
+        }
+
+        return redirect()->signedRoute('track-order.show', ['order' => $order]);
+    }
+
+    /**
+     * Guest-safe: no auth, security comes entirely from the URL signature
+     * minted in lookup() above (same convention as invoice.download) —
+     * only reachable after a successful order-number + contact-info match.
+     */
+    public function show(Order $order): View
+    {
+        $order->load(['items.product', 'statusHistories']);
+
+        return view('orders.track', ['order' => $order, 'isGuest' => true]);
+    }
+}

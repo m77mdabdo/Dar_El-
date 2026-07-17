@@ -11,11 +11,14 @@
                 <div class="p-4 flex items-center justify-between">
                     <div>
                         <a href="{{ route('account.orders.show', $order) }}" class="font-medium hover:text-rose-700">{{ $order->order_number }}</a>
-                        <p class="text-sm text-stone-500">{{ $order->created_at->translatedFormat('F j, Y') }} &middot; {{ ucfirst($order->status) }}</p>
+                        <p class="text-sm text-stone-500">{{ $order->created_at->translatedFormat('F j, Y') }} &middot; {{ __('orders.status_'.$order->status) }}</p>
                     </div>
                     <div class="text-right">
                         <p class="font-medium">{{ number_format($order->total) }} EGP</p>
-                        <a href="{{ route('account.orders.invoice', $order) }}" class="text-xs text-rose-700 underline">{{ __('Invoice') }}</a>
+                        <div class="flex items-center gap-3 justify-end">
+                            <a href="{{ route('account.orders.track', $order) }}" class="text-xs text-rose-700 underline">{{ __('orders.track_title') }}</a>
+                            <a href="{{ route('account.orders.invoice', $order) }}" class="text-xs text-rose-700 underline">{{ __('Invoice') }}</a>
+                        </div>
                     </div>
                 </div>
             @empty
