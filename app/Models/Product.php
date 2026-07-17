@@ -24,7 +24,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id', 'brand_id', 'name_ar', 'name_en', 'slug', 'description_ar', 'description_en',
-        'price', 'compare_at_price', 'sku', 'barcode', 'image_url', 'badge', 'is_active', 'is_featured',
+        'price', 'compare_at_price', 'offer_ends_at', 'sku', 'barcode', 'image_url', 'badge', 'is_active', 'is_featured',
         'status', 'scheduled_publish_at', 'published_at',
         'meta_title_ar', 'meta_title_en', 'meta_description_ar', 'meta_description_en',
         'sku_prefix', 'default_stock', 'default_low_stock_threshold', 'weight', 'dimensions',
@@ -70,6 +70,7 @@ class Product extends Model
             'is_featured' => 'boolean',
             'scheduled_publish_at' => 'datetime',
             'published_at' => 'datetime',
+            'offer_ends_at' => 'datetime',
         ];
     }
 
@@ -333,6 +334,45 @@ class Product extends Model
             $stock <= self::LOW_STOCK_THRESHOLD => ['status' => 'low_stock', 'label' => __('Only :count left', ['count' => $stock]), 'stock' => $stock],
             default => ['status' => 'in_stock', 'label' => __('In Stock'), 'stock' => $stock],
         };
+    }
+
+    /**
+     * A future offer_ends_at is this product's own time-limited offer,
+     * taking precedence over the site-wide countdown on its own product
+     * page (see shop/show.blade.php) and showing a compact badge on its
+     * shop-listing card (see offerEndsInLabel() below).
+     */
+    public function hasActiveOffer(): bool
+    {
+        return $this->offer_ends_at !== null && $this->offer_ends_at->isFuture();
+    }
+
+    /**
+     * Compact, non-ticking "ends in X" text for the shop-listing card badge
+     * — a full live countdown per card isn't worth dozens of simultaneous
+     * timers in a product grid; this is recomputed on every page load,
+     * which is precise enough for a small badge.
+     */
+    public function offerEndsInLabel(): ?string
+    {
+        if (! $this->hasActiveOffer()) {
+            return null;
+        }
+
+        // Carbon 3's diffInX() methods return floats now (precise diffs) —
+        // truncate to whole units for display, same as the old Carbon 2
+        // default behavior this text is designed around.
+        $hours = (int) now()->diffInHours($this->offer_ends_at);
+
+        if ($hours < 1) {
+            return __('Ends in :count min', ['count' => (int) now()->diffInMinutes($this->offer_ends_at)]);
+        }
+
+        if ($hours < 24) {
+            return __('Ends in :count h', ['count' => $hours]);
+        }
+
+        return __('Ends in :count d', ['count' => (int) now()->diffInDays($this->offer_ends_at)]);
     }
 
     /**

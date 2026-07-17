@@ -17,6 +17,7 @@ class SettingController extends Controller
         'default_shipping_fee', 'facebook_url', 'instagram_url', 'tiktok_url',
         'cart_reminder_first_delay_hours', 'cart_reminder_interval_hours', 'cart_max_reminders',
         'meta_pixel_id', 'tiktok_pixel_id', 'ga4_measurement_id',
+        'sitewide_offer_end_at', 'sitewide_offer_label',
     ];
 
     protected const IMAGE_KEYS = [
@@ -57,6 +58,8 @@ class SettingController extends Controller
             'meta_pixel_id' => ['nullable', 'string', 'max:32'],
             'tiktok_pixel_id' => ['nullable', 'string', 'max:32'],
             'ga4_measurement_id' => ['nullable', 'string', 'max:32'],
+            'sitewide_offer_end_at' => ['nullable', 'date'],
+            'sitewide_offer_label' => ['nullable', 'string', 'max:255'],
         ];
         $messages = [];
 

@@ -38,6 +38,20 @@
         'lowStockLabel' => __('Only :count left'),
     ];
 @endphp
+@once
+    {{-- This partial renders once per product in a loop — @once keeps this
+         inline style block (not resources/css/app.css, per the standing
+         deploy-proofing rule) from being duplicated once per card. --}}
+    <style>
+        .dj-offer-badge {
+            position: absolute; bottom: 14px; left: 14px; z-index: 3;
+            background: var(--dj-gold); color: var(--dj-maroon-dark);
+            font-size: 10.5px; font-weight: 800; letter-spacing: .3px;
+            padding: 5px 12px; border-radius: 20px;
+        }
+        body.dj-en .dj-offer-badge { left: auto; right: 14px; }
+    </style>
+@endonce
 <div class="dj-card dj-reveal">
     <div class="dj-swatch dj-photo-wrap dj-tint-maroon" data-product='@json($djPayload)' onclick="djOpenProductModal(JSON.parse(this.dataset.product))">
         @if ($product->cover_image_src)
@@ -65,6 +79,11 @@
 
         @if ($djStockStatus['status'] === 'out_of_stock')
             <div class="dj-soldout-overlay">{{ __('Out of Stock') }}</div>
+        @elseif ($product->hasActiveOffer())
+            {{-- Non-ticking, recomputed on every page load — a full live
+                 countdown per card would mean dozens of simultaneous
+                 timers in a product grid, not worth it for a small badge. --}}
+            <span class="dj-offer-badge">{{ $product->offerEndsInLabel() }}</span>
         @endif
     </div>
     <div class="dj-card-body">
