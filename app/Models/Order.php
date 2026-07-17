@@ -30,7 +30,7 @@ class Order extends Model
         'shipping_method_code', 'shipping_method_name',
         'shipping_delivery_min_days', 'shipping_delivery_max_days',
         'customer_latitude', 'customer_longitude',
-        'stock_deducted_at', 'stock_restored_at',
+        'stock_deducted_at', 'stock_restored_at', 'purchase_event_fired_at',
     ];
 
     protected function casts(): array
@@ -38,6 +38,7 @@ class Order extends Model
         return [
             'stock_deducted_at' => 'datetime',
             'stock_restored_at' => 'datetime',
+            'purchase_event_fired_at' => 'datetime',
         ];
     }
 

@@ -59,4 +59,34 @@
             @endauth
         </div>
     </div>
+
+    @if ($shouldTrackPurchase)
+        {{-- Guarded by CheckoutController::success()'s atomic
+             purchase_event_fired_at compare-and-set — refreshing this page
+             (or a second concurrent load) never re-fires this event for the
+             same order. order_number is used as the transaction ID so ad
+             platforms de-duplicate on their end too if this ever somehow
+             renders twice. No customer PII (name/email/phone/address) is
+             included — only ids, price, quantity, and currency. --}}
+        @php
+            // Built in a @php block, not inline inside @json() — Blade's
+            // directive-argument parser gets confused by a multi-line
+            // expression containing a nested trans_field(...) call and
+            // silently truncates the compiled output mid-array (same issue
+            // fixed in checkout/show.blade.php's begin_checkout block).
+            $djPurchaseTrackingItems = $order->items->map(fn ($item) => [
+                'id' => $item->product_id,
+                'name' => $item->product ? trans_field($item->product, 'name') : $item->product_name,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+            ])->values();
+        @endphp
+        <script>
+            window.djTrack && window.djTrack('purchase', {
+                transactionId: @json($order->order_number),
+                value: {{ $order->total }},
+                items: @json($djPurchaseTrackingItems),
+            });
+        </script>
+    @endif
 @endsection

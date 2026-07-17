@@ -15,6 +15,7 @@ class SettingController extends Controller
         'store_name', 'support_email', 'whatsapp_number',
         'default_shipping_fee', 'facebook_url', 'instagram_url', 'tiktok_url',
         'cart_reminder_first_delay_hours', 'cart_reminder_interval_hours', 'cart_max_reminders',
+        'meta_pixel_id', 'tiktok_pixel_id', 'ga4_measurement_id',
     ];
 
     protected const IMAGE_KEYS = [
@@ -50,6 +51,9 @@ class SettingController extends Controller
             'cart_reminder_first_delay_hours' => ['nullable', 'integer', 'min:1', 'max:72'],
             'cart_reminder_interval_hours' => ['nullable', 'integer', 'min:1', 'max:168'],
             'cart_max_reminders' => ['nullable', 'integer', 'min:0', 'max:10'],
+            'meta_pixel_id' => ['nullable', 'string', 'max:32'],
+            'tiktok_pixel_id' => ['nullable', 'string', 'max:32'],
+            'ga4_measurement_id' => ['nullable', 'string', 'max:32'],
         ];
         $messages = [];
 
