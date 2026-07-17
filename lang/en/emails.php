@@ -169,12 +169,14 @@ return [
     'wishlist_reminder_intro' => 'You still have items saved in your wishlist. Take another look before they sell out.',
     'wishlist_reminder_button' => 'View Wishlist',
 
-    // Back in stock (template only — not wired to any trigger yet)
+    // Back in stock
     'back_in_stock_subject' => ':product is back in stock',
     'back_in_stock_tagline' => 'Back In Stock',
-    'back_in_stock_greeting' => 'Hello :name',
-    'back_in_stock_intro' => 'Good news! :product is back in stock and ready to order.',
+    'back_in_stock_greeting' => 'Good news!',
+    'back_in_stock_intro' => ':product is back in stock and ready to order.',
+    'back_in_stock_intro_with_size' => ':product (size :size) is back in stock and ready to order.',
     'back_in_stock_button' => 'Shop Now',
+    'back_in_stock_unsubscribe' => 'Stop notifying me about this product',
 
     // Newsletter welcome (template only — not wired to any trigger yet)
     'newsletter_welcome_subject' => 'Welcome to the Dar El Jamila newsletter',

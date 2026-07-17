@@ -22,6 +22,7 @@ use App\Mail\ProductLowStockMail;
 use App\Mail\ProductOutOfStockMail;
 use App\Mail\ReviewStatusMail;
 use App\Mail\WishlistReminderMail;
+use App\Models\BackInStockSubscription;
 use App\Models\BlogComment;
 use App\Models\BlogPost;
 use App\Models\Cart;
@@ -70,7 +71,12 @@ class EmailPreviewController extends Controller
             'payment-success' => new PaymentSuccessMail($this->sampleOrder(), 1250),
             'payment-failed' => new PaymentFailedMail($this->sampleOrder(), 'Card declined by bank.'),
             'wishlist-reminder' => new WishlistReminderMail($this->sampleUser(), $this->sampleWishlists()),
-            'back-in-stock' => new ProductBackInStockMail($this->sampleUser(), $this->sampleProduct()),
+            'back-in-stock' => (function () {
+                [$product, $size] = $this->sampleProductWithSize(4);
+                $subscription = BackInStockSubscription::make(['email' => 'layla@example.com']);
+
+                return new ProductBackInStockMail($subscription, $product, $size);
+            })(),
             'newsletter-welcome' => new NewsletterWelcomeMail($this->sampleNewsletterSubscriber()),
             default => abort(404),
         };

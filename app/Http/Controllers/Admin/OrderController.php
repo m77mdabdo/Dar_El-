@@ -10,6 +10,7 @@ use App\Models\ProductSize;
 use App\Models\User;
 use App\Notifications\OrderCancelled;
 use App\Notifications\OrderStatusUpdated;
+use App\Services\BackInStockService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,10 @@ use Throwable;
 
 class OrderController extends Controller
 {
+    public function __construct(protected BackInStockService $backInStock)
+    {
+    }
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Order::class);
@@ -142,14 +147,20 @@ class OrderController extends Controller
                     continue;
                 }
 
-                $productSize = ProductSize::where('product_id', $item->product_id)
+                $productSize = ProductSize::with('product')
+                    ->where('product_id', $item->product_id)
                     ->where('size', $item->size)
                     ->lockForUpdate()
                     ->first();
 
                 if ($productSize) {
+                    $before = $productSize->stock;
                     $productSize->increment('stock', $item->quantity);
                     $restored++;
+
+                    if ($productSize->product) {
+                        $this->backInStock->checkAndNotify($productSize->product, $productSize, $before, $before + $item->quantity);
+                    }
                 }
             }
 
