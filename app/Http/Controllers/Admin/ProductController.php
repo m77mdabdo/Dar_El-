@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Services\BackInStockService;
 use App\Services\ImageUploadService;
 use App\Services\ProductDeleter;
 use App\Services\StockAlertService;
@@ -24,6 +25,7 @@ class ProductController extends Controller
     public function __construct(
         protected ImageUploadService $imageUploader,
         protected StockAlertService $stockAlerts,
+        protected BackInStockService $backInStock,
         protected ProductDeleter $productDeleter,
     ) {
     }
@@ -304,6 +306,7 @@ class ProductController extends Controller
 
             if ($before !== null) {
                 $this->stockAlerts->checkThreshold($product, $productSize, $before, $newStock);
+                $this->backInStock->checkAndNotify($product, $productSize, $before, $newStock);
             }
         }
     }

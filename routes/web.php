@@ -4,6 +4,7 @@ use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\BlogCommentController as AccountBlogCommentController;
 use App\Http\Controllers\Account\OrderController as AccountOrderController;
 use App\Http\Controllers\Account\ReviewController as AccountReviewController;
+use App\Http\Controllers\BackInStockSubscriptionController;
 use App\Http\Controllers\BlogCommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
@@ -31,6 +32,17 @@ Route::get('/invoice/{order}/download', [InvoiceDownloadController::class, 'show
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
+
+Route::post('/products/{product}/notify-me', [BackInStockSubscriptionController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('back-in-stock.store');
+
+// Signed, guest-safe unsubscribe link used in back-in-stock emails — same
+// convention as invoice.download: security comes entirely from the URL
+// signature, not a session, so this works for guest subscribers too.
+Route::get('/notify-me/unsubscribe/{subscription}', [BackInStockSubscriptionController::class, 'unsubscribe'])
+    ->middleware('signed')
+    ->name('back-in-stock.unsubscribe');
 
 // Navbar live-search preview. Higher throttle ceiling than the site's other
 // throttled endpoints (contact/newsletter/reviews at 10/min) — this is a

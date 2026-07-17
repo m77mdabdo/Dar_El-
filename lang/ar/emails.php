@@ -169,12 +169,14 @@ return [
     'wishlist_reminder_intro' => 'لا تزال لديك عناصر محفوظة في قائمة مفضلتك. ألقي نظرة أخرى قبل نفاد الكمية.',
     'wishlist_reminder_button' => 'عرض المفضلة',
 
-    // عودة المخزون (تصميم فقط - غير مفعّل بعد)
+    // عودة المخزون
     'back_in_stock_subject' => ':product متوفر الآن من جديد',
     'back_in_stock_tagline' => 'عاد إلى المخزون',
-    'back_in_stock_greeting' => 'مرحبًا :name',
-    'back_in_stock_intro' => 'خبر سار! :product متوفر الآن من جديد وجاهز للطلب.',
+    'back_in_stock_greeting' => 'خبر سار!',
+    'back_in_stock_intro' => ':product متوفر الآن من جديد وجاهز للطلب.',
+    'back_in_stock_intro_with_size' => ':product (مقاس :size) متوفر الآن من جديد وجاهز للطلب.',
     'back_in_stock_button' => 'تسوقي الآن',
+    'back_in_stock_unsubscribe' => 'إيقاف التنبيهات الخاصة بهذا المنتج',
 
     // ترحيب النشرة البريدية (تصميم فقط - غير مفعّل بعد)
     'newsletter_welcome_subject' => 'مرحبًا بكِ في النشرة البريدية لدار الجميلة',
