@@ -40,4 +40,17 @@ return [
 
     'status_updated' => 'Order status updated.',
     'status_updated_with_restock' => 'Order status updated. Stock restored for :count item(s).',
+
+    'track_eyebrow' => 'Order Tracking',
+    'track_title' => 'Track Your Order',
+    'track_meta_description' => 'Look up your order status with your order number and contact info.',
+    'track_intro' => 'Enter your order number and the phone or email you used at checkout to see its live status.',
+    'track_order_number' => 'Order Number',
+    'track_contact' => 'Phone or Email',
+    'track_contact_placeholder' => 'Phone number or email address',
+    'track_contact_hint' => 'Whichever you gave us at checkout.',
+    'track_submit' => 'Track Order',
+    'track_not_found' => "We couldn't find an order matching that number and contact info. Please double-check and try again.",
+    'track_another' => 'Track Another Order',
+    'track_awaiting' => 'Awaiting',
 ];

@@ -103,4 +103,63 @@ class Order extends Model
 
         return mb_substr($local, 0, 1).'***@'.$domain;
     }
+
+    /**
+     * The real, forward-progress statuses an admin can set (see
+     * Admin\OrderController::updateStatus()'s validation rule — the single
+     * source of truth this list mirrors) minus 'cancelled', which is a
+     * terminal branch off the line rather than a step on it. Order matters:
+     * this IS the customer-facing tracker's step sequence.
+     */
+    public const TRACKING_STAGES = ['pending', 'processing', 'shipped', 'delivered'];
+
+    public function isCancelled(): bool
+    {
+        return $this->status === 'cancelled';
+    }
+
+    /**
+     * One row per TRACKING_STAGES entry, in order, for rendering the
+     * customer-facing tracker. A stage counts as reached/completed by its
+     * position relative to the order's current status — not solely by
+     * whether a matching statusHistories row exists — so a stage an admin
+     * skipped over (e.g. jumping straight from pending to delivered) still
+     * shows as completed rather than incorrectly greyed-out; it just has no
+     * timestamp of its own in that case. Assumes statusHistories is already
+     * eager-loaded (it always should be before calling this — see
+     * OrderTrackingController/Account\OrderController::track()).
+     *
+     * @return array<int, array{key: string, completed: bool, current: bool, timestamp: ?\Illuminate\Support\Carbon}>
+     */
+    public function trackingSteps(): array
+    {
+        $currentIndex = array_search($this->status, self::TRACKING_STAGES, true);
+        $currentIndex = $currentIndex === false ? -1 : $currentIndex;
+
+        return collect(self::TRACKING_STAGES)
+            ->map(fn (string $stage, int $index) => [
+                'key' => $stage,
+                'completed' => $index <= $currentIndex,
+                'current' => $index === $currentIndex,
+                'timestamp' => $this->statusHistories->firstWhere('status', $stage)?->created_at,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * 0–100, how far along TRACKING_STAGES the order's current status is —
+     * feeds the connecting line's fill width in the tracker UI. Meaningless
+     * (and never rendered) for a cancelled order.
+     */
+    public function trackingProgressPercent(): int
+    {
+        $currentIndex = array_search($this->status, self::TRACKING_STAGES, true);
+
+        if ($currentIndex === false || $currentIndex <= 0) {
+            return 0;
+        }
+
+        return (int) round(($currentIndex / (count(self::TRACKING_STAGES) - 1)) * 100);
+    }
 }

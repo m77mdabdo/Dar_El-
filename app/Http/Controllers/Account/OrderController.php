@@ -27,6 +27,20 @@ class OrderController extends Controller
     }
 
     /**
+     * Same ownership check (and same underlying OrderPolicy::view — an
+     * admin browsing here also passes via before()) as show() above, just
+     * rendering the visual tracker instead of the plain detail page.
+     */
+    public function track(Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $order->load(['items.product', 'statusHistories']);
+
+        return view('orders.track', ['order' => $order, 'isGuest' => false]);
+    }
+
+    /**
      * Shared by both the customer route (account.orders.invoice) and the
      * admin route (admin.orders.invoice) — same policy-gated logic either
      * way (an admin always passes OrderPolicy::before()).
