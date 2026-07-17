@@ -280,11 +280,14 @@ class ProductController extends Controller
             // An empty datetime-local input submits as '' — nullable-and-
             // empty still passes the 'date' rule, but Eloquent's datetime
             // cast hands that raw empty string straight to the query
-            // builder, which MySQL rejects outright (SQLite silently
-            // no-ops the update instead, masking this in tests unless
-            // explicitly checked). Coerce to a real null before validation
-            // so "leave empty to disable" actually clears the column.
+            // builder, which MySQL rejects outright (SQLite is lenient
+            // about it instead, masking this in tests unless explicitly
+            // checked against real MySQL — confirmed identically for both
+            // fields below). Coerce to a real null before validation so
+            // "leave empty to disable/unschedule" actually clears the
+            // column instead of throwing in production.
             'offer_ends_at' => $request->offer_ends_at ?: null,
+            'scheduled_publish_at' => $request->scheduled_publish_at ?: null,
         ]);
 
         return $request->validate($this->fieldRules() + [
