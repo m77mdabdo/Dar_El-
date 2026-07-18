@@ -1,21 +1,29 @@
 {
+    "id": "/",
     "name": "Dar El Jamila",
     "short_name": "Dar El Jamila",
     "description": "Dar El Jamila — Couture Abayas, Riyadh",
+    "lang": "ar",
+    "dir": "rtl",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "portrait-primary",
     "background_color": "#F1E4D3",
     "theme_color": "#3C0B17",
+    "categories": ["shopping", "fashion"],
     "icons": [
         {
             "src": "/assets/branding/favicon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "/assets/branding/favicon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         }
     ]
 }

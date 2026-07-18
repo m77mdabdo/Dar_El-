@@ -27,6 +27,12 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
+// Precached by the service worker at install time and served from Cache
+// Storage (no PHP involved) when a navigation fails with no network — see
+// public/sw.js. Visiting it directly while online just shows the same
+// branded page server-rendered normally.
+Route::view('/offline', 'errors.offline')->name('offline');
+
 // Signed, guest-safe invoice link used in customer emails — works whether
 // or not the customer has (or is logged into) an account, unlike the
 // auth+ownership-gated account.orders.invoice route.

@@ -37,5 +37,9 @@ return [
         '500_message' => "We're working to fix this. Please try again shortly.",
         '503_title' => 'Down for Maintenance',
         '503_message' => "We're making some improvements and will be back shortly. Thank you for your patience.",
+        'offline_code' => 'Offline',
+        'offline_title' => "You're Offline",
+        'offline_message' => "It looks like you've lost your internet connection. Some pages you've already visited may still be available — otherwise, please reconnect and try again.",
+        'offline_retry' => 'Try Again',
     ],
 ];
