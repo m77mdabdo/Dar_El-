@@ -12,7 +12,8 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = $request->user()->orders()->latest()->paginate(10);
+        // items.product feeds each order card's thumbnail preview.
+        $orders = $request->user()->orders()->with('items.product')->latest()->paginate(10);
 
         return view('account.orders.index', compact('orders'));
     }
