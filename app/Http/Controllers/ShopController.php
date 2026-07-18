@@ -78,12 +78,31 @@ class ShopController extends Controller
 
         $product->load(['images', 'sizes', 'category', 'brand', 'approvedReviews.images', 'approvedReviews.user']);
 
-        $relatedProducts = Product::with(['images', 'sizes', 'approvedReviews'])
+        // Manually-curated relations take priority (admin's own deliberate
+        // pairing, e.g. a belt hand-linked to a specific abaya — shown
+        // as-is, trusting the admin's judgment even if one happens to be
+        // temporarily out of stock) — only inactive picks are dropped,
+        // since a link to an inactive product would 404. Automatic
+        // same-category fallback fills whatever's left, explicitly
+        // excluding out-of-stock products, the current product itself, and
+        // anything already picked manually.
+        $relatedProducts = $product->relatedProducts()
+            ->with(['images', 'sizes', 'approvedReviews'])
             ->where('is_active', true)
-            ->where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->take(4)
+            ->take(Product::RELATED_PRODUCTS_DISPLAY_COUNT)
             ->get();
+
+        if ($relatedProducts->count() < Product::RELATED_PRODUCTS_DISPLAY_COUNT) {
+            $automaticRelated = Product::with(['images', 'sizes', 'approvedReviews'])
+                ->where('is_active', true)
+                ->where('category_id', $product->category_id)
+                ->whereNotIn('id', $relatedProducts->pluck('id')->push($product->id))
+                ->whereHas('sizes', fn ($q) => $q->where('stock', '>', 0))
+                ->take(Product::RELATED_PRODUCTS_DISPLAY_COUNT - $relatedProducts->count())
+                ->get();
+
+            $relatedProducts = $relatedProducts->concat($automaticRelated);
+        }
 
         $recommendedProducts = $product->brand_id
             ? Product::with(['images', 'sizes', 'approvedReviews'])
