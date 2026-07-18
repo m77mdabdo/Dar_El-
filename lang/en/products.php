@@ -57,6 +57,10 @@ return [
     'scheduled_publish_at' => 'Publish at',
     'offer_ends_at' => 'Offer Ends At',
     'offer_ends_at_hint' => 'Leave empty (or set it in the past) to disable — shows a countdown on this product\'s own page and a small "ends in" badge on its shop-listing card, taking priority over the site-wide countdown offer if both are active.',
+    'related_products_heading' => 'Related Products',
+    'related_products_hint' => 'Hand-pick specific products to show under "You May Also Like" on this product\'s page (e.g. link a belt to a specific abaya). Leave empty to fall back to other active, in-stock products from the same category automatically.',
+    'related_products_search_placeholder' => 'Search products...',
+    'related_products_multiselect_hint' => 'Hold Ctrl (Windows) or Cmd (Mac) to select multiple products.',
 
     'selected' => 'selected',
     'bulk_publish' => 'Publish',

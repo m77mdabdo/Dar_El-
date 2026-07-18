@@ -76,6 +76,16 @@ class ProductAutosave {
             return;
         }
 
+        // A multi-select's .value only ever returns its FIRST selected
+        // option, silently dropping the rest — not safe to capture with
+        // this single-value model. Relations like related_product_ids[]
+        // need sync() semantics (a full picked-set, including "now empty")
+        // that a partial per-field autosave PATCH can't express anyway;
+        // they save via the normal full-form submit instead.
+        if (field.tagName === 'SELECT' && field.multiple) {
+            return;
+        }
+
         this.pending[field.name] = field.type === 'checkbox' ? (field.checked ? '1' : '0') : field.value;
         this.setState('unsaved');
         clearTimeout(this.timer);
