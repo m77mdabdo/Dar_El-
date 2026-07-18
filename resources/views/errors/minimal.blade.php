@@ -40,7 +40,7 @@
         <p class="dj-error-code">@yield('code')</p>
         <h1 class="dj-error-title">@yield('title')</h1>
         <p class="dj-error-message">@yield('message')</p>
-        <a href="{{ url('/') }}" class="dj-error-link">{{ __('general.errors.back_home') }}</a>
+        <a href="@yield('cta_href', url('/'))" class="dj-error-link"@hasSection('cta_onclick') onclick="@yield('cta_onclick')"@endif>@yield('cta_label', __('general.errors.back_home'))</a>
     </div>
 </body>
 </html>
