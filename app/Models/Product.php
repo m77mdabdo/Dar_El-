@@ -17,6 +17,8 @@ class Product extends Model
 
     const LOW_STOCK_THRESHOLD = 5;
 
+    const RELATED_PRODUCTS_DISPLAY_COUNT = 4;
+
     const STATUS_DRAFT = 'draft';
     const STATUS_SCHEDULED = 'scheduled';
     const STATUS_PUBLISHED = 'published';
@@ -92,6 +94,17 @@ class Product extends Model
     public function collections(): BelongsToMany
     {
         return $this->belongsToMany(Collection::class, 'product_collection');
+    }
+
+    /**
+     * Manually-curated "related products" (e.g. a belt hand-linked to a
+     * specific abaya) — deliberately one-directional, see the migration.
+     * Takes priority over ShopController::show()'s automatic same-category
+     * fallback, which only fills in remaining slots this doesn't cover.
+     */
+    public function relatedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_related', 'product_id', 'related_product_id')->withTimestamps();
     }
 
     public function images(): HasMany

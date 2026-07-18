@@ -51,8 +51,9 @@ class ProductController extends Controller
         $this->authorize('create', Product::class);
 
         $categories = Category::orderBy('name_en')->get();
+        $relatableProducts = $this->relatableProducts();
 
-        return view('admin.products.create', compact('categories'));
+        return view('admin.products.create', compact('categories', 'relatableProducts'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -61,7 +62,7 @@ class ProductController extends Controller
 
         $all = $this->validated($request);
         $status = $all['status'];
-        $validated = collect($all)->except(['images', 'image_url', 'status'])->all();
+        $validated = collect($all)->except(['images', 'image_url', 'status', 'related_product_ids'])->all();
 
         $product = Product::create($validated + ['slug' => Str::slug($validated['name_en'])]);
         $product->applyStatus($status);
@@ -72,6 +73,7 @@ class ProductController extends Controller
 
         $this->syncSizes($product, $request);
         $this->uploadImages($product, $request);
+        $this->syncRelatedProducts($product, $request);
 
         ActivityLog::record('created', $product, "Created product {$product->name_en}");
 
@@ -87,10 +89,24 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $categories = Category::orderBy('name_en')->get();
-        $product->load('sizes', 'images', 'options.values.images', 'variants.values.option');
+        $product->load('sizes', 'images', 'options.values.images', 'variants.values.option', 'relatedProducts');
+        $relatableProducts = $this->relatableProducts($product);
         $wizard = $request->boolean('wizard');
 
-        return view('admin.products.edit', compact('product', 'categories', 'wizard'));
+        return view('admin.products.edit', compact('product', 'categories', 'relatableProducts', 'wizard'));
+    }
+
+    /**
+     * Candidate list for the related-products picker — id + both-locale
+     * names only (not full models), since this can run to ~160 rows on this
+     * catalog and the picker only ever needs enough to render option labels.
+     */
+    protected function relatableProducts(?Product $product = null): \Illuminate\Support\Collection
+    {
+        return Product::query()
+            ->when($product, fn ($q) => $q->where('id', '!=', $product->id))
+            ->orderBy('name_en')
+            ->get(['id', 'name_ar', 'name_en']);
     }
 
     public function update(Request $request, Product $product): RedirectResponse
@@ -99,7 +115,7 @@ class ProductController extends Controller
 
         $all = $this->validated($request, $product);
         $status = $all['status'];
-        $validated = collect($all)->except(['images', 'image_url', 'status'])->all();
+        $validated = collect($all)->except(['images', 'image_url', 'status', 'related_product_ids'])->all();
 
         if ($request->hasFile('image_url')) {
             $validated['image_url'] = $this->imageUploader->replace($product->image_url, $request->file('image_url'), "products/{$product->id}");
@@ -110,6 +126,7 @@ class ProductController extends Controller
 
         $this->syncSizes($product, $request);
         $this->uploadImages($product, $request);
+        $this->syncRelatedProducts($product, $request);
 
         ActivityLog::record('updated', $product, "Updated product {$product->name_en}");
 
@@ -294,6 +311,8 @@ class ProductController extends Controller
             'image_url' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'related_product_ids' => ['nullable', 'array'],
+            'related_product_ids.*' => ['integer', 'exists:products,id'],
         ], [
             'image_url.image' => __('Please upload a valid image file.'),
             'image_url.mimes' => __('The image must be a JPG, PNG, or WEBP file.'),
@@ -321,6 +340,23 @@ class ProductController extends Controller
                 $this->backInStock->checkAndNotify($product, $productSize, $before, $newStock);
             }
         }
+    }
+
+    /**
+     * sync() rather than a partial update — an admin unchecking every box
+     * in the multi-select must clear all manual relations, not leave stale
+     * ones behind. Excludes the product's own id defensively (the picker
+     * already omits it from its option list, but a tampered request
+     * shouldn't be able to self-relate).
+     */
+    protected function syncRelatedProducts(Product $product, Request $request): void
+    {
+        $ids = collect((array) $request->input('related_product_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id !== $product->id)
+            ->all();
+
+        $product->relatedProducts()->sync($ids);
     }
 
     protected function uploadImages(Product $product, Request $request): void

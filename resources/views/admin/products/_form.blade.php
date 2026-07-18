@@ -98,6 +98,39 @@
     </label>
 </div>
 
+<div class="dj-admin-card p-4 mt-2">
+    <p class="font-semibold text-[var(--dj-maroon-dark)]">{{ __('products.related_products_heading') }}</p>
+    <p class="dj-admin-hint mb-3">{{ __('products.related_products_hint') }}</p>
+
+    @php
+        $djSelectedRelatedIds = old('related_product_ids', isset($product) ? $product->relatedProducts->pluck('id')->all() : []);
+    @endphp
+
+    <input type="text" id="dj-related-filter" placeholder="{{ __('products.related_products_search_placeholder') }}" class="dj-admin-input mb-2">
+    <select name="related_product_ids[]" id="dj-related-select" multiple size="8" class="dj-admin-input" style="height:200px;">
+        @foreach ($relatableProducts as $candidate)
+            <option value="{{ $candidate->id }}" data-search="{{ \Illuminate\Support\Str::lower($candidate->name_ar.' '.$candidate->name_en) }}" @selected(in_array($candidate->id, $djSelectedRelatedIds))>{{ $candidate->name_ar }} — {{ $candidate->name_en }}</option>
+        @endforeach
+    </select>
+    @error('related_product_ids') <p class="dj-admin-error">{{ $message }}</p> @enderror
+    <p class="dj-admin-hint mt-1">{{ __('products.related_products_multiselect_hint') }}</p>
+</div>
+
+<script>
+    (function () {
+        var filterInput = document.getElementById('dj-related-filter');
+        var select = document.getElementById('dj-related-select');
+        if (! filterInput || ! select) return;
+
+        filterInput.addEventListener('input', function () {
+            var term = this.value.trim().toLowerCase();
+            select.querySelectorAll('option').forEach(function (option) {
+                option.hidden = term !== '' && option.dataset.search.indexOf(term) === -1;
+            });
+        });
+    })();
+</script>
+
 @isset($product)
     <div class="dj-admin-card p-4 mt-2">
         <p class="font-semibold text-[var(--dj-maroon-dark)]">{{ __('product_options.smart_defaults_heading') }}</p>
