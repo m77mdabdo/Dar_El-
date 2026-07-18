@@ -502,3 +502,61 @@ document.addEventListener('DOMContentLoaded', () => {
     djObserveReveals();
     document.querySelectorAll('.dj-stat-num').forEach(el => djStatObserver.observe(el));
 });
+
+/* =========================================================
+   PWA: service worker registration + "Add to Home Screen" prompt
+   The service worker (public/sw.js) owns all caching decisions — this
+   file only registers it and drives the install banner's UI/dismissal
+   state. See sw.js for which routes are cached vs. always-network.
+   ========================================================= */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // A registration failure (offline first load, unsupported
+            // host, etc.) must never block the storefront itself.
+        });
+    });
+}
+
+const DJ_INSTALL_DISMISS_KEY = 'dj-pwa-install-dismissed-at';
+const DJ_INSTALL_DISMISS_DAYS = 14;
+let djDeferredInstallPrompt = null;
+
+function djInstallPromptDismissedRecently() {
+    const raw = localStorage.getItem(DJ_INSTALL_DISMISS_KEY);
+    const dismissedAt = raw ? parseInt(raw, 10) : NaN;
+    if (!dismissedAt) return false;
+    const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
+    return daysSince < DJ_INSTALL_DISMISS_DAYS;
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    // Suppress Chrome's automatic mini-infobar in favor of our own
+    // subtle, dj-styled banner, shown only if not recently dismissed.
+    event.preventDefault();
+    djDeferredInstallPrompt = event;
+    if (djInstallPromptDismissedRecently()) return;
+    document.getElementById('dj-install-banner')?.classList.add('dj-show');
+});
+
+window.djInstallApp = async function () {
+    const banner = document.getElementById('dj-install-banner');
+    if (!djDeferredInstallPrompt) {
+        banner?.classList.remove('dj-show');
+        return;
+    }
+    djDeferredInstallPrompt.prompt();
+    await djDeferredInstallPrompt.userChoice;
+    djDeferredInstallPrompt = null;
+    banner?.classList.remove('dj-show');
+};
+
+window.djDismissInstallBanner = function () {
+    localStorage.setItem(DJ_INSTALL_DISMISS_KEY, Date.now().toString());
+    document.getElementById('dj-install-banner')?.classList.remove('dj-show');
+};
+
+window.addEventListener('appinstalled', () => {
+    document.getElementById('dj-install-banner')?.classList.remove('dj-show');
+    localStorage.removeItem(DJ_INSTALL_DISMISS_KEY);
+});
