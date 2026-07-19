@@ -45,6 +45,23 @@
         <button type="button" class="dj-install-banner-install" onclick="djInstallApp()">{{ __('Install') }}</button>
     </div>
 
+    {{-- iOS Safari never fires beforeinstallprompt (no programmatic install
+         trigger exists there at all, by Apple/WebKit design) — this is the
+         instructional fallback, shown only to iOS Safari via app.js's
+         djIsIosSafari() check. Same styling as the Android banner above,
+         but no functional install button — there's nothing to click that
+         does anything; the visitor has to use Safari's own Share sheet. --}}
+    <div id="dj-ios-install-banner" class="dj-install-banner" role="dialog" aria-label="{{ __('Install Dar El Jamila') }}">
+        <button type="button" class="dj-install-banner-dismiss" onclick="djDismissInstallBanner()" aria-label="{{ __('Dismiss') }}">&times;</button>
+        <div class="dj-install-banner-top">
+            <img src="{{ asset('assets/branding/favicon-192.png') }}" alt="" class="dj-install-banner-icon">
+            <div class="dj-install-banner-text">
+                <strong>{{ __('Install Dar El Jamila') }}</strong>
+                <span>{{ __('Tap the Share button ⬆️ below, then choose "Add to Home Screen".') }}</span>
+            </div>
+        </div>
+    </div>
+
     <div x-data="{ mobileNavOpen: false }">
     <nav class="dj-nav">
         <div class="dj-nav-logo"><a href="{{ route('home') }}"><x-brand-logo class="dj-nav-logo-img" style="height:38px;width:auto;" /></a></div>

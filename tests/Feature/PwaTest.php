@@ -184,4 +184,67 @@ class PwaTest extends TestCase
 
         $this->assertStringContainsString("localStorage.setItem(DJ_INSTALL_DISMISS_KEY, Date.now().toString())", $source);
     }
+
+    // ---------------------------------------------------------------
+    // iOS Safari fallback (beforeinstallprompt never fires there)
+    // ---------------------------------------------------------------
+
+    public function test_ios_install_banner_markup_is_present_on_storefront_pages(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('id="dj-ios-install-banner"', false);
+        $response->assertSee(__('Tap the Share button ⬆️ below, then choose "Add to Home Screen".'));
+    }
+
+    public function test_ios_banner_does_not_render_a_functional_install_button(): void
+    {
+        $response = $this->get('/');
+        $html = $response->getContent();
+
+        $iosBannerStart = strpos($html, 'id="dj-ios-install-banner"');
+        $this->assertNotFalse($iosBannerStart);
+
+        // Isolate just the iOS banner's own markup block (up to the next
+        // closing </div> pair after it) and confirm djInstallApp() —
+        // the Chrome-only programmatic trigger — never appears inside it.
+        $iosBannerHtml = substr($html, $iosBannerStart, 600);
+        $this->assertStringNotContainsString('djInstallApp()', $iosBannerHtml);
+        $this->assertStringContainsString('djDismissInstallBanner()', $iosBannerHtml);
+    }
+
+    public function test_ios_detection_checks_user_agent_excludes_other_ios_browsers_and_checks_standalone_mode(): void
+    {
+        $source = File::get(resource_path('js/app.js'));
+
+        $this->assertStringContainsString('djIsIosSafari', $source);
+        // Other iOS browsers (Chrome/Firefox/Edge/Opera for iOS) also
+        // report "Safari" in their UA — must be excluded, since only
+        // Safari itself has the Share-sheet flow these instructions describe.
+        $this->assertStringContainsString('CriOS', $source);
+        $this->assertStringContainsString('FxiOS', $source);
+        $this->assertStringContainsString('navigator.standalone', $source);
+        $this->assertStringContainsString('djIsRunningStandalone', $source);
+    }
+
+    public function test_ios_fallback_reuses_the_same_dismissal_cooldown_as_the_android_banner(): void
+    {
+        $source = File::get(resource_path('js/app.js'));
+
+        $iosCheckPos = strpos($source, 'djIsIosSafari() && !djIsRunningStandalone()');
+        $this->assertNotFalse($iosCheckPos);
+        $this->assertStringContainsString('djInstallPromptDismissedRecently()', substr($source, $iosCheckPos, 100));
+    }
+
+    public function test_shared_dismiss_function_clears_both_android_and_ios_banners(): void
+    {
+        $source = File::get(resource_path('js/app.js'));
+
+        $dismissFnStart = strpos($source, 'window.djDismissInstallBanner = function');
+        $dismissFnBody = substr($source, $dismissFnStart, 300);
+
+        $this->assertStringContainsString("getElementById('dj-install-banner')", $dismissFnBody);
+        $this->assertStringContainsString("getElementById('dj-ios-install-banner')", $dismissFnBody);
+    }
 }
