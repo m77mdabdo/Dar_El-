@@ -28,7 +28,7 @@ class ShopController extends Controller
             // format and a plain legacy size=M query string — either way
             // this matches a product carrying ANY of the selected sizes.
             ->when(array_filter((array) $request->size), fn ($q, $sizes) => $q->whereHas('sizes', fn ($s) => $s->whereIn('size', $sizes)))
-            ->when($request->boolean('in_stock'), fn ($q) => $q->whereHas('sizes', fn ($s) => $s->where('stock', '>', 0)))
+            ->when($request->boolean('in_stock'), fn ($q) => $q->inStock())
             ->when($request->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
             ->when($request->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
             ->when(! $request->sort, fn ($q) => $q->latest())
@@ -45,7 +45,7 @@ class ShopController extends Controller
         // which exists in the schema but isn't wired into the storefront yet.
         // Only sizes with in-stock, active products are offered as filter
         // options, so the filter never leads a customer to a dead end.
-        $availableSizes = ProductSize::where('stock', '>', 0)
+        $availableSizes = ProductSize::inStock()
             ->whereHas('product', fn ($q) => $q->where('is_active', true))
             ->distinct()
             ->orderBy('size')
@@ -97,7 +97,7 @@ class ShopController extends Controller
                 ->where('is_active', true)
                 ->where('category_id', $product->category_id)
                 ->whereNotIn('id', $relatedProducts->pluck('id')->push($product->id))
-                ->whereHas('sizes', fn ($q) => $q->where('stock', '>', 0))
+                ->inStock()
                 ->take(Product::RELATED_PRODUCTS_DISPLAY_COUNT - $relatedProducts->count())
                 ->get();
 

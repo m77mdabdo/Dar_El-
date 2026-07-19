@@ -322,6 +322,19 @@ class Product extends Model
         };
     }
 
+    /**
+     * "Has at least one size with stock" — the storefront-facing in-stock
+     * check (filter checkbox, related-products fallback), distinct from
+     * scopeFilterByStockStatus() above's admin-facing low/out/in-stock
+     * aggregate-sum bucketing. Was three separate copies of the same
+     * whereHas('sizes', ...) across ShopController before being extracted
+     * here.
+     */
+    public function scopeInStock($query)
+    {
+        return $query->whereHas('sizes', fn ($s) => $s->inStock());
+    }
+
     public function stockForSize(?string $size): int
     {
         if ($size === null) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class OrderTrackingController extends Controller
@@ -52,7 +53,12 @@ class OrderTrackingController extends Controller
                 ->with('error', __('orders.track_not_found'));
         }
 
-        return redirect()->signedRoute('track-order.show', ['order' => $order]);
+        // Temporary (not permanent) signature, same 90-day expiry as the
+        // invoice-download link (resources/views/emails/orders/confirmation.blade.php)
+        // — this page shows the customer's shipping address and phone, so an
+        // indefinitely-valid link would leak that PII forever if forwarded,
+        // screenshotted, or left in browser history.
+        return redirect(URL::temporarySignedRoute('track-order.show', now()->addDays(90), ['order' => $order->id]));
     }
 
     /**
@@ -62,7 +68,7 @@ class OrderTrackingController extends Controller
      */
     public function show(Order $order): View
     {
-        $order->load(['items.product', 'statusHistories']);
+        $order->load(['items.product.images', 'statusHistories']);
 
         return view('orders.track', ['order' => $order, 'isGuest' => true]);
     }
