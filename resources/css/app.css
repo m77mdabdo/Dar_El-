@@ -513,6 +513,17 @@ body.dj-en .dj-article-body h2 { font-family: 'Playfair Display'; }
 .dj-modal-trust span { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #8a6b70; }
 .dj-modal-trust svg { width: 16px; height: 16px; color: var(--dj-maroon); }
 
+/* Secondary action below the modal's solid maroon "Add to Cart" button —
+   same outline treatment as .dj-order-btn-secondary (order-history card's
+   "Invoice" button) so it reads as a clear secondary action instead of
+   competing with the primary button or looking like a stray text link. */
+.dj-modal-view-details {
+    display: block; width: 100%; margin-top: 14px; padding: 13px; border-radius: 12px;
+    border: 1.5px solid var(--dj-cream-2); background: transparent; color: var(--dj-maroon);
+    font-weight: 700; font-size: 13px; text-align: center; text-decoration: none; transition: background .2s;
+}
+.dj-modal-view-details:hover { background: var(--dj-cream-2); }
+
 /* ===== TOAST ===== */
 .dj-toast {
     position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(120%); background: var(--dj-maroon);
