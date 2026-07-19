@@ -176,4 +176,30 @@ class CategoryAndBlogPostSeoFieldsTest extends TestCase
         $response->assertSee('name="meta_description_en"', false);
         $response->assertSee('name="meta_description_ar"', false);
     }
+
+    /**
+     * Same nullable-datetime-admin-field pattern already found and fixed on
+     * Product's offer_ends_at/scheduled_publish_at: an empty datetime-local
+     * submission isn't coerced to null before Eloquent's datetime cast hands
+     * it to the query builder, so "clear the schedule" throws on real MySQL
+     * (SQLite silently accepts it, masking the bug here unless checked
+     * explicitly). See [[carbon3_and_nullable_date_gotchas]] memory.
+     */
+    public function test_admin_can_clear_a_blog_posts_published_at(): void
+    {
+        $admin = $this->admin();
+        $post = BlogPost::create([
+            'title_ar' => 'منشور', 'title_en' => 'Editable Post', 'slug' => 'editable-post-'.uniqid(),
+            'body_ar' => 'محتوى', 'body_en' => 'Body content',
+            'is_published' => true, 'published_at' => '2027-06-01 12:00:00',
+        ]);
+
+        $this->actingAs($admin)->put(route('admin.blog.update', $post), [
+            'title_ar' => $post->title_ar, 'title_en' => $post->title_en,
+            'body_ar' => $post->body_ar, 'body_en' => $post->body_en,
+            'published_at' => '',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull($post->fresh()->published_at);
+    }
 }

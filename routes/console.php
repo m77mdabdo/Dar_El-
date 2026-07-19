@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('carts:send-reminders')->everyThirtyMinutes();
 Schedule::command('products:publish-scheduled')->everyFiveMinutes();
+Schedule::command('back-in-stock:prune')->daily();

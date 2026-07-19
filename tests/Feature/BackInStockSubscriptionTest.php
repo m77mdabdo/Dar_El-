@@ -122,6 +122,43 @@ class BackInStockSubscriptionTest extends TestCase
             ->count());
     }
 
+    /**
+     * Regression guard: a subscriber who was already notified once (e.g. an
+     * earlier restock) and resubscribes after a later stock-out must be
+     * re-armed for the next crossing, not silently excluded forever —
+     * BackInStockService only ever queries whereNull('notified_at'), so
+     * leaving the old row untouched would permanently lock them out while
+     * this endpoint told them they were "already on the list."
+     */
+    public function test_resubscribing_after_already_notified_re_arms_the_subscription(): void
+    {
+        Mail::fake();
+
+        $product = $this->makeProduct();
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 0]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'repeat-customer@example.com',
+            'notified_at' => now()->subMonth(),
+        ]);
+
+        $response = $this->postJson(route('back-in-stock.store', $product), [
+            'email' => 'repeat-customer@example.com', 'product_size_id' => $size->id,
+        ]);
+
+        $response->assertOk();
+        // Same row is reused (no duplicate), but re-armed for the next crossing.
+        $this->assertSame(1, BackInStockSubscription::where('product_id', $product->id)
+            ->where('product_size_id', $size->id)
+            ->where('email', 'repeat-customer@example.com')
+            ->count());
+        $this->assertNull($subscription->fresh()->notified_at);
+
+        // Prove it's actually functional again, not just cleared in isolation.
+        app(BackInStockService::class)->checkAndNotify($product, $size, before: 0, after: 5);
+
+        Mail::assertQueued(ProductBackInStockMail::class, fn ($mail) => $mail->hasTo('repeat-customer@example.com'));
+    }
+
     public function test_signup_for_a_multi_size_product_is_size_specific(): void
     {
         $product = $this->makeProduct();
@@ -377,5 +414,103 @@ class BackInStockSubscriptionTest extends TestCase
 
         $response->assertForbidden();
         $this->assertDatabaseHas('back_in_stock_subscriptions', ['id' => $subscription->id]);
+    }
+
+    // ---------------------------------------------------------------
+    // Cleanup (back-in-stock:prune)
+    // ---------------------------------------------------------------
+
+    public function test_prune_removes_old_subscriptions_for_an_archived_product(): void
+    {
+        $product = $this->makeProduct();
+        $product->update(['status' => Product::STATUS_ARCHIVED]);
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 0]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'stale@example.com',
+        ]);
+        // created_at isn't mass-assignable (not in $fillable) — force it
+        // directly so the row is actually old enough to test the threshold.
+        $subscription->forceFill(['created_at' => now()->subMonths(7)])->save();
+
+        $this->artisan('back-in-stock:prune')->assertSuccessful();
+
+        $this->assertDatabaseMissing('back_in_stock_subscriptions', ['id' => $subscription->id]);
+    }
+
+    public function test_prune_removes_old_still_never_notified_subscriptions_for_a_product_still_at_zero_stock(): void
+    {
+        $product = $this->makeProduct();
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 0]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'stale2@example.com',
+        ]);
+        $subscription->forceFill(['created_at' => now()->subMonths(7)])->save();
+
+        $this->artisan('back-in-stock:prune')->assertSuccessful();
+
+        $this->assertDatabaseMissing('back_in_stock_subscriptions', ['id' => $subscription->id]);
+    }
+
+    public function test_prune_keeps_old_subscriptions_for_an_active_product_currently_in_stock(): void
+    {
+        // Old, but the product isn't archived and has real stock — an old
+        // date alone must not be treated as "dead."
+        $product = $this->makeProduct();
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 5]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'still-relevant@example.com',
+        ]);
+        $subscription->forceFill(['created_at' => now()->subMonths(7)])->save();
+
+        $this->artisan('back-in-stock:prune')->assertSuccessful();
+
+        $this->assertDatabaseHas('back_in_stock_subscriptions', ['id' => $subscription->id]);
+    }
+
+    public function test_prune_keeps_recent_subscriptions_even_for_an_archived_product(): void
+    {
+        $product = $this->makeProduct();
+        $product->update(['status' => Product::STATUS_ARCHIVED]);
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 0]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'recent@example.com',
+        ]);
+        $subscription->forceFill(['created_at' => now()->subDays(10)])->save();
+
+        $this->artisan('back-in-stock:prune')->assertSuccessful();
+
+        $this->assertDatabaseHas('back_in_stock_subscriptions', ['id' => $subscription->id]);
+    }
+
+    public function test_prune_keeps_old_already_notified_subscriptions_for_a_still_active_product(): void
+    {
+        // Fulfilled once and the product is still a normal active listing —
+        // nothing dead about this row, leave it alone.
+        $product = $this->makeProduct();
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 0]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'fulfilled@example.com',
+            'notified_at' => now()->subMonths(6),
+        ]);
+        $subscription->forceFill(['created_at' => now()->subMonths(7)])->save();
+
+        $this->artisan('back-in-stock:prune')->assertSuccessful();
+
+        $this->assertDatabaseHas('back_in_stock_subscriptions', ['id' => $subscription->id]);
+    }
+
+    public function test_prune_respects_the_months_option(): void
+    {
+        $product = $this->makeProduct();
+        $product->update(['status' => Product::STATUS_ARCHIVED]);
+        $size = $product->sizes()->create(['size' => 'M', 'stock' => 0]);
+        $subscription = BackInStockSubscription::create([
+            'product_id' => $product->id, 'product_size_id' => $size->id, 'email' => 'two-months@example.com',
+        ]);
+        $subscription->forceFill(['created_at' => now()->subMonths(3)])->save();
+
+        $this->artisan('back-in-stock:prune', ['--months' => 1])->assertSuccessful();
+
+        $this->assertDatabaseMissing('back_in_stock_subscriptions', ['id' => $subscription->id]);
     }
 }

@@ -43,26 +43,39 @@ class BackInStockSubscriptionController extends Controller
             $productSizeId = $size->id;
         }
 
-        $alreadySubscribed = BackInStockSubscription::where('product_id', $product->id)
+        $existing = BackInStockSubscription::where('product_id', $product->id)
             ->where('product_size_id', $productSizeId)
             ->where('email', $validated['email'])
-            ->exists();
+            ->first();
 
-        if (! $alreadySubscribed) {
+        // A row that was already notified (notified_at set) represents a
+        // *past* restock — BackInStockService only ever queries
+        // whereNull('notified_at'), so leaving it as-is would silently
+        // exclude this subscriber from every future restock while this
+        // response tells them they're covered. Resetting it here re-arms
+        // the same row for the next 0-to-positive crossing instead of
+        // leaving them permanently locked out after their first notification.
+        $alreadyWaiting = $existing && $existing->notified_at === null;
+
+        if (! $existing) {
             BackInStockSubscription::create([
                 'product_id' => $product->id,
                 'product_size_id' => $productSizeId,
                 'email' => $validated['email'],
                 'user_id' => $request->user()?->id,
             ]);
+        } elseif ($existing->notified_at !== null) {
+            $existing->update(['notified_at' => null]);
         }
 
-        // Both the fresh-signup and already-subscribed cases return the same
+        // Both the fresh-signup and already-waiting cases return the same
         // friendly, successful-looking response — a customer who signed up
         // last week and forgot shouldn't see anything that reads as an error.
+        // A previously-notified subscriber gets the "we'll notify you"
+        // message too, since they've just been re-armed for the next restock.
         return response()->json([
             'status' => 'ok',
-            'message' => $alreadySubscribed
+            'message' => $alreadyWaiting
                 ? __("You're already on the list for this — we'll email you the moment it's back.")
                 : __("We'll notify you as soon as it's back in stock."),
         ]);

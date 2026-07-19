@@ -12,8 +12,11 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        // items.product feeds each order card's thumbnail preview.
-        $orders = $request->user()->orders()->with('items.product')->latest()->paginate(10);
+        // items.product.images feeds each order card's thumbnail preview —
+        // cover_image_src falls back to the first gallery image when a
+        // product has no dedicated image_url, so images must be eager
+        // -loaded too or that fallback triggers a query per line item.
+        $orders = $request->user()->orders()->with('items.product.images')->latest()->paginate(10);
 
         return view('account.orders.index', compact('orders'));
     }
@@ -22,7 +25,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['items.product', 'statusHistories', 'shippingMethod']);
+        $order->load(['items.product.images', 'statusHistories', 'shippingMethod']);
 
         return view('account.orders.show', compact('order'));
     }
@@ -36,7 +39,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['items.product', 'statusHistories']);
+        $order->load(['items.product.images', 'statusHistories']);
 
         return view('orders.track', ['order' => $order, 'isGuest' => false]);
     }

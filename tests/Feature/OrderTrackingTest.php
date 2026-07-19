@@ -170,6 +170,42 @@ class OrderTrackingTest extends TestCase
         $response->assertForbidden();
     }
 
+    /**
+     * Regression guard: the guest tracking link must expire, matching the
+     * invoice-download precedent (90 days) — this page shows the customer's
+     * shipping address and phone, so a signature that never expires would
+     * leak that PII indefinitely if the link is forwarded or cached.
+     */
+    public function test_guest_tracking_link_expires_after_90_days(): void
+    {
+        $order = $this->makeOrder(['customer_email' => 'layla@example.com']);
+
+        $response = $this->post(route('track-order.lookup'), [
+            'order_number' => $order->order_number,
+            'contact' => 'layla@example.com',
+        ]);
+        $trackingUrl = $response->headers->get('Location');
+
+        $this->travel(91)->days();
+
+        $this->get($trackingUrl)->assertForbidden();
+    }
+
+    public function test_guest_tracking_link_still_works_within_90_days(): void
+    {
+        $order = $this->makeOrder(['customer_email' => 'layla@example.com']);
+
+        $response = $this->post(route('track-order.lookup'), [
+            'order_number' => $order->order_number,
+            'contact' => 'layla@example.com',
+        ]);
+        $trackingUrl = $response->headers->get('Location');
+
+        $this->travel(89)->days();
+
+        $this->get($trackingUrl)->assertOk();
+    }
+
     public function test_guest_lookup_is_rate_limited(): void
     {
         $order = $this->makeOrder(['customer_email' => 'layla@example.com']);

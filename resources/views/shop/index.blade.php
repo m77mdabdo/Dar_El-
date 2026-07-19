@@ -18,11 +18,7 @@
         <p>{{ __('Abayas, evening dresses, isdal and accessories, all hand-picked with care') }}</p>
     </section>
 
-    @php
-        $djSitewideOfferEndsAt = \App\Models\Setting::get('sitewide_offer_end_at');
-        $djSitewideOfferEndsAt = $djSitewideOfferEndsAt ? \Illuminate\Support\Carbon::parse($djSitewideOfferEndsAt) : null;
-    @endphp
-    @include('partials.offer-countdown', ['endsAt' => $djSitewideOfferEndsAt, 'label' => \App\Models\Setting::get('sitewide_offer_label')])
+    @include('partials.offer-countdown', ['endsAt' => \App\Models\Setting::sitewideOfferEndsAt(), 'label' => \App\Models\Setting::get('sitewide_offer_label')])
 
     @php
         // Every current query param except `category`/`page` — merged into
