@@ -536,6 +536,13 @@ window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     djDeferredInstallPrompt = event;
     if (djInstallPromptDismissedRecently()) return;
+    // Real iOS Safari never fires this event at all, so this check is a
+    // no-op there in practice — but some Chromium-based test/embedded
+    // contexts fire their own real beforeinstallprompt regardless of a
+    // spoofed/unusual user agent, and the two banners must never show at
+    // once. djIsIosSafari() is defined further down (function declarations
+    // hoist), so this is safe even though it runs first at load time.
+    if (djIsIosSafari()) return;
     document.getElementById('dj-install-banner')?.classList.add('dj-show');
 });
 
@@ -554,9 +561,45 @@ window.djInstallApp = async function () {
 window.djDismissInstallBanner = function () {
     localStorage.setItem(DJ_INSTALL_DISMISS_KEY, Date.now().toString());
     document.getElementById('dj-install-banner')?.classList.remove('dj-show');
+    document.getElementById('dj-ios-install-banner')?.classList.remove('dj-show');
 };
 
 window.addEventListener('appinstalled', () => {
     document.getElementById('dj-install-banner')?.classList.remove('dj-show');
     localStorage.removeItem(DJ_INSTALL_DISMISS_KEY);
+});
+
+/**
+ * iOS Safari never fires beforeinstallprompt — Apple/WebKit has no
+ * programmatic install trigger at all, by design, so the banner above is
+ * structurally incapable of ever showing there. This is the fallback: a
+ * separate, purely instructional banner (same dj-install-banner styling,
+ * different content — no functional "Install" button since there's
+ * nothing to click that does anything) telling the visitor how to add the
+ * site via Safari's own Share sheet. Detected via user agent rather than
+ * feature-detecting beforeinstallprompt's absence, since plenty of
+ * non-installable contexts also lack that event.
+ */
+function djIsIosSafari() {
+    const ua = navigator.userAgent;
+    // Modern iPadOS reports as "Macintosh" with touch support instead of
+    // "iPad" in its UA string, so it needs the touch-point check too.
+    const isIosDevice = /iP(hone|od|ad)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    // Chrome/Firefox/Edge/Opera on iOS all report "Safari" in their UA too
+    // (WebKit is mandatory for every iOS browser), but only Safari itself
+    // has the Share-sheet "Add to Home Screen" flow these instructions
+    // describe — showing them in another iOS browser would point at a menu
+    // that doesn't exist there.
+    const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    return isIosDevice && isSafari;
+}
+
+function djIsRunningStandalone() {
+    return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (djIsIosSafari() && !djIsRunningStandalone() && !djInstallPromptDismissedRecently()) {
+        document.getElementById('dj-ios-install-banner')?.classList.add('dj-show');
+    }
 });
