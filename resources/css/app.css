@@ -612,23 +612,33 @@ body.dj-en .dj-service-card h3 { font-family: 'Poppins'; }
 #dj-back-to-top.dj-show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 body.dj-en #dj-back-to-top { right: auto; left: 26px; }
 
-/* ===== PWA INSTALL BANNER ===== */
+/* ===== PWA INSTALL BANNER =====
+   Bottom toast/card, not pinned above the nav — the standard placement for
+   an "Add to Home Screen" prompt on both iOS and Android, and it doesn't
+   compete with the nav bar for attention on first load. Stacked layout
+   (icon+text row, dismiss pinned to the corner, install button on its own
+   full-width row below) rather than cramming text and both controls into
+   one row — that's what made the previous version wrap awkwardly. */
 .dj-install-banner {
-    position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 150; max-width: 420px; margin-inline: auto;
-    background: var(--dj-maroon-dark); color: var(--dj-cream); border-radius: 16px; box-shadow: var(--dj-shadow);
-    padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+    position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 150; max-width: 380px; margin-inline: auto;
+    background: var(--dj-maroon-dark); color: var(--dj-cream); border-radius: 18px; box-shadow: var(--dj-shadow);
+    padding: 18px; display: flex; flex-direction: column; gap: 14px;
     transform: translateY(140%); opacity: 0; transition: transform .35s ease, opacity .35s ease; pointer-events: none;
 }
 .dj-install-banner.dj-show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-.dj-install-banner-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.dj-install-banner-text strong { font-size: 14px; color: var(--dj-gold); }
-.dj-install-banner-text span { font-size: 12px; color: var(--dj-cream-2); line-height: 1.5; }
-.dj-install-banner-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.dj-install-banner-install { background: var(--dj-gold); color: var(--dj-maroon-dark); font-weight: 700; font-size: 12.5px; padding: 9px 16px; border-radius: 30px; white-space: nowrap; }
-.dj-install-banner-dismiss { width: 28px; height: 28px; border-radius: 50%; background: rgba(247,239,228,.12); color: var(--dj-cream); font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-@media (max-width: 480px) {
-    .dj-install-banner { left: 10px; right: 10px; bottom: 10px; padding: 12px 14px; flex-wrap: wrap; }
+.dj-install-banner-dismiss {
+    position: absolute; top: 12px; inset-inline-end: 12px; width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(247,239,228,.12); color: var(--dj-cream); font-size: 16px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s;
 }
+.dj-install-banner-dismiss:hover { background: rgba(247,239,228,.24); }
+.dj-install-banner-top { display: flex; align-items: flex-start; gap: 12px; padding-inline-end: 26px; }
+.dj-install-banner-icon { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,.25); }
+.dj-install-banner-text { display: flex; flex-direction: column; gap: 4px; }
+.dj-install-banner-text strong { font-size: 15px; font-weight: 700; color: var(--dj-gold); line-height: 1.35; }
+.dj-install-banner-text span { font-size: 12.5px; color: var(--dj-cream-2); line-height: 1.6; }
+.dj-install-banner-install { background: var(--dj-gold); color: var(--dj-maroon-dark); font-weight: 700; font-size: 13.5px; padding: 12px; border-radius: 12px; width: 100%; text-align: center; transition: background .2s; }
+.dj-install-banner-install:hover { background: var(--dj-gold-bright); }
 @media (prefers-reduced-motion: reduce) {
     .dj-install-banner { transition: opacity .2s ease; }
 }

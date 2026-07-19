@@ -34,14 +34,15 @@
     <button id="dj-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="{{ __('Back to top') }}">↑</button>
 
     <div id="dj-install-banner" class="dj-install-banner" role="dialog" aria-label="{{ __('Install Dar El Jamila') }}">
-        <div class="dj-install-banner-text">
-            <strong>{{ __('Install Dar El Jamila') }}</strong>
-            <span>{{ __('Add it to your home screen for quick, app-like access.') }}</span>
+        <button type="button" class="dj-install-banner-dismiss" onclick="djDismissInstallBanner()" aria-label="{{ __('Dismiss') }}">&times;</button>
+        <div class="dj-install-banner-top">
+            <img src="{{ asset('assets/branding/favicon-192.png') }}" alt="" class="dj-install-banner-icon">
+            <div class="dj-install-banner-text">
+                <strong>{{ __('Install Dar El Jamila') }}</strong>
+                <span>{{ __('Add it to your home screen for quick, app-like access.') }}</span>
+            </div>
         </div>
-        <div class="dj-install-banner-actions">
-            <button type="button" class="dj-install-banner-install" onclick="djInstallApp()">{{ __('Install') }}</button>
-            <button type="button" class="dj-install-banner-dismiss" onclick="djDismissInstallBanner()" aria-label="{{ __('Dismiss') }}">&times;</button>
-        </div>
+        <button type="button" class="dj-install-banner-install" onclick="djInstallApp()">{{ __('Install') }}</button>
     </div>
 
     <div x-data="{ mobileNavOpen: false }">
