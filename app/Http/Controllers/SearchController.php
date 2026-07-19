@@ -29,6 +29,7 @@ class SearchController extends Controller
         $total = $matches->count();
 
         $results = $matches
+            ->with('images')
             ->latest()
             ->take(self::MAX_RESULTS)
             ->get()

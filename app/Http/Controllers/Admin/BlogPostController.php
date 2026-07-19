@@ -90,7 +90,19 @@ class BlogPostController extends Controller
 
     protected function validated(Request $request): array
     {
-        $request->merge(['is_published' => $request->boolean('is_published')]);
+        $request->merge([
+            'is_published' => $request->boolean('is_published'),
+            // An empty datetime-local input submits as '' — nullable-and-
+            // empty still passes the 'date' rule, but Eloquent's datetime
+            // cast hands that raw empty string straight to the query
+            // builder, which MySQL rejects outright (SQLite is lenient
+            // about it instead, masking this in tests unless explicitly
+            // checked against real MySQL). Coerce to a real null before
+            // validation so "leave empty" actually clears the column
+            // instead of throwing in production — same fix already
+            // applied to Product's offer_ends_at/scheduled_publish_at.
+            'published_at' => $request->published_at ?: null,
+        ]);
 
         return $request->validate([
             'title_ar' => ['required', 'string', 'max:255'],
