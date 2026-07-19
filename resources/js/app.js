@@ -313,7 +313,7 @@ function djRenderProductModal() {
             <div class="dj-modal-trust">
                 <span>${p.trust1}</span><span>${p.trust2}</span><span>${p.trust3}</span>
             </div>
-            <a href="${p.detailsUrl}" style="margin-top:14px; font-size:12px; text-align:center; color:var(--dj-rose-dust); text-decoration:underline;">${p.viewDetailsLabel}</a>
+            <a href="${p.detailsUrl}" class="dj-modal-view-details">${p.viewDetailsLabel}</a>
         </div>
     `;
 }
