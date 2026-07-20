@@ -33,7 +33,12 @@
     <div id="dj-scroll-progress"></div>
     <button id="dj-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="{{ __('Back to top') }}">↑</button>
 
-    <div id="dj-install-banner" class="dj-install-banner" role="dialog" aria-label="{{ __('Install Dar El Jamila') }}">
+    {{-- role="region" (not "dialog") — this is a dismissible, non-modal
+         toast: it never traps focus, is closable via its own dismiss
+         button rather than Escape, and the rest of the page stays fully
+         interactive while it's shown. "dialog" implies modal semantics
+         this component deliberately doesn't have. --}}
+    <div id="dj-install-banner" class="dj-install-banner" role="region" aria-label="{{ __('Install Dar El Jamila') }}">
         <button type="button" class="dj-install-banner-dismiss" onclick="djDismissInstallBanner()" aria-label="{{ __('Dismiss') }}">&times;</button>
         <div class="dj-install-banner-top">
             <img src="{{ asset('assets/branding/favicon-192.png') }}" alt="" class="dj-install-banner-icon">
@@ -51,7 +56,7 @@
          djIsIosSafari() check. Same styling as the Android banner above,
          but no functional install button — there's nothing to click that
          does anything; the visitor has to use Safari's own Share sheet. --}}
-    <div id="dj-ios-install-banner" class="dj-install-banner" role="dialog" aria-label="{{ __('Install Dar El Jamila') }}">
+    <div id="dj-ios-install-banner" class="dj-install-banner" role="region" aria-label="{{ __('Install Dar El Jamila') }}">
         <button type="button" class="dj-install-banner-dismiss" onclick="djDismissInstallBanner()" aria-label="{{ __('Dismiss') }}">&times;</button>
         <div class="dj-install-banner-top">
             <img src="{{ asset('assets/branding/favicon-192.png') }}" alt="" class="dj-install-banner-icon">
