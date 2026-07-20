@@ -233,7 +233,55 @@ class SeoTest extends TestCase
         $response->assertOk();
         $schema = $this->extractJsonLd($response->getContent(), 'Organization');
         $this->assertNotNull($schema);
+        $this->assertSame('https://schema.org', $schema['@context']);
         $this->assertSame([], $schema['sameAs']);
+    }
+
+    /**
+     * Regression guard for a real bug that shipped and went unnoticed for
+     * days: organization-schema.blade.php originally built its array
+     * literal inline inside a bare {!! json_encode([...]) !!} echo instead
+     * of inside a dedicated @php block like every other schema partial.
+     * Blade's directive compiler scans raw template text for @-prefixed
+     * directive names regardless of surrounding PHP-string context, so the
+     * literal '@context' key collided with Laravel's real context-sharing
+     * Blade directive and got replaced with leaked compiled-directive PHP.
+     *
+     * The dangerous part: json_encode() still received a syntactically
+     * valid (if bizarre) PHP array, so the overall output was still valid
+     * JSON — extractJsonLd()'s json_decode() succeeded, "@type" and
+     * "sameAs" still matched correctly, and the test above passed the
+     * whole time despite "@context" silently being garbage instead of
+     * "https://schema.org". This test parses the raw JSON-LD block
+     * directly and asserts on the literal "@context" key specifically, so
+     * this exact class of bug — a raw {!! !!} echo's inline array literal
+     * colliding with a real Blade directive name — can't silently pass
+     * again by relying only on a general assertNotNull()/other-key check.
+     */
+    public function test_organization_schema_context_key_is_the_literal_schema_org_url_not_leaked_php(): void
+    {
+        $response = $this->get(route('home'));
+        $response->assertOk();
+
+        preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $response->getContent(), $matches);
+
+        $organizationBlock = null;
+        foreach ($matches[1] as $block) {
+            $decoded = json_decode(trim($block), true);
+            if (json_last_error() === JSON_ERROR_NONE && ($decoded['@type'] ?? null) === 'Organization') {
+                $organizationBlock = trim($block);
+                break;
+            }
+        }
+
+        $this->assertNotNull($organizationBlock, 'Organization JSON-LD block not found.');
+
+        $decoded = json_decode($organizationBlock, true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertArrayHasKey('@context', $decoded);
+        $this->assertSame('https://schema.org', $decoded['@context']);
+        $this->assertStringNotContainsString('<?php', $organizationBlock);
+        $this->assertStringNotContainsString('__contextArgs', $organizationBlock);
     }
 
     // ---------------------------------------------------------------

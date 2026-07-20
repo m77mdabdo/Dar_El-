@@ -99,13 +99,14 @@
 </div>
 
 <div class="dj-admin-card p-4 mt-2">
-    <p class="font-semibold text-[var(--dj-maroon-dark)]">{{ __('products.related_products_heading') }}</p>
+    <label for="dj-related-select" class="font-semibold text-[var(--dj-maroon-dark)] block">{{ __('products.related_products_heading') }}</label>
     <p class="dj-admin-hint mb-3">{{ __('products.related_products_hint') }}</p>
 
     @php
         $djSelectedRelatedIds = old('related_product_ids', isset($product) ? $product->relatedProducts->pluck('id')->all() : []);
     @endphp
 
+    <label for="dj-related-filter" class="sr-only">{{ __('products.related_products_search_placeholder') }}</label>
     <input type="text" id="dj-related-filter" placeholder="{{ __('products.related_products_search_placeholder') }}" class="dj-admin-input mb-2">
     <select name="related_product_ids[]" id="dj-related-select" multiple size="8" class="dj-admin-input" style="height:200px;">
         @foreach ($relatableProducts as $candidate)
