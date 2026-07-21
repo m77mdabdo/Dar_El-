@@ -113,6 +113,11 @@
                             @endforeach
                         </div>
 
+                        <button type="button" class="dj-size-guide-trigger" onclick="djOpenSizeGuide()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25h18M3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V8.25M3 8.25l1.5-4.5h15l1.5 4.5M8.25 12v3M12 12v6M15.75 12v3"/></svg>
+                            {{ __('Size Guide') }}
+                        </button>
+
                         <div id="dj-pdp-stock" class="dj-stock-badge" style="margin-bottom:16px;"></div>
 
                         <div class="dj-qty-select">
@@ -163,6 +168,99 @@
                 </div>
             </div>
         </div>
+
+        {{-- Inline (not resources/css/app.css or resources/js/app.js) so the
+             size guide ships the moment this Blade file reaches production
+             via a plain git pull — same standing deploy-proofing convention
+             as the WhatsApp button and order-history card above/elsewhere. --}}
+        <div id="dj-size-guide-overlay" class="dj-size-guide-overlay" onclick="if (event.target === this) djCloseSizeGuide()">
+            <div class="dj-size-guide-modal" role="dialog" aria-modal="true" aria-label="{{ __('Size Guide') }}">
+                <button type="button" class="dj-size-guide-close" onclick="djCloseSizeGuide()" aria-label="{{ __('Close') }}">&times;</button>
+                <h2>{{ __('Size Guide') }}</h2>
+                <div class="dj-size-guide-table-wrap">
+                    <table class="dj-size-guide-table">
+                        <thead>
+                            <tr>
+                                <th>{{ __('settings.size_guide_size') }}</th>
+                                <th>{{ __('settings.size_guide_bust') }}</th>
+                                <th>{{ __('settings.size_guide_waist') }}</th>
+                                <th>{{ __('settings.size_guide_hips') }}</th>
+                                <th>{{ __('settings.size_guide_length') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (\App\Models\Setting::sizeGuideChart() as $row)
+                                <tr>
+                                    <td class="dj-size-guide-size-cell">{{ $row['size'] }}</td>
+                                    <td>{{ $row['bust'] }}</td>
+                                    <td>{{ $row['waist'] }}</td>
+                                    <td>{{ $row['hips'] }}</td>
+                                    <td>{{ $row['length'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="dj-size-guide-note">{{ \App\Models\Setting::sizeGuideNote() }}</p>
+            </div>
+        </div>
+
+        <style>
+            .dj-size-guide-trigger {
+                display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none;
+                color: var(--dj-rose-dust); font-size: 13px; font-weight: 700; text-decoration: underline;
+                text-underline-offset: 3px; padding: 0; margin-bottom: 16px; transition: color .2s;
+            }
+            .dj-size-guide-trigger:hover { color: var(--dj-maroon); }
+            .dj-size-guide-trigger svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+            .dj-size-guide-overlay {
+                position: fixed; inset: 0; z-index: 300; background: rgba(60,11,23,.55);
+                display: flex; align-items: center; justify-content: center; padding: 20px;
+                opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s ease, visibility .25s ease;
+            }
+            .dj-size-guide-overlay.dj-show { opacity: 1; visibility: visible; pointer-events: auto; }
+            .dj-size-guide-modal {
+                background: #fff; border-radius: 18px; box-shadow: var(--dj-shadow); padding: 28px 24px;
+                max-width: 480px; width: 100%; max-height: 86vh; overflow-y: auto; position: relative;
+                transform: scale(.96) translateY(8px); transition: transform .25s ease;
+            }
+            .dj-size-guide-overlay.dj-show .dj-size-guide-modal { transform: scale(1) translateY(0); }
+            .dj-size-guide-modal h2 {
+                font-family: 'Tajawal'; font-size: 20px; color: var(--dj-maroon); margin-bottom: 16px; padding-inline-end: 30px;
+            }
+            body.dj-en .dj-size-guide-modal h2 { font-family: 'Playfair Display'; }
+            .dj-size-guide-close {
+                position: absolute; top: 16px; inset-inline-end: 16px; width: 32px; height: 32px; border-radius: 50%;
+                background: var(--dj-cream-2); color: var(--dj-maroon); font-size: 18px; line-height: 1;
+                display: flex; align-items: center; justify-content: center; transition: background .2s;
+            }
+            .dj-size-guide-close:hover { background: var(--dj-gold); }
+            .dj-size-guide-table-wrap { overflow-x: auto; }
+            .dj-size-guide-table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+            .dj-size-guide-table th, .dj-size-guide-table td {
+                padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--dj-cream-2);
+                font-variant-numeric: tabular-nums;
+            }
+            .dj-size-guide-table th { color: var(--dj-rose-dust); font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
+            .dj-size-guide-size-cell { font-weight: 700; color: var(--dj-maroon); }
+            .dj-size-guide-note { font-size: 12px; color: #8a6b70; line-height: 1.7; margin-top: 16px; }
+            @media (prefers-reduced-motion: reduce) {
+                .dj-size-guide-overlay, .dj-size-guide-modal { transition: opacity .15s ease; transform: none !important; }
+            }
+        </style>
+
+        <script>
+            window.djOpenSizeGuide = function () {
+                document.getElementById('dj-size-guide-overlay')?.classList.add('dj-show');
+            };
+            window.djCloseSizeGuide = function () {
+                document.getElementById('dj-size-guide-overlay')?.classList.remove('dj-show');
+            };
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') djCloseSizeGuide();
+            });
+        </script>
 
         @include('partials.back-in-stock-notify', ['product' => $product])
 
