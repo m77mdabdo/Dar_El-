@@ -113,7 +113,7 @@
                             @endforeach
                         </div>
 
-                        <button type="button" class="dj-size-guide-trigger" onclick="djOpenSizeGuide()">
+                        <button type="button" class="dj-size-guide-trigger dj-keep-clickable" onclick="djOpenSizeGuide()">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25h18M3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V8.25M3 8.25l1.5-4.5h15l1.5 4.5M8.25 12v3M12 12v6M15.75 12v3"/></svg>
                             {{ __('Size Guide') }}
                         </button>
@@ -127,7 +127,7 @@
                             <button type="button" id="dj-pdp-qty-plus" onclick="djPdpChangeQty(1)">+</button>
                         </div>
 
-                        <button type="button" onclick="djPdpAddToCart()" id="dj-pdp-add-btn" class="dj-modal-add">
+                        <button type="button" onclick="djPdpAddToCart()" id="dj-pdp-add-btn" class="dj-modal-add dj-keep-clickable">
                             {{ __('Add to Cart') }}
                         </button>
                     </form>

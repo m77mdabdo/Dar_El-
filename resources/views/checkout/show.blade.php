@@ -33,8 +33,9 @@
                     </div>
                 </div>
 
-                <input type="email" name="customer_email" class="{{ $errors->has('customer_email') ? 'dj-input-error' : '' }}" value="{{ old('customer_email', auth()->user()->email ?? '') }}" placeholder="{{ __('Email') }}" aria-label="{{ __('Email') }}" aria-invalid="{{ $errors->has('customer_email') ? 'true' : 'false' }}" required>
+                <input type="email" name="customer_email" class="{{ $errors->has('customer_email') ? 'dj-input-error' : '' }}" value="{{ old('customer_email', auth()->user()->email ?? '') }}" placeholder="{{ __('Email (optional)') }}" aria-label="{{ __('Email (optional)') }}" aria-invalid="{{ $errors->has('customer_email') ? 'true' : 'false' }}">
                 @error('customer_email') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
+                <p class="dj-checkout-email-hint">{{ __('Add your email to receive an order confirmation and invoice — you can always track your order by phone number instead.') }}</p>
 
                 <div class="dj-form-row">
                     <div>
@@ -99,7 +100,7 @@
                     </div>
                 @endif
 
-                <button type="submit" class="dj-place-order-btn" id="dj-checkout-submit" {{ $hasStockIssues ? 'disabled' : '' }}>{{ __('Place Order') }}</button>
+                <button type="submit" class="dj-place-order-btn dj-keep-clickable" id="dj-checkout-submit" {{ $hasStockIssues ? 'disabled' : '' }}>{{ __('Place Order') }}</button>
             </form>
         </div>
 

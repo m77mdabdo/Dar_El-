@@ -109,7 +109,14 @@ class CheckoutController extends Controller
                     'user_id' => $request->user()?->id,
                     'order_number' => 'ORD-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
                     'customer_name' => $validated['customer_name'],
-                    'customer_email' => $validated['customer_email'],
+                    // Empty string, not null — the column itself stays
+                    // NOT NULL (no migration needed for what's ultimately
+                    // just "no email provided"), and every consumer of this
+                    // value already treats an empty string as "no email" the
+                    // same way it would treat null: Order::resolveCustomerEmail()
+                    // and maskEmailForLogging() both use falsy checks, not
+                    // strict null checks.
+                    'customer_email' => $validated['customer_email'] ?? '',
                     'customer_phone' => $validated['customer_phone'],
                     'governorate' => $validated['governorate'],
                     'city' => $validated['city'],

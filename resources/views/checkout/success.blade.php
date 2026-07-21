@@ -10,7 +10,11 @@
         <h2>{{ __('Your Order Has Been Received!') }}</h2>
         <p>{{ __("Thank you for trusting Dar El Jamila. We'll start preparing your order right away.") }}</p>
         <div class="dj-order-number">#{{ $order->order_number }}</div>
-        <p>{{ __('A confirmation email with your invoice is on its way.') }}</p>
+        @if ($order->resolveCustomerEmail())
+            <p>{{ __('A confirmation email with your invoice is on its way.') }}</p>
+        @else
+            <p>{{ __('Save your order number above — you can track your order anytime using it and your phone number.') }}</p>
+        @endif
 
         <div style="text-align:left; background:#fff; border-radius:16px; padding:24px; margin-top:26px; box-shadow:0 10px 24px -18px rgba(60,11,23,.3);">
             @foreach ($order->items as $item)
@@ -56,8 +60,23 @@
             <a href="{{ route('shop.index') }}" class="dj-hero-cta" style="position:relative;">{{ __('Continue Shopping') }}</a>
             @auth
                 <a href="{{ route('account.orders.show', $order) }}" class="dj-hero-cta" style="position:relative;">{{ __('View Order') }}</a>
+            @else
+                <a href="{{ route('track-order.form') }}" class="dj-hero-cta" style="position:relative;">{{ __('orders.track_title') }}</a>
             @endauth
         </div>
+
+        {{-- Optional, not forced — a guest who just checked out with zero
+             account friction can still choose to create one afterward for
+             easier order tracking next time. Pre-fills from the order they
+             just placed rather than starting from a blank register form. --}}
+        @guest
+            <div class="dj-guest-account-prompt">
+                <p>{{ __('Create an account to track all your future orders easily.') }}</p>
+                <a href="{{ route('register', ['name' => $order->customer_name, 'email' => $order->resolveCustomerEmail(), 'phone' => $order->customer_phone]) }}">
+                    {{ __('Create an Account') }}
+                </a>
+            </div>
+        @endguest
     </div>
 
     @if ($shouldTrackPurchase)
