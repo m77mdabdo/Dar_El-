@@ -40,6 +40,7 @@ return [
 
     'status_updated' => 'Order status updated.',
     'status_updated_with_restock' => 'Order status updated. Stock restored for :count item(s).',
+    'status_updated_push_title' => 'Order :number',
 
     'track_eyebrow' => 'Order Tracking',
     'track_title' => 'Track Your Order',
