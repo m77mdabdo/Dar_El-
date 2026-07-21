@@ -163,3 +163,47 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(networkFirstNavigation(request));
     }
 });
+
+// Web Push: PushNotificationService (app/Services/PushNotificationService.php)
+// sends a JSON payload of { title, body, url } — shown here as a real OS
+// notification. A push with no data (e.g. a bare keep-alive ping some push
+// services send) is silently ignored rather than shown as an empty toast.
+self.addEventListener('push', (event) => {
+    if (!event.data) return;
+
+    let data;
+    try {
+        data = event.data.json();
+    } catch (err) {
+        return;
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(data.title || 'Dar El Jamila', {
+            body: data.body || '',
+            icon: '/assets/branding/favicon-512.png',
+            badge: '/assets/branding/favicon-512.png',
+            data: { url: data.url || '/' },
+        })
+    );
+});
+
+// Clicking the OS notification focuses an already-open tab on that URL if
+// one exists, instead of always opening a new one.
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const url = event.notification.data?.url || '/';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (const client of windowClients) {
+                if (client.url === url && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(url);
+            }
+        })
+    );
+});

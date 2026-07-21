@@ -505,5 +505,12 @@
     "Ready to Request an Exchange?": "جاهزة لطلب استبدال؟",
     "Message us your order number and we’ll take it from there.": "راسلينا برقم طلبك وسنتولى الباقي.",
     "Return Policy": "سياسة الاستبدال",
-    "Read our full return & exchange policy": "اطّلعي على سياسة الاستبدال والإرجاع كاملة"
+    "Read our full return & exchange policy": "اطّلعي على سياسة الاستبدال والإرجاع كاملة",
+
+    "Enable Notifications": "تفعيل الإشعارات",
+    "Stay in the Loop": "ابقي على اطّلاع",
+    "Get a notification the moment there's an update — no need to check your email.": "استلمي إشعارًا فور وجود تحديث — دون الحاجة لمراجعة بريدك الإلكتروني.",
+    "Want a push notification when \":name\" is back, too? No need to check your email.": "تحبي تستلمي إشعارًا فوريًا لما \":name\" يرجع متاح؟ دون الحاجة لمراجعة بريدك الإلكتروني.",
+    "Get notified when your order ships or arrives": "استلمي إشعارًا عند شحن طلبك أو وصوله",
+    "Notifications enabled": "تم تفعيل الإشعارات"
 }

@@ -639,6 +639,7 @@ body.dj-en #dj-back-to-top { right: auto; left: 26px; }
 .dj-install-banner-dismiss:hover { background: rgba(247,239,228,.24); }
 .dj-install-banner-top { display: flex; align-items: flex-start; gap: 12px; padding-inline-end: 26px; }
 .dj-install-banner-icon { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,.25); }
+.dj-push-optin-icon { background: var(--dj-gold); display: flex; align-items: center; justify-content: center; font-size: 21px; }
 .dj-install-banner-text { display: flex; flex-direction: column; gap: 4px; }
 .dj-install-banner-text strong { font-size: 15px; font-weight: 700; color: var(--dj-gold); line-height: 1.35; }
 .dj-install-banner-text span { font-size: 12.5px; color: var(--dj-cream-2); line-height: 1.6; }

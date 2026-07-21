@@ -92,4 +92,26 @@ return [
         'key' => env('PEXELS_API_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Web Push (VAPID)
+    |--------------------------------------------------------------------------
+    |
+    | Used by PushNotificationService (minishlink/web-push) to send browser
+    | push notifications for back-in-stock alerts and order-status updates.
+    | Generate a keypair with `php artisan webpush:vapid` — never reuse the
+    | pair committed to this repo's local .env; production needs its own,
+    | generated directly on the server and never shared with this codebase.
+    | 'subject' must be a mailto: address or a URL identifying the sender,
+    | per the VAPID spec — push services use it to contact you if your
+    | server is misbehaving (e.g. sending too many notifications).
+    |
+    */
+
+    'webpush' => [
+        'public_key' => env('WEBPUSH_VAPID_PUBLIC_KEY'),
+        'private_key' => env('WEBPUSH_VAPID_PRIVATE_KEY'),
+        'subject' => env('WEBPUSH_VAPID_SUBJECT', 'mailto:'.env('MAIL_FROM_ADDRESS', 'info@dareljamila.com')),
+    ],
+
 ];

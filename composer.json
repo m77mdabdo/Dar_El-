@@ -8,10 +8,12 @@
     "require": {
         "php": "^8.3",
         "barryvdh/laravel-dompdf": "^3.1",
+        "guzzlehttp/guzzle": "^7.15.1",
         "intervention/image": "^3.0",
         "laravel/framework": "^13.8",
         "laravel/socialite": "^5.28",
         "laravel/tinker": "^3.0",
+        "minishlink/web-push": "^10.1",
         "mpdf/mpdf": "^8.3",
         "spatie/browsershot": "^5.4",
         "spatie/laravel-permission": "^8.3"

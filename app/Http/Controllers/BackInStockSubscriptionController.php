@@ -7,7 +7,9 @@ use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class BackInStockSubscriptionController extends Controller
 {
@@ -58,15 +60,29 @@ class BackInStockSubscriptionController extends Controller
         $alreadyWaiting = $existing && $existing->notified_at === null;
 
         if (! $existing) {
-            BackInStockSubscription::create([
+            $subscription = BackInStockSubscription::create([
                 'product_id' => $product->id,
                 'product_size_id' => $productSizeId,
                 'email' => $validated['email'],
                 'user_id' => $request->user()?->id,
             ]);
-        } elseif ($existing->notified_at !== null) {
-            $existing->update(['notified_at' => null]);
+        } else {
+            if ($existing->notified_at !== null) {
+                $existing->update(['notified_at' => null]);
+            }
+            $subscription = $existing;
         }
+
+        // Short-lived, single-use, unguessable reference the frontend can
+        // hand back to POST /push/subscribe if this customer also opts into
+        // a push notification for this signup right after seeing this
+        // response (see partials/back-in-stock-notify.blade.php). Deliberately
+        // not the subscription's own numeric id — that would let anyone
+        // attach their own push subscription to someone else's back-in-stock
+        // row just by enumerating ids. 15 minutes is more than enough time
+        // for the "want a push too?" prompt to still be on screen.
+        $pushLinkToken = (string) Str::uuid();
+        Cache::put('push-link-'.$pushLinkToken, $subscription->id, now()->addMinutes(15));
 
         // Both the fresh-signup and already-waiting cases return the same
         // friendly, successful-looking response — a customer who signed up
@@ -78,6 +94,7 @@ class BackInStockSubscriptionController extends Controller
             'message' => $alreadyWaiting
                 ? __("You're already on the list for this — we'll email you the moment it's back.")
                 : __("We'll notify you as soon as it's back in stock."),
+            'push_link_token' => $pushLinkToken,
         ]);
     }
 
