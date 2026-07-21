@@ -162,9 +162,9 @@
                 @endif
 
                 <div class="dj-modal-trust">
-                    <span>{{ __('Secure Order') }}</span>
-                    <span>{{ __('Nationwide Delivery') }}</span>
-                    <span>{{ __('3-Day Exchange') }}</span>
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z"/></svg>{{ __('Secure Order') }}</span>
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 018 0v2"/></svg>{{ __('Nationwide Delivery') }}</span>
+                    <a href="{{ route('return-policy') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>{{ __('3-Day Exchange') }}</a>
                 </div>
             </div>
         </div>
