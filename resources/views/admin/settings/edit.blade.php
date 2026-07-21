@@ -112,6 +112,48 @@
             </div>
 
             <div class="border-t border-[var(--dj-cream-2)] pt-4">
+                <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.size_guide') }}</h2>
+                <p class="dj-admin-hint mb-3">{{ __('settings.size_guide_hint') }}</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-start dj-admin-label">{{ __('settings.size_guide_size') }}</th>
+                                <th class="text-start dj-admin-label">{{ __('settings.size_guide_bust') }}</th>
+                                <th class="text-start dj-admin-label">{{ __('settings.size_guide_waist') }}</th>
+                                <th class="text-start dj-admin-label">{{ __('settings.size_guide_hips') }}</th>
+                                <th class="text-start dj-admin-label">{{ __('settings.size_guide_length') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (['S', 'M', 'L', 'XL', 'XXL'] as $sizeLabel)
+                                <tr>
+                                    <td class="py-1 pe-3 font-semibold text-[var(--dj-maroon)]">{{ $sizeLabel }}</td>
+                                    @foreach (['bust', 'waist', 'hips', 'length'] as $column)
+                                        <td class="py-1 pe-3">
+                                            <input type="number" min="0" max="300"
+                                                   name="size_guide[{{ $sizeLabel }}][{{ $column }}]"
+                                                   value="{{ old('size_guide.'.$sizeLabel.'.'.$column, $sizeGuideChart[$sizeLabel][$column] ?? '') }}"
+                                                   class="dj-admin-input">
+                                            @error('size_guide.'.$sizeLabel.'.'.$column) <p class="dj-admin-error">{{ $message }}</p> @enderror
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="dj-admin-hint mt-2">{{ __('settings.size_guide_measurements_hint') }}</p>
+
+                <div class="mt-3">
+                    <label class="dj-admin-label">{{ __('settings.size_guide_note_label') }}</label>
+                    <textarea name="size_guide_note" rows="2" class="dj-admin-input" dir="rtl">{{ old('size_guide_note', \App\Models\Setting::sizeGuideNote()) }}</textarea>
+                    @error('size_guide_note') <p class="dj-admin-error">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="border-t border-[var(--dj-cream-2)] pt-4">
                 <h2 class="font-semibold mb-3 text-[var(--dj-maroon-dark)]">{{ __('settings.marketing_tracking') }}</h2>
 
                 <div class="space-y-4">

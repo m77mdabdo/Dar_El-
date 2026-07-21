@@ -38,6 +38,16 @@ return [
     'sitewide_offer_end_at' => 'Offer Ends At',
     'sitewide_offer_hint' => 'Leave the end date empty (or set it in the past) to disable — the countdown banner then stops appearing everywhere on the site. Shown on the homepage, the shop page, and on any product page that doesn\'t have its own offer_ends_at set.',
 
+    'size_guide' => 'Size Guide',
+    'size_guide_hint' => 'One shared chart for the whole catalog, shown on every product page. Measurements are in centimeters.',
+    'size_guide_size' => 'Size',
+    'size_guide_bust' => 'Bust (cm)',
+    'size_guide_waist' => 'Waist (cm)',
+    'size_guide_hips' => 'Hips (cm)',
+    'size_guide_length' => 'Length (cm)',
+    'size_guide_measurements_hint' => 'Leave a cell empty to show 0 — better to fill in a real approximate measurement than leave it blank.',
+    'size_guide_note_label' => 'Note shown below the chart',
+
     'site_images' => 'Site Images',
     'images_hint' => 'JPG, PNG, or WEBP. Max 4MB each. Uploading a new image replaces the current one.',
     'save_settings' => 'Save Settings',
