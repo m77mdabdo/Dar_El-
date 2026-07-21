@@ -20,4 +20,11 @@ class PageController extends Controller
 
         return view('pages.services', compact('heroImage'));
     }
+
+    public function returnPolicy()
+    {
+        $heroImage = Setting::get('return_policy_hero_image', 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=1600&q=80&auto=format&fit=crop');
+
+        return view('pages.return-policy', compact('heroImage'));
+    }
 }

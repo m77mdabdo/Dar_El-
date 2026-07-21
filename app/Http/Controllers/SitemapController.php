@@ -29,6 +29,7 @@ class SitemapController extends Controller
             ['loc' => route('shop.index'), 'lastmod' => now(), 'changefreq' => 'daily', 'priority' => '0.9'],
             ['loc' => route('about'), 'lastmod' => now(), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('contact.show'), 'lastmod' => now(), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => route('return-policy'), 'lastmod' => now(), 'changefreq' => 'monthly', 'priority' => '0.4'],
         ];
 
         foreach (Product::where('is_active', true)->select(['id', 'slug', 'updated_at'])->get() as $product) {
