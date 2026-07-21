@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\EnsureAdminPermission;
-use App\Http\Middleware\RequireVerifiedIfAuthenticated;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Foundation\Application;
@@ -44,7 +43,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'verified.if.auth' => RequireVerifiedIfAuthenticated::class,
             'admin' => AdminMiddleware::class,
             'admin.permission' => EnsureAdminPermission::class,
             'super_admin' => SuperAdminMiddleware::class,

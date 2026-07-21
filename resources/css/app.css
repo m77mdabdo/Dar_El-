@@ -643,6 +643,12 @@ body.dj-en #dj-back-to-top { right: auto; left: 26px; }
     .dj-install-banner { transition: opacity .2s ease; }
 }
 
+/* Applied by djUpdateInstallBannerYield() in app.js whenever the banner's
+   own rect currently coincides with a .dj-keep-clickable element (e.g. the
+   size-guide trigger on a product page) — the banner steps back instead of
+   sitting on top of it, and returns once the page scrolls past that point. */
+.dj-install-banner.dj-show.dj-yield { opacity: 0; pointer-events: none; }
+
 /* #dj-whatsapp-float and .dj-ask-whatsapp styling lives inline in
    partials/whatsapp-float.blade.php and shop/show.blade.php instead of here —
    deliberate, so it ships the moment those Blade files reach production via a
@@ -684,6 +690,7 @@ body.dj-en .dj-checkout-form-box h3 { font-family: 'Poppins'; }
     border-color: #d64545; background: #fdf3f3;
 }
 .dj-checkout-form-box .dj-field-msg-error { color: #b83333; font-size: 12px; margin-top: -10px; margin-bottom: 10px; }
+.dj-checkout-email-hint { color: #8a6b70; font-size: 12px; margin-top: -10px; margin-bottom: 14px; line-height: 1.6; }
 .dj-pay-methods { display: flex; flex-direction: column; gap: 12px; margin: 18px 0 24px; }
 .dj-pay-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--dj-cream-2); border-radius: 12px; transition: .2s; }
 .dj-pay-option.dj-active { border-color: var(--dj-maroon); background: var(--dj-cream); }
@@ -720,6 +727,11 @@ body.dj-en .dj-order-summary h3 { font-family: 'Poppins'; }
 .dj-confirm-wrap h2 { font-size: clamp(21px, 5vw, 28px); color: var(--dj-maroon); margin-bottom: 12px; }
 .dj-confirm-wrap p { font-size: 14.5px; color: #8a6b70; line-height: 1.9; margin-bottom: 8px; }
 .dj-order-number { display: inline-block; background: var(--dj-cream-2); color: var(--dj-maroon); font-weight: 800; padding: 10px 24px; border-radius: 30px; margin: 18px 0 30px; font-size: 15px; letter-spacing: 1px; }
+
+.dj-guest-account-prompt { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--dj-cream-2); }
+.dj-guest-account-prompt p { font-size: 13px; color: #8a6b70; margin-bottom: 10px; }
+.dj-guest-account-prompt a { display: inline-block; color: var(--dj-maroon); font-weight: 700; font-size: 13.5px; text-decoration: underline; text-underline-offset: 3px; }
+.dj-guest-account-prompt a:hover { color: var(--dj-maroon-dark); }
 
 /* ===== BREADCRUMB ===== */
 .dj-breadcrumb { margin-bottom: 20px; }

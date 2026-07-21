@@ -45,7 +45,7 @@
 
             <div class="dj-field">
                 <svg class="dj-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/><path d="M4 20.5c1.4-3.6 4.6-5.5 8-5.5s6.6 1.9 8 5.5"/></svg>
-                <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" placeholder=" ">
+                <input id="name" type="text" name="name" value="{{ old('name', request()->query('name', '')) }}" required autofocus autocomplete="name" placeholder=" ">
                 <label for="name" class="dj-field-label">{{ __('Full Name') }}</label>
                 @error('name')
                     <p class="dj-field-error">{{ $message }}</p>
@@ -54,7 +54,7 @@
 
             <div class="dj-field">
                 <svg class="dj-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5v-11Z"/><path d="m4 6 8 6 8-6"/></svg>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" placeholder=" ">
+                <input id="email" type="email" name="email" value="{{ old('email', request()->query('email', '')) }}" required autocomplete="username" placeholder=" ">
                 <label for="email" class="dj-field-label">{{ __('Email') }}</label>
                 @error('email')
                     <p class="dj-field-error">{{ $message }}</p>
@@ -63,7 +63,7 @@
 
             <div class="dj-field">
                 <svg class="dj-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8Z"/></svg>
-                <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder=" ">
+                <input id="phone" type="tel" name="phone" value="{{ old('phone', request()->query('phone', '')) }}" required autocomplete="tel" placeholder=" ">
                 <label for="phone" class="dj-field-label">{{ __('Phone Number') }}</label>
                 @error('phone')
                     <p class="dj-field-error">{{ $message }}</p>

@@ -530,6 +530,62 @@ function djInstallPromptDismissedRecently() {
     return daysSince < DJ_INSTALL_DISMISS_DAYS;
 }
 
+function djSetInstallBannerVisible(el, visible) {
+    el?.classList.toggle('dj-show', visible);
+    djScheduleInstallBannerYieldCheck();
+    // The banner's own show/hide transition (.35s) is still animating its
+    // position at the moment above — a fresh check is needed once it
+    // settles, since a mid-transition rect can under- or over-report overlap.
+    setTimeout(djScheduleInstallBannerYieldCheck, 400);
+}
+
+/**
+ * Both banners are position:fixed at the bottom of the viewport, which can
+ * coincide with ordinary page content scrolled to that same band (found via
+ * the size-guide trigger button on a product page — reserving empty space
+ * with body padding doesn't help, since a fixed element's viewport position
+ * has nothing to do with the document's total scroll height). Instead, any
+ * element marked .dj-keep-clickable is checked for real overlap with a
+ * visible banner's own rect; if they coincide, the banner yields (fades out,
+ * stops accepting clicks) until the page scrolls past that point.
+ */
+function djInstallBannerRectOverlaps(banner) {
+    if (!banner || !banner.classList.contains('dj-show')) return false;
+
+    const bannerRect = banner.getBoundingClientRect();
+
+    return Array.from(document.querySelectorAll('.dj-keep-clickable')).some((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) return false;
+
+        return !(
+            rect.bottom < bannerRect.top
+            || rect.top > bannerRect.bottom
+            || rect.right < bannerRect.left
+            || rect.left > bannerRect.right
+        );
+    });
+}
+
+function djUpdateInstallBannerYield() {
+    ['dj-install-banner', 'dj-ios-install-banner'].forEach((id) => {
+        const banner = document.getElementById(id);
+        banner?.classList.toggle('dj-yield', djInstallBannerRectOverlaps(banner));
+    });
+}
+
+let djInstallBannerYieldCheckQueued = false;
+function djScheduleInstallBannerYieldCheck() {
+    if (djInstallBannerYieldCheckQueued) return;
+    djInstallBannerYieldCheckQueued = true;
+    requestAnimationFrame(() => {
+        djInstallBannerYieldCheckQueued = false;
+        djUpdateInstallBannerYield();
+    });
+}
+window.addEventListener('scroll', djScheduleInstallBannerYieldCheck, { passive: true });
+window.addEventListener('resize', djScheduleInstallBannerYieldCheck);
+
 window.addEventListener('beforeinstallprompt', (event) => {
     // Suppress Chrome's automatic mini-infobar in favor of our own
     // subtle, dj-styled banner, shown only if not recently dismissed.
@@ -543,29 +599,29 @@ window.addEventListener('beforeinstallprompt', (event) => {
     // once. djIsIosSafari() is defined further down (function declarations
     // hoist), so this is safe even though it runs first at load time.
     if (djIsIosSafari()) return;
-    document.getElementById('dj-install-banner')?.classList.add('dj-show');
+    djSetInstallBannerVisible(document.getElementById('dj-install-banner'), true);
 });
 
 window.djInstallApp = async function () {
     const banner = document.getElementById('dj-install-banner');
     if (!djDeferredInstallPrompt) {
-        banner?.classList.remove('dj-show');
+        djSetInstallBannerVisible(banner, false);
         return;
     }
     djDeferredInstallPrompt.prompt();
     await djDeferredInstallPrompt.userChoice;
     djDeferredInstallPrompt = null;
-    banner?.classList.remove('dj-show');
+    djSetInstallBannerVisible(banner, false);
 };
 
 window.djDismissInstallBanner = function () {
     localStorage.setItem(DJ_INSTALL_DISMISS_KEY, Date.now().toString());
-    document.getElementById('dj-install-banner')?.classList.remove('dj-show');
-    document.getElementById('dj-ios-install-banner')?.classList.remove('dj-show');
+    djSetInstallBannerVisible(document.getElementById('dj-install-banner'), false);
+    djSetInstallBannerVisible(document.getElementById('dj-ios-install-banner'), false);
 };
 
 window.addEventListener('appinstalled', () => {
-    document.getElementById('dj-install-banner')?.classList.remove('dj-show');
+    djSetInstallBannerVisible(document.getElementById('dj-install-banner'), false);
     localStorage.removeItem(DJ_INSTALL_DISMISS_KEY);
 });
 
@@ -600,6 +656,6 @@ function djIsRunningStandalone() {
 
 document.addEventListener('DOMContentLoaded', () => {
     if (djIsIosSafari() && !djIsRunningStandalone() && !djInstallPromptDismissedRecently()) {
-        document.getElementById('dj-ios-install-banner')?.classList.add('dj-show');
+        djSetInstallBannerVisible(document.getElementById('dj-ios-install-banner'), true);
     }
 });

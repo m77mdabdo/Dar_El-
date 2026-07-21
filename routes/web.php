@@ -102,7 +102,14 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
 });
 
-Route::prefix('checkout')->name('checkout.')->middleware('verified.if.auth')->group(function () {
+// Deliberately no auth/verified gate — guests can complete checkout with
+// just name/phone/address (see StoreCheckoutRequest). Creating an account
+// stays fully available (login/register still work exactly as before,
+// register still requires OTP), it's just no longer forced before
+// checkout. See checkout.success for the optional post-order account
+// prompt, and StoreCheckoutRequest's phone-based rate limit for the
+// abuse guard that replaces the OTP gate for this path.
+Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/', [CheckoutController::class, 'show'])->name('show');
     Route::post('/', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('store');
     Route::get('/{order}/success', [CheckoutController::class, 'success'])->name('success');
