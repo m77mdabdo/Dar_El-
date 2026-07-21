@@ -40,6 +40,7 @@ return [
 
     'status_updated' => 'تم تحديث حالة الطلب.',
     'status_updated_with_restock' => 'تم تحديث حالة الطلب. تم استعادة المخزون لعدد :count صنف/أصناف.',
+    'status_updated_push_title' => 'طلب رقم :number',
 
     'track_eyebrow' => 'تتبع الطلب',
     'track_title' => 'تتبعي طلبك',
