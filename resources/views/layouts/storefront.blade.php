@@ -190,7 +190,13 @@
             <a href="mailto:{{ \App\Models\Setting::get('support_email', 'info@dareljamila.com') }}" title="Email">✉</a>
         </div>
 
-        <a href="{{ route('track-order.form') }}" style="display:inline-block; font-size:12.5px; color:var(--dj-gold); text-decoration:underline; margin-bottom:14px;">{{ __('orders.track_title') }}</a>
+        <div class="dj-footer-links">
+            <a href="{{ route('about') }}">{{ __('About') }}</a>
+            <a href="{{ route('services') }}">{{ __('Services') }}</a>
+            <a href="{{ route('return-policy') }}">{{ __('Return Policy') }}</a>
+            <a href="{{ route('contact.show') }}">{{ __('Contact') }}</a>
+            <a href="{{ route('track-order.form') }}">{{ __('orders.track_title') }}</a>
+        </div>
 
         <div class="dj-fine">&copy; {{ date('Y') }} {{ __('Dar El Jamila. All rights reserved.') }}</div>
     </footer>
