@@ -12,6 +12,8 @@ use Throwable;
 
 class BackInStockService
 {
+    public function __construct(protected PushNotificationService $push) {}
+
     /**
      * Notify subscribers when a size's stock crosses from 0 (or below) to
      * positive. Only fires on the crossing itself, same convention as
@@ -64,6 +66,23 @@ class BackInStockService
                     'product_size_id' => $productSizeId,
                     'error' => $e->getMessage(),
                 ]);
+            }
+
+            // A separate, independent send from the email above — its own
+            // try/catch already lives inside PushNotificationService, so a
+            // push failure (or simply not being opted in, the common case)
+            // can never affect the email that was just queued, and vice versa.
+            if ($subscription->push_subscription_id) {
+                $subscription->loadMissing('pushSubscription');
+
+                if ($subscription->pushSubscription) {
+                    $this->push->sendToSubscription(
+                        $subscription->pushSubscription,
+                        trans_field($product, 'name'),
+                        __("It's back in stock — grab it before it sells out again."),
+                        route('shop.show', $product)
+                    );
+                }
             }
         }
     }
