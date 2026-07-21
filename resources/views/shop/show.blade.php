@@ -205,13 +205,44 @@
             </div>
         </div>
 
+        {{-- Floating shortcut to the same size guide, product pages only —
+             the chart data above is specific to this product, so this button
+             has nothing useful to do (and nowhere sensible to send someone)
+             on any page that isn't a product page. Stacks directly above the
+             site-wide WhatsApp float (see partials/whatsapp-float.blade.php).
+             #dj-back-to-top is pushed up below (scoped to this page only, not
+             app.css — every other page keeps its normal WhatsApp-only gap) so
+             none of the three ever overlap. Same inline-CSS convention as the
+             size guide overlay above, for the same deploy-proofing reason. --}}
+        <button type="button" id="dj-size-guide-float" class="dj-keep-clickable" onclick="djOpenSizeGuide()" aria-label="{{ __('Size Guide') }}" title="{{ __('Size Guide') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25h18M3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V8.25M3 8.25l1.5-4.5h15l1.5 4.5M8.25 12v3M12 12v6M15.75 12v3"/></svg>
+        </button>
+
         <style>
-            .dj-size-guide-trigger {
-                display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none;
-                color: var(--dj-rose-dust); font-size: 13px; font-weight: 700; text-decoration: underline;
-                text-underline-offset: 3px; padding: 0; margin-bottom: 16px; transition: color .2s;
+            #dj-size-guide-float {
+                position: fixed; bottom: 92px; right: 26px; width: 56px; height: 56px; border-radius: 50%;
+                background: var(--dj-maroon); color: var(--dj-gold); display: flex; align-items: center; justify-content: center;
+                box-shadow: var(--dj-shadow); z-index: 85; transition: background .2s, transform .15s;
             }
-            .dj-size-guide-trigger:hover { color: var(--dj-maroon); }
+            #dj-size-guide-float:hover { background: var(--dj-maroon-dark); transform: scale(1.06); }
+            #dj-size-guide-float svg { width: 26px; height: 26px; }
+            body.dj-en #dj-size-guide-float { right: auto; left: 26px; }
+
+            /* This page only: #dj-back-to-top's site-wide position (app.css)
+               leaves just enough room for the WhatsApp float below it — here
+               there's a third circle in the stack, so it needs to sit higher:
+               92px (this button's own position) + 56px (its height) + 10px
+               (the same gap the site already uses between WhatsApp and
+               back-to-top) = 158px. */
+            #dj-back-to-top { bottom: 158px; }
+
+            .dj-size-guide-trigger {
+                display: inline-flex; align-items: center; gap: 7px; background: transparent;
+                border: 1.5px solid var(--dj-cream-2); color: var(--dj-maroon); font-size: 12.5px; font-weight: 700;
+                padding: 9px 16px; border-radius: 10px; margin-bottom: 16px; transition: background .2s, border-color .2s, transform .1s;
+            }
+            .dj-size-guide-trigger:hover { background: var(--dj-cream-2); border-color: var(--dj-maroon); }
+            .dj-size-guide-trigger:active { transform: scale(.97); }
             .dj-size-guide-trigger svg { width: 16px; height: 16px; flex-shrink: 0; }
 
             .dj-size-guide-overlay {
