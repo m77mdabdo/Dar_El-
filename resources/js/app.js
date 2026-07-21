@@ -659,3 +659,111 @@ document.addEventListener('DOMContentLoaded', () => {
         djSetInstallBannerVisible(document.getElementById('dj-ios-install-banner'), true);
     }
 });
+
+/* =========================================================
+   Web Push opt-in — contextual only (see djShowPushOptinBanner()'s
+   call sites: partials/back-in-stock-notify.blade.php after a successful
+   signup, and the "My Orders" page). Never requested on page load; a raw
+   Notification.requestPermission() prompt with no context reads as a random
+   permission popup and gets auto-declined by most people.
+   ========================================================= */
+const DJ_PUSH_DISMISS_KEY = 'dj-push-optin-dismissed-at';
+const DJ_PUSH_DISMISS_DAYS = 3;
+let djPendingPushLinkToken = null;
+
+function djPushOptinDismissedRecently() {
+    const raw = localStorage.getItem(DJ_PUSH_DISMISS_KEY);
+    const dismissedAt = raw ? parseInt(raw, 10) : NaN;
+    if (!dismissedAt) return false;
+    const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
+    return daysSince < DJ_PUSH_DISMISS_DAYS;
+}
+
+function djAnyInstallBannerVisible() {
+    return document.getElementById('dj-install-banner')?.classList.contains('dj-show')
+        || document.getElementById('dj-ios-install-banner')?.classList.contains('dj-show');
+}
+
+/**
+ * message: shown in the banner (e.g. mentioning the specific product).
+ * linkToken: the push_link_token from a back-in-stock signup response, so
+ * the eventual subscribe call can be tied to that specific request — omit
+ * for the generic "notify me about my orders" trigger, which ties to the
+ * logged-in user instead (see djSubscribeToPush()).
+ */
+window.djShowPushOptinBanner = function (message, linkToken) {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!document.querySelector('meta[name="webpush-public-key"]')) return;
+    if (djPushOptinDismissedRecently()) return;
+    if (djAnyInstallBannerVisible()) return;
+
+    const banner = document.getElementById('dj-push-optin-banner');
+    if (!banner) return;
+
+    const messageEl = document.getElementById('dj-push-optin-message');
+    if (messageEl && message) messageEl.textContent = message;
+    djPendingPushLinkToken = linkToken || null;
+
+    banner.classList.add('dj-show');
+};
+
+window.djDismissPushOptin = function () {
+    localStorage.setItem(DJ_PUSH_DISMISS_KEY, Date.now().toString());
+    document.getElementById('dj-push-optin-banner')?.classList.remove('dj-show');
+};
+
+window.djAcceptPushOptin = async function () {
+    document.getElementById('dj-push-optin-banner')?.classList.remove('dj-show');
+    await djSubscribeToPush(djPendingPushLinkToken);
+    djPendingPushLinkToken = null;
+};
+
+function djUrlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+}
+
+/**
+ * Requests permission, subscribes via PushManager, and registers the
+ * subscription with the backend. Safe to call speculatively — every guard
+ * (unsupported browser, missing VAPID key, permission denied) just resolves
+ * to false rather than throwing, since this is always optional on top of
+ * whatever mail/database notification already covers the same event.
+ */
+window.djSubscribeToPush = async function (linkToken) {
+    if (typeof Notification === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+
+    const publicKey = document.querySelector('meta[name="webpush-public-key"]')?.content;
+    if (!publicKey) return false;
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') return false;
+
+        const registration = await navigator.serviceWorker.ready;
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: djUrlBase64ToUint8Array(publicKey),
+            });
+        }
+
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const body = subscription.toJSON();
+        if (linkToken) body.link_token = linkToken;
+
+        await fetch('/push/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+            body: JSON.stringify(body),
+        });
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+};

@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if ($webpushKey = config('services.webpush.public_key'))
+        <meta name="webpush-public-key" content="{{ $webpushKey }}">
+    @endif
     <script>window.djI18n = { close: @json(__('Close')) };</script>
     @include('partials.tracking-base')
     <meta name="description" content="@yield('meta_description', __('Abayas and dresses crafted with care to highlight your elegance in every occasion.'))">
@@ -65,6 +68,25 @@
                 <span>{{ __('Tap the Share button ⬆️ below, then choose "Add to Home Screen".') }}</span>
             </div>
         </div>
+    </div>
+
+    {{-- Shown contextually via djShowPushOptinBanner() — never on page load —
+         right after a customer subscribes to a back-in-stock alert, or from
+         the "My Orders" page. Same dj-install-banner card styling as the two
+         banners above (same bottom-toast visual language), distinct id/JS so
+         it never gets caught up in the install banner's own show/hide state.
+         djShowPushOptinBanner() also skips showing this if either install
+         banner is currently visible, so the two can't visually collide. --}}
+    <div id="dj-push-optin-banner" class="dj-install-banner" role="region" aria-label="{{ __('Enable Notifications') }}">
+        <button type="button" class="dj-install-banner-dismiss" onclick="djDismissPushOptin()" aria-label="{{ __('Dismiss') }}">&times;</button>
+        <div class="dj-install-banner-top">
+            <div class="dj-install-banner-icon dj-push-optin-icon" aria-hidden="true">🔔</div>
+            <div class="dj-install-banner-text">
+                <strong>{{ __('Stay in the Loop') }}</strong>
+                <span id="dj-push-optin-message">{{ __("Get a notification the moment there's an update — no need to check your email.") }}</span>
+            </div>
+        </div>
+        <button type="button" class="dj-install-banner-install" onclick="djAcceptPushOptin()">{{ __('Enable Notifications') }}</button>
     </div>
 
     <div x-data="{ mobileNavOpen: false }">

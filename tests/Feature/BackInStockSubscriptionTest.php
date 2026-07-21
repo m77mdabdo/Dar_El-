@@ -207,6 +207,19 @@ class BackInStockSubscriptionTest extends TestCase
             ->count());
     }
 
+    public function test_signup_response_includes_a_push_link_token(): void
+    {
+        // See PushNotificationTest for how this token is consumed by
+        // POST /push/subscribe — verified here only that the signup
+        // endpoint itself hands one back.
+        $product = $this->makeProduct();
+
+        $response = $this->postJson(route('back-in-stock.store', $product), ['email' => 'pushtoken@example.com']);
+
+        $response->assertOk();
+        $this->assertNotEmpty($response->json('push_link_token'));
+    }
+
     public function test_signup_rejects_an_invalid_email(): void
     {
         $product = $this->makeProduct();

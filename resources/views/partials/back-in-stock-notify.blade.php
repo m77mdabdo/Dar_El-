@@ -87,6 +87,7 @@
         sending: @json(__('Sending...')),
         invalidEmail: @json(__('Please enter a valid email address.')),
         genericError: @json(__('Something went wrong. Please try again.')),
+        pushOptinMessage: @json(__('Want a push notification when ":name" is back, too? No need to check your email.')),
     };
 
     var currentSizeId = null;
@@ -154,6 +155,24 @@
                 if (result.ok) {
                     formArea.style.display = 'none';
                     showMessage(result.data.message, false);
+                    // Contextual push opt-in — only ever asked right after a
+                    // customer has just shown real interest in an alert for
+                    // this exact product, never on page load. See
+                    // djShowPushOptinBanner() in app.js for why/how. This
+                    // modal's own overlay sits above the banner (it needs to
+                    // cover the whole page while open), so it's closed first
+                    // — after a moment to actually read the confirmation
+                    // message above — or the banner would be shown but
+                    // unreachable behind it.
+                    if (window.djShowPushOptinBanner) {
+                        setTimeout(function () {
+                            window.djCloseNotifyMe();
+                            window.djShowPushOptinBanner(
+                                i18n.pushOptinMessage.replace(':name', productName),
+                                result.data.push_link_token
+                            );
+                        }, 1600);
+                    }
                 } else {
                     var msg = (result.data.errors && result.data.errors.email && result.data.errors.email[0]) || i18n.genericError;
                     showMessage(msg, true);

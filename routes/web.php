@@ -16,6 +16,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShopController;
@@ -66,6 +67,13 @@ Route::post('/products/{product}/notify-me', [BackInStockSubscriptionController:
 Route::get('/notify-me/unsubscribe/{subscription}', [BackInStockSubscriptionController::class, 'unsubscribe'])
     ->middleware('signed')
     ->name('back-in-stock.unsubscribe');
+
+// A new public-facing write (anyone can POST an arbitrary endpoint/keys
+// payload here) — same throttle ceiling as the other public write endpoints
+// above (contact/newsletter/reviews/notify-me at 10/min).
+Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('push.subscribe');
 
 // Navbar live-search preview. Higher throttle ceiling than the site's other
 // throttled endpoints (contact/newsletter/reviews at 10/min) — this is a

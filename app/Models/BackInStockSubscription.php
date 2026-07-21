@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BackInStockSubscription extends Model
 {
-    protected $fillable = ['product_id', 'product_size_id', 'email', 'user_id', 'notified_at'];
+    protected $fillable = ['product_id', 'product_size_id', 'email', 'user_id', 'push_subscription_id', 'notified_at'];
 
     protected function casts(): array
     {
@@ -29,5 +29,10 @@ class BackInStockSubscription extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pushSubscription(): BelongsTo
+    {
+        return $this->belongsTo(PushSubscription::class);
     }
 }
