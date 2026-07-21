@@ -87,12 +87,14 @@ class CheckoutEmailNotificationTest extends TestCase
 
     public function test_guest_customer_receives_order_confirmation_using_checkout_email(): void
     {
-        // This project requires authentication to reach /checkout (by
-        // design — see verified.if.auth middleware), so there is no
-        // unauthenticated HTTP path to exercise here. What "guest" means at
-        // the data layer is an order with no linked account: the resolver
-        // and dispatch must work purely from the order's own email
-        // snapshot, never touching a user relation that doesn't exist.
+        // Data-layer-only version of this check: builds the guest Order
+        // directly rather than through the real HTTP checkout flow, to
+        // isolate "does the resolver/dispatch work purely from the order's
+        // own email snapshot, without touching a user relation that
+        // doesn't exist" from everything else checkout does. See
+        // test_guest_customer_receives_order_confirmation_via_the_real_checkout_flow_below
+        // for the full HTTP-driven equivalent (guest checkout is a real,
+        // unauthenticated path now — see GuestCheckoutTest).
         Mail::fake();
 
         $order = Order::create([
@@ -111,6 +113,36 @@ class CheckoutEmailNotificationTest extends TestCase
         Mail::to($order->resolveCustomerEmail())->send(new InvoiceMail($order));
 
         Mail::assertQueued(InvoiceMail::class, fn ($mail) => $mail->hasTo('guest-checkout@example.com'));
+    }
+
+    public function test_guest_customer_receives_order_confirmation_via_the_real_checkout_flow(): void
+    {
+        Mail::fake();
+        $product = $this->makeProduct();
+        $this->postJson(route('cart.add', $product), ['size' => 'M', 'quantity' => 1])->assertOk();
+
+        $this->post(route('checkout.store'), $this->checkoutPayload('real-guest@example.com', 'Real Guest', [
+            'customer_email' => 'real-guest@example.com',
+        ]))->assertSessionHasNoErrors();
+
+        $order = Order::latest('id')->firstOrFail();
+        $this->assertNull($order->user_id);
+
+        Mail::assertQueued(InvoiceMail::class, fn ($mail) => $mail->hasTo('real-guest@example.com') && $mail->order->is($order));
+    }
+
+    public function test_guest_checkout_without_an_email_skips_the_confirmation_email_without_erroring(): void
+    {
+        Mail::fake();
+        $product = $this->makeProduct();
+        $this->postJson(route('cart.add', $product), ['size' => 'M', 'quantity' => 1])->assertOk();
+
+        $response = $this->post(route('checkout.store'), $this->checkoutPayload('', 'No Email Guest', [
+            'customer_email' => null,
+        ]));
+
+        $response->assertSessionHasNoErrors();
+        Mail::assertNothingQueued();
     }
 
     public function test_admin_receives_separate_new_order_notification(): void
