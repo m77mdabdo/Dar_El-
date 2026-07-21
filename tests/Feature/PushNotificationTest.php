@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\BackInStockSubscription;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\PushSubscription;
 use App\Models\User;
 use App\Services\PushNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class PushNotificationTest extends TestCase
@@ -215,6 +217,55 @@ class PushNotificationTest extends TestCase
         });
 
         app(\App\Services\BackInStockService::class)->checkAndNotify($product, $size, before: 0, after: 3);
+    }
+
+    // ---------------------------------------------------------------
+    // Order-status push wiring
+    // ---------------------------------------------------------------
+
+    protected function makeAdmin(): User
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(Role::findOrCreate('admin', 'web'));
+
+        return $admin;
+    }
+
+    public function test_order_status_change_sends_a_push_to_the_orders_user(): void
+    {
+        $admin = $this->makeAdmin();
+        $customer = User::factory()->create();
+        $order = Order::create([
+            'order_number' => 'ORD-'.uniqid(), 'user_id' => $customer->id,
+            'customer_name' => 'Test Customer', 'customer_email' => $customer->email, 'customer_phone' => '01000000000',
+            'governorate' => 'Cairo', 'city' => 'Nasr City', 'address' => 'Street 1',
+            'subtotal' => 500, 'shipping_fee' => 0, 'total' => 500,
+            'status' => 'processing', 'payment_method' => Order::PAYMENT_METHOD_COD,
+        ]);
+
+        $this->mock(PushNotificationService::class, function ($mock) use ($customer) {
+            $mock->shouldReceive('sendToUser')->once()->withArgs(fn ($userId) => $userId === $customer->id);
+        });
+
+        $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'shipped'])->assertRedirect();
+    }
+
+    public function test_guest_order_status_change_never_attempts_a_push(): void
+    {
+        $admin = $this->makeAdmin();
+        $order = Order::create([
+            'order_number' => 'ORD-'.uniqid(), 'user_id' => null,
+            'customer_name' => 'Guest Customer', 'customer_email' => '', 'customer_phone' => '01000000000',
+            'governorate' => 'Cairo', 'city' => 'Nasr City', 'address' => 'Street 1',
+            'subtotal' => 500, 'shipping_fee' => 0, 'total' => 500,
+            'status' => 'processing', 'payment_method' => Order::PAYMENT_METHOD_COD,
+        ]);
+
+        $this->mock(PushNotificationService::class, function ($mock) {
+            $mock->shouldNotReceive('sendToUser');
+        });
+
+        $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'shipped'])->assertRedirect();
     }
 
     // ---------------------------------------------------------------

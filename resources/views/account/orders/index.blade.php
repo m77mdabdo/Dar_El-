@@ -4,7 +4,51 @@
 
 @section('content')
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 class="font-serif text-3xl mb-8">{{ __('My Orders') }}</h1>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
+            <h1 class="font-serif text-3xl">{{ __('My Orders') }}</h1>
+
+            {{-- Inline (not resources/css/app.css or resources/js/app.js) so
+                 this ships the moment this file reaches production via a
+                 plain git pull — same standing convention as the WhatsApp
+                 button and size guide elsewhere. Hidden entirely when push
+                 isn't supported/configured (see the script below), rather
+                 than showing a button that would just silently fail. --}}
+            <button type="button" id="dj-orders-push-optin" class="dj-order-btn dj-order-btn-secondary" style="display:none;" onclick="djOrdersPagePushOptin()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                <span id="dj-orders-push-optin-label">{{ __('Get notified when your order ships or arrives') }}</span>
+            </button>
+        </div>
+
+        <script>
+            (function () {
+                var btn = document.getElementById('dj-orders-push-optin');
+                var label = document.getElementById('dj-orders-push-optin-label');
+                if (!btn) return;
+
+                var supported = 'serviceWorker' in navigator && 'PushManager' in window
+                    && typeof Notification !== 'undefined'
+                    && document.querySelector('meta[name="webpush-public-key"]');
+                if (!supported || Notification.permission === 'denied') return;
+
+                if (Notification.permission === 'granted') {
+                    label.textContent = @json(__('Notifications enabled'));
+                    btn.disabled = true;
+                    btn.style.opacity = '.7';
+                }
+                btn.style.display = '';
+
+                window.djOrdersPagePushOptin = async function () {
+                    btn.disabled = true;
+                    var ok = await window.djSubscribeToPush();
+                    if (ok) {
+                        label.textContent = @json(__('Notifications enabled'));
+                        btn.style.opacity = '.7';
+                    } else {
+                        btn.disabled = false;
+                    }
+                };
+            })();
+        </script>
 
         @php
             // bg/color per real admin-managed status (Order::TRACKING_STAGES

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderCancelled;
 use App\Notifications\OrderStatusUpdated;
 use App\Services\BackInStockService;
+use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +21,10 @@ use Throwable;
 
 class OrderController extends Controller
 {
-    public function __construct(protected BackInStockService $backInStock)
-    {
+    public function __construct(
+        protected BackInStockService $backInStock,
+        protected PushNotificationService $push,
+    ) {
     }
 
     public function index(Request $request)
@@ -113,6 +116,20 @@ class OrderController extends Controller
                     'error' => $e->getMessage(),
                 ]);
             }
+
+            // Independent of the notify() call above — its own try/catch
+            // already lives inside PushNotificationService, so this can
+            // never affect the mail/database channels that notification
+            // just dispatched. Only ever reaches a user_id (see the
+            // surrounding if), same as OrderStatusUpdated itself — a guest
+            // order has no account to have subscribed a device to in the
+            // first place (see PushSubscriptionController).
+            $this->push->sendToUser(
+                $order->user_id,
+                __('orders.status_updated_push_title', ['number' => $order->order_number]),
+                __('orders.status_'.$validated['status']),
+                route('account.orders.show', $order)
+            );
         }
 
         if ($validated['status'] === 'cancelled') {
