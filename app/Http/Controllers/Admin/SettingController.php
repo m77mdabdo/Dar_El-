@@ -18,7 +18,13 @@ class SettingController extends Controller
         'cart_reminder_first_delay_hours', 'cart_reminder_interval_hours', 'cart_max_reminders',
         'meta_pixel_id', 'tiktok_pixel_id', 'ga4_measurement_id',
         'sitewide_offer_end_at', 'sitewide_offer_label',
+        'size_guide_note',
     ];
+
+    /** Rows the size-guide chart form always renders, matching the sizes actually used across the catalog (see DemoProductSeeder::CLOTHING_SIZES). */
+    protected const SIZE_GUIDE_ROWS = ['S', 'M', 'L', 'XL', 'XXL'];
+
+    protected const SIZE_GUIDE_COLUMNS = ['bust', 'waist', 'hips', 'length'];
 
     protected const IMAGE_KEYS = [
         'home_hero_image', 'about_hero_image', 'about_story_image', 'services_hero_image',
@@ -36,8 +42,9 @@ class SettingController extends Controller
     public function edit()
     {
         $settings = Setting::whereIn('key', [...self::KEYS, ...self::IMAGE_KEYS, ...self::BOOLEAN_KEYS])->pluck('value', 'key');
+        $sizeGuideChart = collect(Setting::sizeGuideChart())->keyBy('size');
 
-        return view('admin.settings.edit', compact('settings'));
+        return view('admin.settings.edit', compact('settings', 'sizeGuideChart'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -60,7 +67,14 @@ class SettingController extends Controller
             'ga4_measurement_id' => ['nullable', 'string', 'max:32'],
             'sitewide_offer_end_at' => ['nullable', 'date'],
             'sitewide_offer_label' => ['nullable', 'string', 'max:255'],
+            'size_guide_note' => ['nullable', 'string', 'max:500'],
+            'size_guide' => ['nullable', 'array'],
         ];
+        foreach (self::SIZE_GUIDE_ROWS as $sizeLabel) {
+            foreach (self::SIZE_GUIDE_COLUMNS as $column) {
+                $rules["size_guide.{$sizeLabel}.{$column}"] = ['nullable', 'integer', 'min:0', 'max:300'];
+            }
+        }
         $messages = [];
 
         foreach (self::IMAGE_KEYS as $key) {
@@ -76,6 +90,17 @@ class SettingController extends Controller
             if (array_key_exists($key, $validated)) {
                 Setting::set($key, $validated[$key]);
             }
+        }
+
+        if ($request->has('size_guide')) {
+            $chart = collect(self::SIZE_GUIDE_ROWS)->map(fn ($sizeLabel) => [
+                'size' => $sizeLabel,
+                ...collect(self::SIZE_GUIDE_COLUMNS)->mapWithKeys(
+                    fn ($column) => [$column => (int) ($validated['size_guide'][$sizeLabel][$column] ?? 0)]
+                )->all(),
+            ])->all();
+
+            Setting::set('size_guide_chart', json_encode($chart, JSON_UNESCAPED_UNICODE));
         }
 
         foreach (self::IMAGE_KEYS as $key) {
