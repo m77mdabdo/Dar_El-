@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BackInStockSubscription;
 use App\Models\PushSubscription;
+use App\Rules\ValidWebPushEndpoint;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -30,9 +31,27 @@ class PushSubscriptionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'endpoint' => ['required', 'url', 'max:400'],
-            'keys.p256dh' => ['required', 'string', 'max:255'],
-            'keys.auth' => ['required', 'string', 'max:255'],
+            // 'url' alone used to be the only check here — it accepts any
+            // scheme/host at all, including internal/loopback addresses.
+            // PushNotificationService later makes a real server-side HTTP
+            // request to exactly this value (see minishlink/web-push's
+            // sendOneNotification()), so an unrestricted endpoint is a
+            // genuine SSRF vector: register an internal URL, then trigger
+            // any event that pushes to it (an order-status change on your
+            // own order, or a back-in-stock fulfillment) and the server
+            // makes the request for you. ValidWebPushEndpoint is an
+            // allowlist of the real push services browsers use — see its
+            // own docblock for why an allowlist, not a blocklist.
+            'endpoint' => ['required', 'string', 'max:400', new ValidWebPushEndpoint],
+            // Real key material: p256dh is a base64url-encoded, uncompressed
+            // EC P-256 public key (always 65 raw bytes -> ~87 chars, no
+            // padding, confirmed against a real browser-generated
+            // subscription); auth is a 16-byte secret (~22 chars). The
+            // regex enforces the base64url charset; the length bounds have
+            // headroom for minor cross-browser padding differences without
+            // accepting obviously-garbage values.
+            'keys.p256dh' => ['required', 'string', 'regex:/^[A-Za-z0-9_-]+=*$/', 'min:80', 'max:100'],
+            'keys.auth' => ['required', 'string', 'regex:/^[A-Za-z0-9_-]+=*$/', 'min:20', 'max:30'],
             'link_token' => ['nullable', 'string', 'max:255'],
         ]);
 
