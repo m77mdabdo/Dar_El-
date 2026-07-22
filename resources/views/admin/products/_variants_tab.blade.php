@@ -6,6 +6,18 @@
     }, 1);
 @endphp
 
+{{--
+    This tab writes to a different table (product_variants) than the one the
+    storefront/cart/checkout actually read from (product_sizes, edited in the
+    "Sizes & Stock" tab) — see that tab for the real inventory. Until those
+    two are unified, this banner is the only thing standing between a
+    well-meaning employee and silently-ineffective stock edits, so it's
+    styled as an unmissable banner deliberately, not a small muted hint.
+--}}
+<div class="dj-admin-card p-4 mb-4" style="background:#fdf3e7; border:1px solid #e8c39a;">
+    <p class="font-semibold" style="color:#8a5a1f;">{{ __('product_options.variants_dev_warning') }}</p>
+</div>
+
 <div class="flex items-center justify-between gap-3 mb-4">
     <div>
         <h2 class="font-semibold text-[var(--dj-maroon-dark)]">{{ __('product_options.variants_heading') }}</h2>
