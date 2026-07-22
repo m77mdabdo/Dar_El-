@@ -100,6 +100,14 @@
                 </div>
             </div>
         </div>
+
+        <div style="margin-top:20px;">
+            @include('partials.order-change-request', [
+                'order' => $order,
+                'changeRequestActionUrl' => $changeRequestActionUrl ?? null,
+                'existingChangeRequest' => $existingChangeRequest ?? null,
+            ])
+        </div>
     </div>
 
     {{-- Inline CSS (not resources/css/app.css) per this project's standing

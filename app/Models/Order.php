@@ -119,6 +119,22 @@ class Order extends Model
     }
 
     /**
+     * The real moment an admin set this order to 'delivered', from
+     * statusHistories — not updated_at, which reflects the LAST change to
+     * the row (an admin editing the shipping address after delivery, for
+     * instance, would silently push the exchange-request deadline out).
+     * Assumes statusHistories is already eager-loaded, same assumption as
+     * trackingSteps(). Null if the order was never actually marked
+     * delivered through the normal flow (e.g. seeded directly with that
+     * status) — callers must treat that as "no exchange window," not fall
+     * back to some other timestamp.
+     */
+    public function deliveredAt(): ?\Illuminate\Support\Carbon
+    {
+        return $this->statusHistories->firstWhere('status', 'delivered')?->created_at;
+    }
+
+    /**
      * One row per TRACKING_STAGES entry, in order, for rendering the
      * customer-facing tracker. A stage counts as reached/completed by its
      * position relative to the order's current status — not solely by

@@ -13,6 +13,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceDownloadController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\OrderChangeRequestController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
@@ -53,6 +54,14 @@ Route::post('/track-order', [OrderTrackingController::class, 'lookup'])
 Route::get('/track-order/{order}', [OrderTrackingController::class, 'show'])
     ->name('track-order.show')
     ->middleware('signed');
+
+// Deliberately NOT ->middleware('signed') here — an authenticated request
+// has no signature at all. The controller itself checks hasValidSignature()
+// only for guests; see OrderChangeRequestController::store() for the full
+// per-caller security reasoning.
+Route::post('/orders/{order}/change-request', [OrderChangeRequestController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('order-change-requests.store');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product:slug}', [ShopController::class, 'show'])->name('shop.show');

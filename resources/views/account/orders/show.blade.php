@@ -34,6 +34,12 @@
                     @endforeach
                 </div>
 
+                @include('partials.order-change-request', [
+                    'order' => $order,
+                    'changeRequestActionUrl' => $changeRequestActionUrl ?? null,
+                    'existingChangeRequest' => $existingChangeRequest ?? null,
+                ])
+
                 <div>
                     <h2 class="font-medium mb-3">{{ __('Status History') }}</h2>
                     <ul class="space-y-2 text-sm">

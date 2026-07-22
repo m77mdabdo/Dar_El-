@@ -16,6 +16,7 @@ return [
         'dashboard' => 'Dashboard',
         'sales' => 'Sales',
         'orders' => 'Orders',
+        'order_change_requests' => 'Change Requests',
         'customers' => 'Customers',
         'carts' => 'Carts',
         'catalog' => 'Catalog',

@@ -16,6 +16,7 @@ return [
         'dashboard' => 'لوحة التحكم',
         'sales' => 'المبيعات',
         'orders' => 'الطلبات',
+        'order_change_requests' => 'طلبات التعديل',
         'customers' => 'العملاء',
         'carts' => 'السلال',
         'catalog' => 'الكتالوج',
