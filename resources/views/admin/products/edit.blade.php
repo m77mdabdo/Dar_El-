@@ -35,6 +35,7 @@
         <div class="dj-admin-tabs flex items-center justify-between" x-show="!wizardMode">
             <div class="flex flex-wrap">
                 <button type="button" @click="tab = 'basic'" :class="{ 'dj-active': tab === 'basic' }" class="dj-admin-tab">{{ __('product_options.tab_basic_info') }}</button>
+                <button type="button" @click="tab = 'sizes'" :class="{ 'dj-active': tab === 'sizes' }" class="dj-admin-tab">{{ __('products.sizes_stock') }}</button>
                 <button type="button" @click="tab = 'options'" :class="{ 'dj-active': tab === 'options' }" class="dj-admin-tab">{{ __('product_options.tab_options') }}</button>
                 <button type="button" @click="tab = 'variants'" :class="{ 'dj-active': tab === 'variants' }" class="dj-admin-tab">{{ __('product_options.tab_variants') }}</button>
                 <button type="button" @click="tab = 'images'" :class="{ 'dj-active': tab === 'images' }" class="dj-admin-tab">{{ __('product_options.tab_images') }}</button>
@@ -47,6 +48,7 @@
                 {{ __('product_options.step_label') }} <span x-text="stepIndex + 1"></span> / <span x-text="steps.length"></span> —
                 <span x-text="{
                     basic: '{{ __('product_options.tab_basic_info') }}',
+                    sizes: '{{ __('products.sizes_stock') }}',
                     images: '{{ __('product_options.tab_images') }}',
                     options: '{{ __('product_options.tab_options') }}',
                     variants: '{{ __('product_options.tab_variants') }}',
@@ -73,6 +75,10 @@
                     <button type="submit" class="dj-admin-btn dj-admin-btn-primary" data-shortcut-save>{{ __('products.save_product') }}</button>
                 </form>
             </div>
+        </div>
+
+        <div x-show="tab === 'sizes'" x-cloak>
+            @include('admin.products._sizes_tab')
         </div>
 
         <div x-show="tab === 'options'" x-cloak>

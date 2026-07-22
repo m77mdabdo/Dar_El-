@@ -41,6 +41,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::delete('products/{product}/images/{image}', [ProductController::class, 'destroyImage'])->name('products.images.destroy');
 
     Route::prefix('products/{product}')->name('products.')->group(function () {
+        Route::patch('sizes', [ProductController::class, 'updateSizes'])->name('sizes.update');
+
         Route::post('options', [ProductOptionController::class, 'store'])->name('options.store');
         Route::patch('options/{option}', [ProductOptionController::class, 'update'])->name('options.update');
         Route::delete('options/{option}', [ProductOptionController::class, 'destroy'])->name('options.destroy');

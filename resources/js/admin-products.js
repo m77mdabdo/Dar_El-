@@ -324,7 +324,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('djProductWizard', (wizardMode, bulkActionUrl, productId, redirectUrl) => ({
         tab: 'basic',
         wizardMode,
-        steps: ['basic', 'images', 'options', 'variants', 'seo', 'review'],
+        steps: ['basic', 'sizes', 'images', 'options', 'variants', 'seo', 'review'],
 
         get stepIndex() {
             return this.steps.indexOf(this.tab);

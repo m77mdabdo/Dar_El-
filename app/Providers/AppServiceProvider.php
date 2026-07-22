@@ -74,7 +74,16 @@ class AppServiceProvider extends ServiceProvider
             $view->with('wishlistedIds', $wishlistedIds);
         });
 
-        View::composer('admin.layout', function ($view) {
+        // Wildcard, not just 'admin.layout': a child view like admin.dashboard
+        // builds its own content in a @php block that runs BEFORE
+        // @extends('admin.layout') ever resolves the parent template, so a
+        // composer scoped only to 'admin.layout' fires too late for that
+        // child-level block to see $notifUnreadCount — it silently falls
+        // back to a default there while the header (composed as part of the
+        // parent) shows the real number. Matching every 'admin.*' view means
+        // whichever view actually uses this value gets it directly, from
+        // this one expression, rather than each needing its own query.
+        View::composer('admin.*', function ($view) {
             $user = auth()->user();
 
             $view->with('notifUnreadCount', $user?->unreadNotifications()->count() ?? 0);
