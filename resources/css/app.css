@@ -627,9 +627,14 @@ body.dj-en .dj-service-card h3 { font-family: 'Poppins'; }
     #dj-nav-progress { transition: opacity .2s ease; }
 }
 
-/* ===== BACK TO TOP ===== */
+/* ===== BACK TO TOP =====
+   bottom:158px, not 92px — the stack is now three deep site-wide (WhatsApp
+   float at 26 + its own 56px height + a 10px gap = 92 for the order-tracking
+   float, then +56+10 = 158 for this one). See partials/order-tracking-float
+   .blade.php and shop/show.blade.php (which pushes this further still, to
+   make room for its own extra product-only float). */
 #dj-back-to-top {
-    position: fixed; bottom: 92px; right: 26px; width: 46px; height: 46px; border-radius: 50%; background: var(--dj-maroon);
+    position: fixed; bottom: 158px; right: 26px; width: 46px; height: 46px; border-radius: 50%; background: var(--dj-maroon);
     color: var(--dj-gold); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: var(--dj-shadow);
     z-index: 80; opacity: 0; transform: translateY(14px) scale(.8); transition: .3s; pointer-events: none;
 }
