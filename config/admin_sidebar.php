@@ -30,6 +30,7 @@ return [
         'icon' => 'chart-bar',
         'items' => [
             ['label' => 'nav.orders', 'route' => 'admin.orders.index', 'match' => 'admin.orders.*', 'permission' => 'orders.view'],
+            ['label' => 'nav.order_change_requests', 'route' => 'admin.order-change-requests.index', 'match' => 'admin.order-change-requests.*', 'permission' => 'orders.view'],
             ['label' => 'nav.customers', 'route' => 'admin.customers.index', 'match' => 'admin.customers.*', 'permission' => 'customers.view'],
             ['label' => 'nav.carts', 'route' => 'admin.carts.index', 'match' => 'admin.carts.*', 'permission' => 'carts.view'],
         ],

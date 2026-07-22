@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderChangeRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -70,6 +71,20 @@ class OrderTrackingController extends Controller
     {
         $order->load(['items.product.images', 'statusHistories']);
 
-        return view('orders.track', ['order' => $order, 'isGuest' => true]);
+        // Its own freshly-minted signed URL, distinct from this page's own
+        // signature — Laravel signatures are tied to one specific route +
+        // params, so the guest-safe change-request POST needs its own
+        // (same 90-day expiry as this page's own link and invoice.download,
+        // for the same reason: this exposes shipping address/phone-adjacent
+        // action, not something to stay valid forever if the link leaks).
+        $changeRequestActionUrl = URL::temporarySignedRoute('order-change-requests.store', now()->addDays(90), ['order' => $order->id]);
+        $existingChangeRequest = OrderChangeRequest::where('order_id', $order->id)
+            ->where('status', OrderChangeRequest::STATUS_PENDING)
+            ->first();
+
+        return view('orders.track', [
+            'order' => $order, 'isGuest' => true,
+            'changeRequestActionUrl' => $changeRequestActionUrl, 'existingChangeRequest' => $existingChangeRequest,
+        ]);
     }
 }
