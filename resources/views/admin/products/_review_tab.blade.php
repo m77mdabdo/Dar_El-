@@ -27,8 +27,12 @@
             <dd class="text-[var(--dj-ink)]">{{ $product->variants->count() }}</dd>
         </div>
         <div>
-            <dt class="dj-admin-label">{{ __('products.stock') }}</dt>
-            <dd class="text-[var(--dj-ink)]">{{ $product->totalStock() + $product->variants->sum('stock') }}</dd>
+            {{-- Real (product_sizes) stock only — adding the Variants tab's
+                 stock on top would blend a live number with one the
+                 storefront never reads, exactly the confusion the warning
+                 banner on that tab exists to prevent. --}}
+            <dt class="dj-admin-label">{{ __('products.sizes_stock') }}</dt>
+            <dd class="text-[var(--dj-ink)]">{{ $product->totalStock() }}</dd>
         </div>
     </dl>
 

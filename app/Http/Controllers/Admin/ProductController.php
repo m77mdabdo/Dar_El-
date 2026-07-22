@@ -326,20 +326,51 @@ class ProductController extends Controller
     protected function syncSizes(Product $product, Request $request): void
     {
         foreach ((array) $request->input('sizes', []) as $size => $stock) {
-            if ($size === '') {
-                continue;
-            }
-
-            $newStock = max(0, (int) $stock);
-            $before = $product->sizes()->where('size', $size)->value('stock');
-
-            $productSize = $product->sizes()->updateOrCreate(['size' => $size], ['stock' => $newStock]);
-
-            if ($before !== null) {
-                $this->stockAlerts->checkThreshold($product, $productSize, $before, $newStock);
-                $this->backInStock->checkAndNotify($product, $productSize, $before, $newStock);
+            if ($size !== '') {
+                $this->upsertSize($product, $size, (int) $stock);
             }
         }
+
+        $newSizeName = trim((string) $request->input('new_size_name'));
+
+        if ($newSizeName !== '') {
+            $this->upsertSize($product, $newSizeName, (int) $request->input('new_size_stock'));
+        }
+    }
+
+    protected function upsertSize(Product $product, string $size, int $stock): void
+    {
+        $newStock = max(0, $stock);
+        $before = $product->sizes()->where('size', $size)->value('stock');
+
+        $productSize = $product->sizes()->updateOrCreate(['size' => $size], ['stock' => $newStock]);
+
+        if ($before !== null) {
+            $this->stockAlerts->checkThreshold($product, $productSize, $before, $newStock);
+            $this->backInStock->checkAndNotify($product, $productSize, $before, $newStock);
+        }
+    }
+
+    /**
+     * The real, storefront-affecting stock editor — see the "Sizes & Stock"
+     * tab. Deliberately its own action/route rather than folding into
+     * update(): that method's validated() requires the full product field
+     * set (name, category, price...), which this tab's form never sends.
+     */
+    public function updateSizes(Request $request, Product $product): RedirectResponse
+    {
+        $this->authorize('update', $product);
+
+        $request->validate([
+            'new_size_name' => ['nullable', 'string', 'max:50'],
+            'new_size_stock' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $this->syncSizes($product, $request);
+
+        ActivityLog::record('updated', $product, "Updated stock for {$product->name_en}");
+
+        return back()->with('status', __('products.sizes_updated'));
     }
 
     /**

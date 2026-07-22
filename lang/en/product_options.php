@@ -42,6 +42,7 @@ return [
     'confirm_delete_value' => 'Delete this value and every variant built from it?',
     'hex_color_invalid' => 'Enter a valid hex color, e.g. #6D2332.',
 
+    'variants_dev_warning' => '⚠️ This section is still under development and does not affect the real stock shown to customers — quantities here are not used by the storefront or checkout. To update actual available stock, use the "Sizes & Stock" tab instead.',
     'variants_heading' => 'Variants',
     'variants_hint' => 'Generate every combination of your option values, then set SKU, price, stock, and image per variant.',
     'no_options_for_variants' => 'Add at least one option with values first.',
