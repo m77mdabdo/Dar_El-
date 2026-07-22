@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailPreviewController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\OrderChangeRequestController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductBulkActionController;
@@ -65,6 +66,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
     Route::get('orders/{order}/invoice', [AccountOrderController::class, 'invoice'])->name('orders.invoice');
+
+    Route::get('order-change-requests', [OrderChangeRequestController::class, 'index'])->name('order-change-requests.index')->middleware('admin.permission:orders.view');
+    Route::patch('order-change-requests/{orderChangeRequest}/status', [OrderChangeRequestController::class, 'updateStatus'])->name('order-change-requests.status')->middleware('admin.permission:orders.update_status');
 
     Route::prefix('customers')->name('customers.')->group(function () {
         Route::get('/', [CustomerController::class, 'index'])->name('index');

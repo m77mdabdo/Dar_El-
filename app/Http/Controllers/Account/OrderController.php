@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Account;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\OrderChangeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,7 +28,12 @@ class OrderController extends Controller
 
         $order->load(['items.product.images', 'statusHistories', 'shippingMethod']);
 
-        return view('account.orders.show', compact('order'));
+        $changeRequestActionUrl = route('order-change-requests.store', $order);
+        $existingChangeRequest = OrderChangeRequest::where('order_id', $order->id)
+            ->where('status', OrderChangeRequest::STATUS_PENDING)
+            ->first();
+
+        return view('account.orders.show', compact('order', 'changeRequestActionUrl', 'existingChangeRequest'));
     }
 
     /**
@@ -41,7 +47,15 @@ class OrderController extends Controller
 
         $order->load(['items.product.images', 'statusHistories']);
 
-        return view('orders.track', ['order' => $order, 'isGuest' => false]);
+        $changeRequestActionUrl = route('order-change-requests.store', $order);
+        $existingChangeRequest = OrderChangeRequest::where('order_id', $order->id)
+            ->where('status', OrderChangeRequest::STATUS_PENDING)
+            ->first();
+
+        return view('orders.track', [
+            'order' => $order, 'isGuest' => false,
+            'changeRequestActionUrl' => $changeRequestActionUrl, 'existingChangeRequest' => $existingChangeRequest,
+        ]);
     }
 
     /**
