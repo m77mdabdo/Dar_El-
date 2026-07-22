@@ -121,8 +121,13 @@ class CheckoutEmailNotificationTest extends TestCase
         $product = $this->makeProduct();
         $this->postJson(route('cart.add', $product), ['size' => 'M', 'quantity' => 1])->assertOk();
 
+        // Guest checkout requires a CAPTCHA answer (see
+        // CheckoutController::generateCaptcha()) — visiting show() first
+        // seeds the session with the challenge this submission answers.
+        $this->get(route('checkout.show'));
         $this->post(route('checkout.store'), $this->checkoutPayload('real-guest@example.com', 'Real Guest', [
             'customer_email' => 'real-guest@example.com',
+            'captcha_answer' => session('checkout_captcha_answer'),
         ]))->assertSessionHasNoErrors();
 
         $order = Order::latest('id')->firstOrFail();
@@ -137,8 +142,10 @@ class CheckoutEmailNotificationTest extends TestCase
         $product = $this->makeProduct();
         $this->postJson(route('cart.add', $product), ['size' => 'M', 'quantity' => 1])->assertOk();
 
+        $this->get(route('checkout.show'));
         $response = $this->post(route('checkout.store'), $this->checkoutPayload('', 'No Email Guest', [
             'customer_email' => null,
+            'captcha_answer' => session('checkout_captcha_answer'),
         ]));
 
         $response->assertSessionHasNoErrors();

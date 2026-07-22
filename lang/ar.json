@@ -521,5 +521,14 @@
     "Click the map or drag the pin to your exact location — the fields below will fill in automatically, and you can still adjust them.": "اضغطي على الخريطة أو اسحبي الدبوس لموقعك بالضبط — هتتعبّى الحقول تحت تلقائيًا، ويمكنك تعديلها بعد كده.",
     "Detecting address...": "جارٍ تحديد العنوان...",
     "Address filled in below — feel free to adjust it if it's not quite right.": "تم تعبئة العنوان تحت — لو مش مظبوط تمامًا، عدّليه براحتك.",
-    "Could not detect an address for this location — please fill it in manually below.": "تعذّر تحديد عنوان لهذا الموقع — يرجى تعبئته يدويًا تحت."
+    "Could not detect an address for this location — please fill it in manually below.": "تعذّر تحديد عنوان لهذا الموقع — يرجى تعبئته يدويًا تحت.",
+
+    "The :attribute must be a valid push service URL.": "يجب أن يكون :attribute رابط خدمة إشعارات صالحًا.",
+    "This does not look like a supported push notification service.": "هذه ليست خدمة إشعارات مدعومة.",
+
+    "Several orders were recently placed for this delivery address. Please wait a bit before placing another, or contact us directly if you need help.": "تم تقديم عدة طلبات مؤخرًا لهذا العنوان. يرجى الانتظار قليلاً قبل تقديم طلب آخر، أو التواصل معنا مباشرةً إذا احتجتِ للمساعدة.",
+    "Quick Verification": "تحقق سريع",
+    "To help us block automated spam, please answer this simple question.": "لمساعدتنا في منع الرسائل الآلية غير المرغوبة، يرجى الإجابة على هذا السؤال البسيط.",
+    ":a + :b = ?": ":a + :b = ؟",
+    "That answer isn't quite right — please try again.": "الإجابة غير صحيحة تمامًا — يرجى المحاولة مرة أخرى."
 }

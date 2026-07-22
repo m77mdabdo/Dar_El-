@@ -24,7 +24,8 @@ class Order extends Model
 
     protected $fillable = [
         'user_id', 'order_number', 'customer_name', 'customer_email', 'customer_phone',
-        'governorate', 'city', 'address', 'notes', 'locale', 'subtotal', 'shipping_fee',
+        'customer_phone_normalized', 'governorate', 'city', 'address', 'address_rate_limit_key',
+        'checkout_fingerprint', 'notes', 'locale', 'subtotal', 'shipping_fee',
         'coupon_code', 'discount_amount', 'shipping_method_id', 'total', 'status',
         'payment_method', 'payment_status',
         'shipping_method_code', 'shipping_method_name',

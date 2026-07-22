@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CheckoutRateLimitExceededException;
 use App\Http\Requests\StoreCheckoutRequest;
 use App\Jobs\GenerateAndSendInvoice;
 use App\Mail\InvoiceMail;
@@ -16,7 +17,10 @@ use App\Notifications\OrderPlaced;
 use App\Services\CartService;
 use App\Services\CartTrackingService;
 use App\Services\StockAlertService;
+use App\Support\CheckoutAddressNormalizer;
+use App\Support\PhoneNumberNormalizer;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -27,6 +31,16 @@ use Throwable;
 
 class CheckoutController extends Controller
 {
+    /** Guest-abuse guards — see the locked section in store() for how these are enforced atomically. */
+    protected const MAX_ORDERS_PER_PHONE = 5;
+
+    protected const MAX_ORDERS_PER_ADDRESS = 5;
+
+    protected const RATE_LIMIT_WINDOW_MINUTES = 60;
+
+    /** How long a resubmission of the exact same cart+phone reuses the original order instead of creating a duplicate. */
+    protected const IDEMPOTENCY_WINDOW_MINUTES = 2;
+
     public function __construct(
         protected CartService $cart,
         protected StockAlertService $stockAlerts,
@@ -45,6 +59,8 @@ class CheckoutController extends Controller
         // table had no active rows, while validation still required one.
         ShippingMethod::ensureAtLeastOneActive();
 
+        $captcha = auth()->check() ? null : $this->generateCaptcha();
+
         return view('checkout.show', [
             'items' => $this->cart->items(),
             'subtotal' => $this->cart->subtotal(),
@@ -53,7 +69,28 @@ class CheckoutController extends Controller
             'shippingMethods' => ShippingMethod::where('is_active', true)->orderBy('fee')->get(),
             'heroImage' => Setting::get('checkout_hero_image', 'https://images.unsplash.com/photo-1772474569781-2fb1c6539f8c?w=1600&q=80&auto=format&fit=crop'),
             'hasStockIssues' => ! $this->cart->isValid(),
+            'captchaA' => $captcha['a'] ?? null,
+            'captchaB' => $captcha['b'] ?? null,
         ]);
+    }
+
+    /**
+     * Small, home-grown math challenge rather than a third-party CAPTCHA
+     * service — this store has no payment step to protect (COD only) and no
+     * ad budget behind the traffic it worries about, just automated form
+     * spam; a two-digit sum is enough friction for a script while staying
+     * invisible to a real customer. The answer is session-stored, not
+     * signed/embedded in the page, so it can't be read back out of the HTML
+     * the way a hidden-field answer could be.
+     */
+    private function generateCaptcha(): array
+    {
+        $a = random_int(1, 9);
+        $b = random_int(1, 9);
+
+        session(['checkout_captcha_answer' => $a + $b]);
+
+        return ['a' => $a, 'b' => $b];
     }
 
     public function store(StoreCheckoutRequest $request): RedirectResponse
@@ -100,92 +137,177 @@ class CheckoutController extends Controller
         $shippingMinDays = $shippingMethod?->delivery_time_min_days ?? 3;
         $shippingMaxDays = $shippingMethod?->delivery_time_max_days ?? 5;
 
-        try {
-            $order = DB::transaction(function () use (
-                $validated, $items, $shippingMethod, $shippingFee, $subtotal, $discount, $coupon, $total, $request,
-                $shippingMethodCode, $shippingMethodName, $shippingMinDays, $shippingMaxDays,
-            ) {
-                $order = Order::create([
-                    'user_id' => $request->user()?->id,
-                    'order_number' => 'ORD-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
-                    'customer_name' => $validated['customer_name'],
-                    // Empty string, not null — the column itself stays
-                    // NOT NULL (no migration needed for what's ultimately
-                    // just "no email provided"), and every consumer of this
-                    // value already treats an empty string as "no email" the
-                    // same way it would treat null: Order::resolveCustomerEmail()
-                    // and maskEmailForLogging() both use falsy checks, not
-                    // strict null checks.
-                    'customer_email' => $validated['customer_email'] ?? '',
-                    'customer_phone' => $validated['customer_phone'],
-                    'governorate' => $validated['governorate'],
-                    'city' => $validated['city'],
-                    'address' => $validated['address'],
-                    'notes' => $validated['notes'] ?? null,
-                    'locale' => app()->getLocale(),
-                    'subtotal' => $subtotal,
-                    'shipping_fee' => $shippingFee,
-                    'coupon_code' => $coupon?->code,
-                    'discount_amount' => $discount,
-                    'shipping_method_id' => $shippingMethod?->id,
-                    'shipping_method_code' => $shippingMethodCode,
-                    'shipping_method_name' => $shippingMethodName,
-                    'shipping_delivery_min_days' => $shippingMinDays,
-                    'shipping_delivery_max_days' => $shippingMaxDays,
-                    'total' => $total,
-                    'status' => 'pending',
-                    'payment_method' => $validated['payment_method'],
-                    'payment_status' => Order::PAYMENT_STATUS_PENDING,
-                    'customer_latitude' => $validated['customer_latitude'] ?? null,
-                    'customer_longitude' => $validated['customer_longitude'] ?? null,
-                ]);
+        $normalizedPhone = PhoneNumberNormalizer::normalize($validated['customer_phone']);
+        $addressKey = CheckoutAddressNormalizer::key($validated['governorate'], $validated['city'], $validated['address']);
 
-                foreach ($items as $item) {
-                    // Lock the row so two customers racing for the last piece
-                    // can't both succeed; the second one re-checks fresh stock.
-                    $productSize = ProductSize::where('product_id', $item['product']->id)
-                        ->where('size', $item['size'])
-                        ->lockForUpdate()
+        // Cart contents + phone identify "this exact checkout attempt" —
+        // used below to recognize a double-click/network-retry resubmission
+        // before it creates a second order. Sorted so item order in the
+        // cart array (which carries no meaning) can't produce two different
+        // fingerprints for the same real cart.
+        $cartSignature = collect($items)
+            ->map(fn ($item) => $item['product']->id.':'.$item['size'].':'.$item['quantity'])
+            ->sort()
+            ->implode('|');
+        $checkoutFingerprint = hash('sha256', $normalizedPhone.'|'.$cartSignature);
+
+        $isDuplicateResubmission = false;
+
+        try {
+            // Both locks are always acquired in this same order (phone, then
+            // address) at this single call site, so two requests can never
+            // deadlock waiting on each other in opposite order. Each blocks
+            // up to 5s then throws rather than hanging forever if something
+            // is stuck holding a lock.
+            $order = Cache::lock('checkout-lock:phone:'.$normalizedPhone, 15)->block(5, function () use (
+                $addressKey, $checkoutFingerprint, $validated, $items, $shippingMethod, $shippingFee, $subtotal,
+                $discount, $coupon, $total, $request, $shippingMethodCode, $shippingMethodName, $shippingMinDays,
+                $shippingMaxDays, $normalizedPhone, &$isDuplicateResubmission,
+            ) {
+                return Cache::lock('checkout-lock:address:'.$addressKey, 15)->block(5, function () use (
+                    $addressKey, $checkoutFingerprint, $validated, $items, $shippingMethod, $shippingFee, $subtotal,
+                    $discount, $coupon, $total, $request, $shippingMethodCode, $shippingMethodName, $shippingMinDays,
+                    $shippingMaxDays, $normalizedPhone, &$isDuplicateResubmission,
+                ) {
+                    // Idempotency check (Finding #3): a prior request from
+                    // this exact phone+cart within the window already
+                    // created an order — reuse it rather than double-submit.
+                    // Safe to check before the rate limits below: reusing an
+                    // existing order was never blocked by them the first
+                    // time, so it can't be blocked by them now either.
+                    $existing = Order::where('checkout_fingerprint', $checkoutFingerprint)
+                        ->where('created_at', '>=', now()->subMinutes(self::IDEMPOTENCY_WINDOW_MINUTES))
+                        ->latest('id')
                         ->first();
 
-                    $before = $productSize?->stock ?? 0;
+                    if ($existing) {
+                        $isDuplicateResubmission = true;
 
-                    if (! $productSize || $before < $item['quantity']) {
-                        throw new \RuntimeException(__('Sorry, ":name" (size :size) only has :count piece(s) left. Please update your cart.', [
-                            'name' => trans_field($item['product'], 'name'),
-                            'size' => $item['size'],
-                            'count' => $before,
-                        ]));
+                        return $existing;
                     }
 
-                    $order->items()->create([
-                        'product_id' => $item['product']->id,
-                        'product_name' => $item['product']->name_en,
-                        'size' => $item['size'],
-                        'price' => $item['product']->price,
-                        'quantity' => $item['quantity'],
-                    ]);
+                    $windowStart = now()->subMinutes(self::RATE_LIMIT_WINDOW_MINUTES);
 
-                    $productSize->decrement('stock', $item['quantity']);
+                    $phoneCount = Order::where('customer_phone_normalized', $normalizedPhone)
+                        ->where('created_at', '>=', $windowStart)
+                        ->count();
 
-                    $this->stockAlerts->checkThreshold($item['product'], $productSize, $before, $before - $item['quantity']);
-                }
+                    if ($phoneCount >= self::MAX_ORDERS_PER_PHONE) {
+                        throw new CheckoutRateLimitExceededException(
+                            __('You\'ve placed several orders recently. Please wait a bit before placing another, or contact us directly if you need help.'),
+                            'customer_phone'
+                        );
+                    }
 
-                if ($coupon) {
-                    $coupon->increment('used_count');
-                }
+                    $addressCount = Order::where('address_rate_limit_key', $addressKey)
+                        ->where('created_at', '>=', $windowStart)
+                        ->count();
 
-                OrderStatusHistory::create([
-                    'order_id' => $order->id,
-                    'status' => 'pending',
-                    'note' => 'Order placed.',
-                    'changed_by' => $request->user()?->id,
-                ]);
+                    if ($addressCount >= self::MAX_ORDERS_PER_ADDRESS) {
+                        throw new CheckoutRateLimitExceededException(
+                            __('Several orders were recently placed for this delivery address. Please wait a bit before placing another, or contact us directly if you need help.'),
+                            'address'
+                        );
+                    }
 
-                $order->forceFill(['stock_deducted_at' => now()])->save();
+                    return DB::transaction(function () use (
+                        $validated, $items, $shippingMethod, $shippingFee, $subtotal, $discount, $coupon, $total, $request,
+                        $shippingMethodCode, $shippingMethodName, $shippingMinDays, $shippingMaxDays,
+                        $normalizedPhone, $addressKey, $checkoutFingerprint,
+                    ) {
+                        $order = Order::create([
+                            'user_id' => $request->user()?->id,
+                            'order_number' => 'ORD-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
+                            'customer_name' => $validated['customer_name'],
+                            // Empty string, not null — the column itself stays
+                            // NOT NULL (no migration needed for what's ultimately
+                            // just "no email provided"), and every consumer of this
+                            // value already treats an empty string as "no email" the
+                            // same way it would treat null: Order::resolveCustomerEmail()
+                            // and maskEmailForLogging() both use falsy checks, not
+                            // strict null checks.
+                            'customer_email' => $validated['customer_email'] ?? '',
+                            'customer_phone' => $validated['customer_phone'],
+                            'customer_phone_normalized' => $normalizedPhone,
+                            'governorate' => $validated['governorate'],
+                            'city' => $validated['city'],
+                            'address' => $validated['address'],
+                            'address_rate_limit_key' => $addressKey,
+                            'checkout_fingerprint' => $checkoutFingerprint,
+                            'notes' => $validated['notes'] ?? null,
+                            'locale' => app()->getLocale(),
+                            'subtotal' => $subtotal,
+                            'shipping_fee' => $shippingFee,
+                            'coupon_code' => $coupon?->code,
+                            'discount_amount' => $discount,
+                            'shipping_method_id' => $shippingMethod?->id,
+                            'shipping_method_code' => $shippingMethodCode,
+                            'shipping_method_name' => $shippingMethodName,
+                            'shipping_delivery_min_days' => $shippingMinDays,
+                            'shipping_delivery_max_days' => $shippingMaxDays,
+                            'total' => $total,
+                            'status' => 'pending',
+                            'payment_method' => $validated['payment_method'],
+                            'payment_status' => Order::PAYMENT_STATUS_PENDING,
+                            'customer_latitude' => $validated['customer_latitude'] ?? null,
+                            'customer_longitude' => $validated['customer_longitude'] ?? null,
+                        ]);
 
-                return $order;
+                        foreach ($items as $item) {
+                            // Lock the row so two customers racing for the last piece
+                            // can't both succeed; the second one re-checks fresh stock.
+                            $productSize = ProductSize::where('product_id', $item['product']->id)
+                                ->where('size', $item['size'])
+                                ->lockForUpdate()
+                                ->first();
+
+                            $before = $productSize?->stock ?? 0;
+
+                            if (! $productSize || $before < $item['quantity']) {
+                                throw new \RuntimeException(__('Sorry, ":name" (size :size) only has :count piece(s) left. Please update your cart.', [
+                                    'name' => trans_field($item['product'], 'name'),
+                                    'size' => $item['size'],
+                                    'count' => $before,
+                                ]));
+                            }
+
+                            $order->items()->create([
+                                'product_id' => $item['product']->id,
+                                'product_name' => $item['product']->name_en,
+                                'size' => $item['size'],
+                                'price' => $item['product']->price,
+                                'quantity' => $item['quantity'],
+                            ]);
+
+                            $productSize->decrement('stock', $item['quantity']);
+
+                            $this->stockAlerts->checkThreshold($item['product'], $productSize, $before, $before - $item['quantity']);
+                        }
+
+                        if ($coupon) {
+                            $coupon->increment('used_count');
+                        }
+
+                        OrderStatusHistory::create([
+                            'order_id' => $order->id,
+                            'status' => 'pending',
+                            'note' => 'Order placed.',
+                            'changed_by' => $request->user()?->id,
+                        ]);
+
+                        $order->forceFill(['stock_deducted_at' => now()])->save();
+
+                        return $order;
+                    });
+                });
             });
+        } catch (CheckoutRateLimitExceededException $e) {
+            Log::warning('Checkout blocked: rate limit exceeded', [
+                'user_id' => $request->user()?->id,
+                'field' => $e->field,
+            ]);
+
+            return back()->withErrors([$e->field => $e->getMessage()])->withInput();
         } catch (\RuntimeException $e) {
             // Stock-shortage messages are already specific and safe to show
             // the customer as-is (product name, size, remaining count).
@@ -209,6 +331,23 @@ class CheckoutController extends Controller
             return back()
                 ->withErrors(['order' => __('Something went wrong while placing your order. Please try again.')])
                 ->withInput();
+        }
+
+        if ($isDuplicateResubmission) {
+            // The original submission already ran every step below (emails,
+            // notifications, invoice job) — re-running them here would mean
+            // the customer gets a second confirmation email/WhatsApp-style
+            // notification for an order they only placed once. From the
+            // customer's side this resubmission should look exactly like
+            // the success it already was: same success page, cart cleared.
+            Log::info('Checkout resubmission recognized: reused existing order instead of creating a duplicate', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+            ]);
+
+            $this->cart->clear();
+
+            return redirect()->route('checkout.success', $order)->with('status', __('Order placed successfully.'));
         }
 
         // Everything below only runs once the order is durably committed —
