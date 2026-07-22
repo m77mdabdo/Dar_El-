@@ -212,12 +212,19 @@
             <a href="mailto:{{ \App\Models\Setting::get('support_email', 'info@dareljamila.com') }}" title="Email">✉</a>
         </div>
 
-        <div class="dj-footer-links">
-            <a href="{{ route('about') }}">{{ __('About') }}</a>
-            <a href="{{ route('services') }}">{{ __('Services') }}</a>
-            <a href="{{ route('return-policy') }}">{{ __('Return Policy') }}</a>
-            <a href="{{ route('contact.show') }}">{{ __('Contact') }}</a>
-            <a href="{{ route('track-order.form') }}">{{ __('orders.track_title') }}</a>
+        <div class="dj-footer-links-section">
+            <div class="dj-footer-links-label">{{ __('Quick Links') }}</div>
+            <nav class="dj-footer-links" aria-label="{{ __('Quick Links') }}">
+                <a href="{{ route('about') }}">{{ __('About') }}</a>
+                <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
+                <a href="{{ route('services') }}">{{ __('Services') }}</a>
+                <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
+                <a href="{{ route('return-policy') }}">{{ __('Return Policy') }}</a>
+                <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
+                <a href="{{ route('contact.show') }}">{{ __('Contact') }}</a>
+                <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
+                <a href="{{ route('track-order.form') }}">{{ __('orders.track_title') }}</a>
+            </nav>
         </div>
 
         <div class="dj-fine">&copy; {{ date('Y') }} {{ __('Dar El Jamila. All rights reserved.') }}</div>
