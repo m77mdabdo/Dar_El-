@@ -514,5 +514,12 @@
     "Get notified when your order ships or arrives": "استلمي إشعارًا عند شحن طلبك أو وصوله",
     "Notifications enabled": "تم تفعيل الإشعارات",
 
-    "Quick Links": "روابط سريعة"
+    "Quick Links": "روابط سريعة",
+
+    "Contact Information": "بيانات التواصل",
+    "Select your location on the map": "اختاري موقعك على الخريطة",
+    "Click the map or drag the pin to your exact location — the fields below will fill in automatically, and you can still adjust them.": "اضغطي على الخريطة أو اسحبي الدبوس لموقعك بالضبط — هتتعبّى الحقول تحت تلقائيًا، ويمكنك تعديلها بعد كده.",
+    "Detecting address...": "جارٍ تحديد العنوان...",
+    "Address filled in below — feel free to adjust it if it's not quite right.": "تم تعبئة العنوان تحت — لو مش مظبوط تمامًا، عدّليه براحتك.",
+    "Could not detect an address for this location — please fill it in manually below.": "تعذّر تحديد عنوان لهذا الموقع — يرجى تعبئته يدويًا تحت."
 }
