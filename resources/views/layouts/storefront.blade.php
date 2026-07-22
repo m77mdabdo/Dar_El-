@@ -233,6 +233,7 @@
     @include('partials.cart-drawer')
     @include('partials.product-modal')
     @include('partials.whatsapp-float')
+    @include('partials.order-tracking-float')
 
 </body>
 </html>
