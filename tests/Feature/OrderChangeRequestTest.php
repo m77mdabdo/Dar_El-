@@ -259,6 +259,42 @@ class OrderChangeRequestTest extends TestCase
         $this->assertDatabaseCount('order_change_requests', 1);
     }
 
+    /**
+     * The controller-level test above proves the ordinary sequential case
+     * works. This one proves the actual security property: the guard is a
+     * database constraint, not an app-level check-then-create (which is a
+     * TOCTOU race — two concurrent requests can both see "no pending row"
+     * and both insert before either one commits). Creating two pending rows
+     * directly through the model, back to back with no controller/HTTP
+     * layer involved at all, still can't succeed — proving the invariant
+     * holds regardless of request timing, not just in the single-threaded
+     * order a test happens to run in.
+     */
+    public function test_the_database_itself_rejects_a_second_pending_row_for_the_same_order(): void
+    {
+        $order = $this->makeOrder();
+        OrderChangeRequest::create(['order_id' => $order->id, 'type' => 'modify', 'reason' => 'wrong_size']);
+
+        $this->expectException(\Illuminate\Database\UniqueConstraintViolationException::class);
+
+        OrderChangeRequest::create(['order_id' => $order->id, 'type' => 'cancel', 'reason' => 'changed_mind']);
+    }
+
+    public function test_a_new_pending_request_is_allowed_once_the_previous_one_is_resolved(): void
+    {
+        $order = $this->makeOrder();
+        $signedUrl = URL::temporarySignedRoute('order-change-requests.store', now()->addDays(90), ['order' => $order->id]);
+
+        $this->postJson($signedUrl, $this->payload())->assertOk();
+
+        OrderChangeRequest::where('order_id', $order->id)->first()->update(['status' => 'resolved']);
+
+        $second = $this->postJson($signedUrl, $this->payload());
+
+        $second->assertOk();
+        $this->assertDatabaseCount('order_change_requests', 2);
+    }
+
     public function test_submission_is_rate_limited(): void
     {
         for ($i = 0; $i < 10; $i++) {
