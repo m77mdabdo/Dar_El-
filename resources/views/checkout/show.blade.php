@@ -113,6 +113,15 @@
                 </div>
                 @error('payment_method') <p style="color:var(--dj-rose-dust); font-size:12px; margin-top:10px;">{{ $message }}</p> @enderror
 
+                @guest
+                    <div class="dj-checkout-section-divider"></div>
+
+                    <h3>{{ __('Quick Verification') }}</h3>
+                    <p class="dj-checkout-email-hint">{{ __('To help us block automated spam, please answer this simple question.') }}</p>
+                    <input type="text" inputmode="numeric" autocomplete="off" name="captcha_answer" class="{{ $errors->has('captcha_answer') ? 'dj-input-error' : '' }}" placeholder="{{ __(':a + :b = ?', ['a' => $captchaA, 'b' => $captchaB]) }}" aria-label="{{ __(':a + :b = ?', ['a' => $captchaA, 'b' => $captchaB]) }}" aria-invalid="{{ $errors->has('captcha_answer') ? 'true' : 'false' }}" required>
+                    @error('captcha_answer') <p class="dj-field-msg-error">{{ $message }}</p> @enderror
+                @endguest
+
                 @if ($errors->any())
                     <div id="dj-checkout-error-summary" class="dj-checkout-stock-error" style="margin-top:16px;">
                         <strong style="display:block; margin-bottom:6px;">{{ __('Please review the highlighted fields below:') }}</strong>

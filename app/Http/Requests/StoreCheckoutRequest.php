@@ -12,14 +12,6 @@ use Illuminate\Validation\Rule;
 class StoreCheckoutRequest extends FormRequest
 {
     /**
-     * Max orders the same phone number may place within the rate-limit
-     * window below — see withValidator().
-     */
-    protected const MAX_ORDERS_PER_PHONE = 5;
-
-    protected const RATE_LIMIT_WINDOW_MINUTES = 60;
-
-    /**
      * Only fields actually rendered on the checkout page — no field is
      * validated here that the customer can't see and fill in.
      *
@@ -27,7 +19,7 @@ class StoreCheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'customer_name' => ['required', 'string', 'max:255'],
             // Nullable: this is a COD-only store with no payment step, so
             // email isn't essential to fulfillment — guests can skip it.
@@ -68,41 +60,45 @@ class StoreCheckoutRequest extends FormRequest
             'customer_latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'customer_longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
+
+        // Guest-only: an authenticated account already had to prove control
+        // of a real email/OTP flow at some point (or is a returning, known
+        // customer), so a bot cost is only worth imposing on the anonymous
+        // path this challenge actually targets. See CheckoutController::show()
+        // for where the two operands are generated and session-stored.
+        if (! $this->user()) {
+            $rules['captcha_answer'] = ['required', 'integer'];
+        }
+
+        return $rules;
     }
 
     /**
-     * Guest checkout no longer sits behind the OTP/account gate, so this is
-     * the replacement abuse guard: cap how many orders the same phone
-     * number can place in a short window. Orders immediately decrement
-     * real stock (see CheckoutController::store()), so unlimited rapid
-     * checkout attempts aren't just a spam nuisance the way a contact-form
-     * flood would be — they can actually deplete inventory a genuine
-     * customer would otherwise have bought. Applies regardless of auth
-     * state: an authenticated-but-unverified account has exactly as little
-     * verified identity as a guest now that OTP isn't required first, so
-     * there's no reason to only guard one of them. Layered on top of (not
-     * instead of) the existing throttle:10,1 on this route, which limits
-     * by IP — this catches the same actor spreading requests across
-     * several IPs, which the IP throttle alone would miss.
+     * The math-challenge check — the only thing withValidator() still does.
+     * The phone/address rate limits used to live here too, but a FormRequest
+     * runs entirely before the controller method does, so a check here can
+     * never be atomic with the Order::create() call it's meant to gate: two
+     * concurrent requests could both pass this check before either one's
+     * order commits. That enforcement now lives in
+     * CheckoutController::store() itself, inside the same locked section
+     * that creates the order — see there for the full reasoning.
      */
     public function withValidator(Validator $validator): void
     {
+        if ($this->user()) {
+            return;
+        }
+
         $validator->after(function (Validator $validator) {
-            $phone = $this->input('customer_phone');
+            // pull(), not get(): consumed exactly once regardless of outcome,
+            // so a failed attempt can never be retried against the same
+            // answer — the redirect back to the checkout page (see
+            // CheckoutController::store()'s error responses) always
+            // generates a fresh challenge via a fresh GET to show().
+            $expected = $this->session()->pull('checkout_captcha_answer');
 
-            if (! $phone) {
-                return;
-            }
-
-            $recentOrders = Order::where('customer_phone', $phone)
-                ->where('created_at', '>=', now()->subMinutes(self::RATE_LIMIT_WINDOW_MINUTES))
-                ->count();
-
-            if ($recentOrders >= self::MAX_ORDERS_PER_PHONE) {
-                $validator->errors()->add(
-                    'customer_phone',
-                    __('You\'ve placed several orders recently. Please wait a bit before placing another, or contact us directly if you need help.')
-                );
+            if ($expected === null || (int) $this->input('captcha_answer') !== (int) $expected) {
+                $validator->errors()->add('captcha_answer', __('That answer isn\'t quite right — please try again.'));
             }
         });
     }
