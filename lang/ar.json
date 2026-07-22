@@ -512,5 +512,7 @@
     "Get a notification the moment there's an update — no need to check your email.": "استلمي إشعارًا فور وجود تحديث — دون الحاجة لمراجعة بريدك الإلكتروني.",
     "Want a push notification when \":name\" is back, too? No need to check your email.": "تحبي تستلمي إشعارًا فوريًا لما \":name\" يرجع متاح؟ دون الحاجة لمراجعة بريدك الإلكتروني.",
     "Get notified when your order ships or arrives": "استلمي إشعارًا عند شحن طلبك أو وصوله",
-    "Notifications enabled": "تم تفعيل الإشعارات"
+    "Notifications enabled": "تم تفعيل الإشعارات",
+
+    "Quick Links": "روابط سريعة"
 }
