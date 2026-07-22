@@ -18,11 +18,23 @@ class PushNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * p256dh/auth here are shaped like real Web Push key material (correct
+     * base64url charset and length — a real p256dh is a base64url-encoded,
+     * uncompressed EC P-256 public key, always ~87 chars; auth is a 16-byte
+     * secret, ~22 chars, confirmed against a real browser-generated
+     * subscription) so these tests exercise the same validation path real
+     * traffic does, not a shortcut around it. See ValidWebPushEndpointTest
+     * for the tests specifically targeting format/host rejection.
+     */
     protected function subscribePayload(array $overrides = []): array
     {
         return array_merge([
             'endpoint' => 'https://fcm.googleapis.com/fcm/send/'.uniqid(),
-            'keys' => ['p256dh' => 'fake-p256dh-key', 'auth' => 'fake-auth-key'],
+            'keys' => [
+                'p256dh' => 'BNZt1sr089T8_QclkT-OqDVevOhFACXtStn5mqb2AP6VGhj1YnLwbceJ6PrP-H5xoKzaLr4_DIgud1fiDgSkT'.substr(uniqid(), 0, 2),
+                'auth' => 'TXzvF9_PZts9JMuIpVC1'.substr(uniqid(), 0, 2),
+            ],
         ], $overrides);
     }
 
@@ -52,8 +64,8 @@ class PushNotificationTest extends TestCase
         $response->assertOk();
         $this->assertDatabaseHas('push_subscriptions', [
             'endpoint' => $payload['endpoint'],
-            'p256dh' => 'fake-p256dh-key',
-            'auth' => 'fake-auth-key',
+            'p256dh' => $payload['keys']['p256dh'],
+            'auth' => $payload['keys']['auth'],
             'user_id' => null,
         ]);
     }
@@ -75,14 +87,19 @@ class PushNotificationTest extends TestCase
     {
         $endpoint = 'https://fcm.googleapis.com/fcm/send/'.uniqid();
 
+        $updatedKeys = [
+            'p256dh' => 'BAbcdEFghijKLmnoPQRstuvWXyz0123456789_-AbcdEFghijKLmnoPQRstuvWXyz0123456789_-ABCDE',
+            'auth' => 'ZYXwvutsRQPOnmlKJihGFE',
+        ];
+
         $this->postJson(route('push.subscribe'), $this->subscribePayload(['endpoint' => $endpoint]))->assertOk();
         $this->postJson(route('push.subscribe'), $this->subscribePayload([
             'endpoint' => $endpoint,
-            'keys' => ['p256dh' => 'updated-key', 'auth' => 'updated-auth'],
+            'keys' => $updatedKeys,
         ]))->assertOk();
 
         $this->assertSame(1, PushSubscription::where('endpoint', $endpoint)->count());
-        $this->assertDatabaseHas('push_subscriptions', ['endpoint' => $endpoint, 'p256dh' => 'updated-key']);
+        $this->assertDatabaseHas('push_subscriptions', ['endpoint' => $endpoint, 'p256dh' => $updatedKeys['p256dh']]);
     }
 
     public function test_subscribe_rejects_a_payload_missing_required_fields(): void
