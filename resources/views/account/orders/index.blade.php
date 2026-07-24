@@ -50,25 +50,12 @@
             })();
         </script>
 
-        @php
-            // bg/color per real admin-managed status (Order::TRACKING_STAGES
-            // + cancelled) — same vocabulary the tracking page uses, just a
-            // distinct color per stage here instead of a stepper.
-            $djStatusColors = [
-                'pending' => ['bg' => 'rgba(232,195,154,.35)', 'fg' => '#8a5a2a'],
-                'processing' => ['bg' => 'rgba(59,130,246,.12)', 'fg' => '#2563eb'],
-                'shipped' => ['bg' => 'rgba(147,51,234,.12)', 'fg' => '#7e22ce'],
-                'delivered' => ['bg' => 'rgba(47,122,77,.12)', 'fg' => '#2f7a4d'],
-                'cancelled' => ['bg' => 'rgba(156,80,100,.12)', 'fg' => '#9C5064'],
-            ];
-        @endphp
-
         @if ($orders->isEmpty())
             <p class="p-6 bg-white border border-stone-200 rounded-lg text-stone-500 text-sm">{{ __("You haven't placed any orders yet.") }}</p>
         @else
             <div class="space-y-4">
                 @foreach ($orders as $order)
-                    @php $djColor = $djStatusColors[$order->status] ?? $djStatusColors['pending']; @endphp
+                    @php $djColor = \App\Models\Order::statusBadgeColor($order->status); @endphp
                     <div class="dj-order-card">
                         <div class="dj-order-card-main">
                             <div class="dj-order-thumbs">

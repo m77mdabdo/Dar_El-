@@ -71,8 +71,11 @@ class OrderHistoryCardTest extends TestCase
 
     public function test_unrecognized_status_falls_back_to_the_pending_color(): void
     {
-        // Defensive fallback in the view (`$djStatusColors[$order->status] ?? $djStatusColors['pending']`)
-        // for any status value that isn't one of the 5 known keys.
+        // Defensive fallback, now in Order::statusBadgeColor()'s own
+        // `default =>` arm (the shared single source of truth every
+        // status-badge view calls — see OrderStatusBadgeColorTest) rather
+        // than a per-view `?? $fallback` — for any status value that isn't
+        // one of the 5 known keys.
         $user = User::factory()->create();
         $order = $this->makeOrder($user, 'pending');
         $order->update(['status' => 'unknown_status']);

@@ -33,19 +33,12 @@
             </thead>
             <tbody>
                 @forelse ($orders as $order)
-                    @php
-                        $djOrderBadge = match ($order->status) {
-                            'delivered' => 'dj-admin-badge-success',
-                            'cancelled' => 'dj-admin-badge-danger',
-                            'pending' => 'dj-admin-badge-gold',
-                            default => 'dj-admin-badge-info',
-                        };
-                    @endphp
+                    @php $djColor = \App\Models\Order::statusBadgeColor($order->status); @endphp
                     <tr>
                         <td class="font-semibold text-[var(--dj-maroon)]">{{ $order->order_number }}</td>
                         <td>{{ $order->customer_name }}</td>
                         <td class="font-medium">{{ number_format($order->total) }} EGP</td>
-                        <td><span class="dj-admin-badge {{ $djOrderBadge }}">{{ __('orders.status_'.$order->status) }}</span></td>
+                        <td><span class="dj-admin-badge" style="background:{{ $djColor['bg'] }}; color:{{ $djColor['fg'] }};">{{ __('orders.status_'.$order->status) }}</span></td>
                         <td>{{ $order->payment ? __('orders.payment_status_'.$order->payment->status) : '-' }}</td>
                         <td>{{ $order->created_at->translatedFormat('M j, Y') }}</td>
                         <td class="text-end">
