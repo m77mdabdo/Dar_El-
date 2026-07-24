@@ -69,7 +69,8 @@ return [
     'related_products_heading' => 'منتجات ذات صلة',
     'related_products_hint' => 'اختاري منتجات محددة لعرضها ضمن "قد يعجبك أيضًا" في صفحة هذا المنتج (مثال: ربط حزام بعباية معينة). اتركيه فارغًا للاعتماد تلقائيًا على منتجات أخرى نشطة ومتوفرة من نفس الفئة.',
     'related_products_search_placeholder' => 'ابحثي عن منتج...',
-    'related_products_multiselect_hint' => 'اضغطي مع الاستمرار على Ctrl (ويندوز) أو Cmd (ماك) لاختيار أكثر من منتج.',
+    'related_products_remove' => 'إزالة',
+    'related_products_no_results' => 'لا توجد نتائج مطابقة.',
 
     'selected' => 'محدد',
     'bulk_publish' => 'نشر',

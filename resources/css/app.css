@@ -1585,6 +1585,38 @@ textarea.dj-admin-input { min-height: 100px; resize: vertical; }
 .dj-admin-shell input[type="checkbox"] { color: var(--dj-maroon); accent-color: var(--dj-maroon); width: 16px; height: 16px; border-radius: 5px; }
 .dj-admin-shell input[type="checkbox"]:focus { outline: none; box-shadow: 0 0 0 3px rgba(232,195,154,.4); border-color: var(--dj-maroon); }
 
+/* ----- Chip picker (touch-friendly multi-select, no Ctrl/Cmd-click) ----- */
+.dj-admin-chip-picker { position: relative; }
+.dj-admin-chip {
+    display: inline-flex; align-items: center; gap: 6px; background: rgba(232,195,154,.35); color: #8a5a2a;
+    font-size: 12.5px; font-weight: 600; padding-inline-start: 12px; padding-inline-end: 6px; padding-block: 5px;
+    border-radius: 999px; max-width: 100%;
+}
+.dj-admin-chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dj-admin-chip button {
+    display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(138,90,42,.15); color: #8a5a2a; font-size: 15px; line-height: 1; flex-shrink: 0; transition: background .15s;
+}
+.dj-admin-chip button:hover, .dj-admin-chip button:focus-visible { background: rgba(138,90,42,.3); outline: none; }
+
+/* Dropdown sits below the search input, same field-look via dj-admin-input,
+   card-like elevation so it clearly reads as "floating above" the rest of
+   the form rather than as inline content. max-height + scroll keeps a
+   ~160-product candidate list from turning into an endless page on a
+   tablet, where the same 8-row native <select> used to just... also scroll,
+   so this isn't a regression, just the same idea with tap-sized rows. */
+.dj-admin-chip-results {
+    position: absolute; z-index: 20; inset-inline: 0; margin-top: 4px; max-height: 260px; overflow-y: auto;
+    background: #fff; border: 1.5px solid var(--dj-cream-2); border-radius: 10px;
+    box-shadow: 0 14px 30px -12px rgba(60,11,23,.3);
+}
+.dj-admin-chip-result {
+    display: block; width: 100%; text-align: start; padding: 12px 14px; font-size: 13px; color: var(--dj-ink);
+    border-top: 1px solid var(--dj-cream-2); transition: background .15s;
+}
+.dj-admin-chip-result:first-child { border-top: none; }
+.dj-admin-chip-result:hover, .dj-admin-chip-result:focus-visible { background: rgba(232,195,154,.18); outline: none; }
+
 /* ----- Alerts / empty states ----- */
 .dj-admin-alert { border-radius: 12px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; }
 .dj-admin-alert-success { background: #e3f3e6; color: #237a3f; border: 1px solid #c5e6cc; }
