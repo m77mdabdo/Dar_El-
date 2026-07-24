@@ -41,8 +41,14 @@ return [
         'items' => [
             ['label' => 'nav.products', 'route' => 'admin.products.index', 'match' => 'admin.products.*', 'permission' => 'products.view'],
             ['label' => 'nav.categories', 'route' => 'admin.categories.index', 'match' => 'admin.categories.*', 'permission' => 'categories.view'],
-            ['label' => 'nav.product_images', 'route' => null, 'permission' => 'products.manage_images'],
-            ['label' => 'nav.variants', 'route' => null, 'permission' => 'products.manage_variants'],
+            // Product Images and Variants used to be listed here as their
+            // own "Soon" placeholders, but both shipped this session —
+            // they're just not separate top-level pages. Every product's
+            // Images and Variants tabs (Admin\ProductController::edit(),
+            // see resources/views/admin/products/edit.blade.php) are the
+            // real, live feature; a second, redundant top-level nav entry
+            // for either was never actually the plan, so removed rather
+            // than left as a placeholder that would never get filled in.
             ['label' => 'nav.inventory', 'route' => null, 'permission' => 'inventory.view'],
             ['label' => 'nav.reviews', 'route' => 'admin.reviews.index', 'match' => 'admin.reviews.*', 'permission' => 'reviews.view'],
         ],
@@ -95,7 +101,12 @@ return [
             ['label' => 'nav.settings_website', 'route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'permission' => 'settings.view'],
             ['label' => 'nav.settings_payments', 'route' => null, 'permission' => 'payment_settings.edit'],
             ['label' => 'nav.settings_shipping', 'route' => null, 'permission' => 'shipping_settings.edit'],
-            ['label' => 'nav.settings_social', 'route' => null, 'permission' => 'settings.view'],
+            // Facebook/Instagram URLs are real, working fields on the
+            // Website settings form (SettingController::edit()) — there's
+            // no separate "social settings" page, so this points at the
+            // same real route as Website above rather than staying a
+            // placeholder for a page that would just duplicate it.
+            ['label' => 'nav.settings_social', 'route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'permission' => 'settings.view'],
             ['label' => 'nav.settings_admin_users', 'route' => 'admin.users.index', 'match' => 'admin.users.*', 'permission' => 'users.view'],
             ['label' => 'nav.settings_roles', 'route' => 'admin.roles.index', 'match' => 'admin.roles.*', 'permission' => 'roles.view'],
             ['label' => 'nav.settings_permissions', 'route' => 'admin.permissions.index', 'match' => 'admin.permissions.*', 'permission' => 'permissions.view'],

@@ -1357,14 +1357,26 @@ body.dj-en .dj-wishlist-btn-modal { left: auto; right: 20px; }
 }
 .dj-admin-nav-sub-link:hover { background: rgba(232,195,154,.08); color: var(--dj-cream); }
 .dj-admin-nav-sub-link.dj-active { background: rgba(232,195,154,.16); color: var(--dj-gold); font-weight: 600; }
+/* Deliberately NOT just a dimmer shade of the same real-link color — real
+   sub-links sit at .58 opacity, and a 26-point gap plus italics is what
+   actually reads as "a different kind of item" at a glance, rather than
+   something a new employee might mistake for a slightly-quieter real link
+   (the .32 this used to be, next to .58, wasn't obviously a different
+   category — just "a bit dimmer"). */
 .dj-admin-nav-soon {
     display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px;
-    color: rgba(247,239,228,.32); font-size: 13px; cursor: not-allowed; user-select: none;
+    color: rgba(247,239,228,.32); font-size: 13px; font-style: italic; cursor: not-allowed; user-select: none;
 }
 .dj-admin-soon-badge {
-    font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; background: rgba(232,195,154,.12);
-    color: rgba(232,195,154,.6); padding: 2px 7px; border-radius: 6px; flex-shrink: 0; margin-inline-start: 8px;
+    font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .3px;
+    background: rgba(212,165,116,.16); border: 1px solid rgba(212,165,116,.4);
+    color: var(--dj-gold-bright); padding: 2px 8px; border-radius: 6px; flex-shrink: 0; margin-inline-start: 8px;
 }
+/* Same badge, reused next to a group's own name (dj-admin-nav-group-btn)
+   when every single item inside it is still unbuilt — so "Reports", for
+   instance, is flagged before it's even expanded, not just once you're
+   already looking at its five placeholder rows. */
+.dj-admin-nav-group-btn .dj-admin-soon-badge { margin-inline-start: 0; }
 .dj-admin-sidebar-footer {
     border-top: 1px solid rgba(232,195,154,.15); padding: 10px; margin-top: 8px;
 }

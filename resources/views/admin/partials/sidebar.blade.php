@@ -48,7 +48,14 @@
                 <span class="truncate">{{ __('admin.'.$entry['label']) }}</span>
             </a>
         @else
-            @php $djOpen = $djHasActiveChild($entry['items']); @endphp
+            @php
+                $djOpen = $djHasActiveChild($entry['items']);
+                // Flags a group whose every visible item is still unbuilt
+                // (Reports, today) so that's obvious before expanding it at
+                // all, not just once its five placeholder rows are showing.
+                $djGroupAllSoon = collect($entry['items'])->isNotEmpty()
+                    && collect($entry['items'])->every(fn ($item) => empty($item['route']));
+            @endphp
             <div x-data="{ open: {{ $djOpen ? 'true' : 'false' }} }">
                 <button
                     type="button"
@@ -58,6 +65,9 @@
                 >
                     <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="{{ $djIcons[$entry['icon']] }}" /></svg>
                     <span class="flex-1 text-start truncate">{{ __('admin.'.$entry['label']) }}</span>
+                    @if ($djGroupAllSoon)
+                        <span class="dj-admin-soon-badge">{{ __('admin.soon') }}</span>
+                    @endif
                     <svg class="w-4 h-4 shrink-0 transition-transform" :class="open ? 'rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ app()->getLocale() === 'ar' ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' }}" />
                     </svg>
