@@ -105,6 +105,19 @@
         <div class="dj-nav-right">
             @include('partials.global-search')
 
+            {{-- Same destination logic as the floating shortcut it replaced
+                 (partials/cart-float.blade.php took over that float's old
+                 slot) — resolved server-side, not guessed client-side: a
+                 logged-in customer's own order history has richer tracking
+                 (statuses, invoices) than the guest lookup form would give
+                 them. Same .dj-cart-btn treatment/sizing as the Wishlist
+                 link right next to it, so it collapses to icon-only at the
+                 same breakpoint (see app.css's 390px rule) rather than
+                 needing its own responsive handling. --}}
+            <a href="{{ auth()->check() ? route('account.orders.index') : route('track-order.form') }}" class="dj-cart-btn" aria-label="{{ __('orders.track_title') }}">
+                📦 <span>{{ __('orders.track_title') }}</span>
+            </a>
+
             @auth
                 <a href="{{ route('wishlist.index') }}" class="dj-cart-btn" aria-label="{{ __('Wishlist') }}">
                     ♡ <span>{{ __('Wishlist') }}</span> <span class="dj-cart-count" id="dj-wishlist-count">{{ $wishlistCount ?? 0 }}</span>
@@ -233,7 +246,7 @@
     @include('partials.cart-drawer')
     @include('partials.product-modal')
     @include('partials.whatsapp-float')
-    @include('partials.order-tracking-float')
+    @include('partials.cart-float')
 
 </body>
 </html>
