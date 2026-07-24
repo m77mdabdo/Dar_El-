@@ -55,14 +55,27 @@ async function djFetch(url, method, body) {
 }
 window.djFetch = djFetch;
 
+// The one place that writes to the floating cart button's count badge —
+// every add/update/remove flow funnels through here (or through
+// djUpdateCartFromResponse() below, which just calls this), so the badge
+// can't drift out of sync with whichever flow last touched the cart. Hides
+// the badge outright at 0 rather than showing "0": an empty circle with a
+// zero in it reads as "something's wrong", not "cart is empty".
+window.djUpdateCartCount = function (count) {
+    const el = document.getElementById('dj-cart-float-count');
+    if (!el) return;
+    const n = count ?? 0;
+    el.textContent = Math.min(n, 99) + (n > 99 ? '+' : '');
+    el.hidden = n < 1;
+};
+
 function djUpdateCartFromResponse(data) {
-    const countEl = document.getElementById('dj-cart-count');
+    djUpdateCartCount(data.count);
     const totalEl = document.getElementById('dj-cart-total');
     const shippingRowEl = document.getElementById('dj-cart-shipping-row');
     const shippingEl = document.getElementById('dj-cart-shipping');
     const itemsEl = document.getElementById('dj-drawer-items');
 
-    if (countEl) countEl.textContent = data.count ?? 0;
     if (totalEl && data.total_formatted) totalEl.textContent = data.total_formatted;
     if (shippingEl && data.shipping_formatted) shippingEl.textContent = data.shipping_formatted;
     if (shippingRowEl) shippingRowEl.style.display = (data.shipping_fee ?? 0) > 0 ? '' : 'none';

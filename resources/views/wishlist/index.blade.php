@@ -84,8 +84,7 @@
                 const data = await djFetch(btn.dataset.moveUrl, 'POST', { size: selected.dataset.size });
                 djShowToast(btn.dataset.addedMessage);
                 if (typeof data.cart_count === 'number') {
-                    const countEl = document.getElementById('dj-cart-count');
-                    if (countEl) countEl.textContent = data.cart_count;
+                    djUpdateCartCount(data.cart_count);
                 }
                 if (typeof data.wishlist_count === 'number') {
                     const wEl = document.getElementById('dj-wishlist-count');
