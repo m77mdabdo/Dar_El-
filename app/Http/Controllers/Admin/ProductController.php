@@ -356,8 +356,14 @@ class ProductController extends Controller
      * tab. Deliberately its own action/route rather than folding into
      * update(): that method's validated() requires the full product field
      * set (name, category, price...), which this tab's form never sends.
+     *
+     * Also the inline-edit target from the Inventory overview
+     * (Admin\InventoryController) — same form shape, submitted via fetch()
+     * there instead of a full page post, so this branches on wantsJson()
+     * rather than being a second, separate action. Whichever screen called
+     * it, it's the one place that ever writes to product_sizes.
      */
-    public function updateSizes(Request $request, Product $product): RedirectResponse
+    public function updateSizes(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $product);
 
@@ -369,6 +375,18 @@ class ProductController extends Controller
         $this->syncSizes($product, $request);
 
         ActivityLog::record('updated', $product, "Updated stock for {$product->name_en}");
+
+        if ($request->wantsJson()) {
+            $product->load('sizes');
+
+            return response()->json([
+                'status' => 'ok',
+                'message' => __('products.sizes_updated'),
+                'total_stock' => $product->totalStock(),
+                'stock_status' => $product->stockStatus($product->totalStock()),
+                'sizes' => $product->sizes->pluck('stock', 'size'),
+            ]);
+        }
 
         return back()->with('status', __('products.sizes_updated'));
     }
