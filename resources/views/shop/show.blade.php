@@ -209,13 +209,13 @@
              the chart data above is specific to this product, so this button
              has nothing useful to do (and nowhere sensible to send someone)
              on any page that isn't a product page. Stacks above the two
-             site-wide floats below it (WhatsApp, then order tracking — see
+             site-wide floats below it (WhatsApp, then cart — see
              partials/whatsapp-float.blade.php and
-             partials/order-tracking-float.blade.php). #dj-back-to-top is
-             pushed up further still (scoped to this page only, not app.css —
-             every other page only has two floats below it, not three) so
-             none of the four ever overlap. Same inline-CSS convention as the
-             size guide overlay above, for the same deploy-proofing reason. --}}
+             partials/cart-float.blade.php). #dj-back-to-top is pushed up
+             further still (scoped to this page only, not app.css — every
+             other page only has two floats below it, not three) so none of
+             the four ever overlap. Same inline-CSS convention as the size
+             guide overlay above, for the same deploy-proofing reason. --}}
         <button type="button" id="dj-size-guide-float" class="dj-keep-clickable" onclick="djOpenSizeGuide()" aria-label="{{ __('Size Guide') }}" title="{{ __('Size Guide') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25h18M3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V8.25M3 8.25l1.5-4.5h15l1.5 4.5M8.25 12v3M12 12v6M15.75 12v3"/></svg>
         </button>
