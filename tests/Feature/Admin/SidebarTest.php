@@ -44,6 +44,21 @@ class SidebarTest extends TestCase
         $this->assertMatchesRegularExpression($pattern, $content);
     }
 
+    /**
+     * A bare assertSee() on the label text and a bare assertSee() on the
+     * "dj-admin-nav-soon" marker can both pass for reasons that have
+     * nothing to do with each other — the label text might just appear
+     * elsewhere on the page (the dashboard has its own "Inventory" chart
+     * section, for instance), and the marker exists as long as *any*
+     * unbuilt item is still on the page. This proves the label is actually
+     * inside a <span class="dj-admin-nav-soon">...</span> element.
+     */
+    protected function assertSidebarItemIsSoon(string $content, string $label): void
+    {
+        $pattern = '/<span class="dj-admin-nav-soon">\s*<span class="truncate">'.preg_quote($label, '/').'<\/span>/s';
+        $this->assertMatchesRegularExpression($pattern, $content);
+    }
+
     public function test_a_real_nav_item_renders_as_a_working_link(): void
     {
         $admin = $this->makeAdmin();
@@ -61,13 +76,10 @@ class SidebarTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         $response->assertOk();
-        // "Inventory" (nav.inventory) is still genuinely unbuilt — a
-        // dedicated cross-product stock page distinct from the per-product
-        // Sizes & Stock tab. Rendered as a <span>, never an <a>, so there's
-        // no href to visit at all, and carries the Soon badge.
-        $response->assertSee('<span class="dj-admin-nav-soon">', false);
-        $response->assertSee(__('admin.nav.inventory'));
-        $response->assertSee(__('admin.soon'));
+        // "Wishlist" (nav.wishlist, under Marketing) is still genuinely
+        // unbuilt — rendered as a <span>, never an <a>, so there's no href
+        // to visit at all, and carries the Soon badge.
+        $this->assertSidebarItemIsSoon($response->getContent(), __('admin.nav.wishlist'));
     }
 
     public function test_product_images_and_variants_are_no_longer_listed_as_separate_soon_placeholders(): void
@@ -142,11 +154,20 @@ class SidebarTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         $response->assertOk();
-        // "Catalog" (nav.catalog) has real items (Products, Categories,
-        // Reviews) alongside just one unbuilt one (Inventory) — the group
-        // header itself must NOT carry a Soon badge, even though one of
-        // its children does.
+        // "Catalog" (nav.catalog) is now fully real (Products, Categories,
+        // Inventory, Reviews) — the group header must NOT carry a Soon
+        // badge.
         $buttonMarkup = $this->extractGroupButtonMarkup($response->getContent(), __('admin.nav.catalog'));
         $this->assertStringNotContainsString('dj-admin-soon-badge', $buttonMarkup);
+    }
+
+    public function test_inventory_is_now_a_real_working_link_not_a_soon_placeholder(): void
+    {
+        $admin = $this->makeAdmin();
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $this->assertSeeSidebarLink($response->getContent(), route('admin.inventory.index'));
     }
 }
