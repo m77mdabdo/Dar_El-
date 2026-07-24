@@ -114,6 +114,28 @@ class Order extends Model
      */
     public const TRACKING_STAGES = ['pending', 'processing', 'shipped', 'delivered'];
 
+    /**
+     * Single source of truth for status badge colors — every place an order
+     * status renders as a colored badge (admin orders list, admin customer
+     * detail's order tables, the customer-facing order history) calls this
+     * rather than keeping its own copy. That duplication is exactly how two
+     * of those views ended up rendering 'processing' and 'shipped' with the
+     * identical color: each had its own small, slightly-different mapping,
+     * and nothing kept them in sync. bg/fg pairs, not a CSS class name, so
+     * callers can drop them into a plain inline style and don't need a
+     * matching admin-badge-* or dj-order-badge-* modifier class to exist.
+     */
+    public static function statusBadgeColor(string $status): array
+    {
+        return match ($status) {
+            'processing' => ['bg' => 'rgba(59,130,246,.12)', 'fg' => '#2563eb'],
+            'shipped' => ['bg' => 'rgba(147,51,234,.12)', 'fg' => '#7e22ce'],
+            'delivered' => ['bg' => 'rgba(47,122,77,.12)', 'fg' => '#2f7a4d'],
+            'cancelled' => ['bg' => 'rgba(156,80,100,.12)', 'fg' => '#9C5064'],
+            default => ['bg' => 'rgba(232,195,154,.35)', 'fg' => '#8a5a2a'], // pending, and any unrecognized status
+        };
+    }
+
     public function isCancelled(): bool
     {
         return $this->status === 'cancelled';

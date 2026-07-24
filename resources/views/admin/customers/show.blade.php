@@ -90,10 +90,11 @@
                     </thead>
                     <tbody>
                         @forelse ($recentOrders as $order)
+                            @php $djColor = \App\Models\Order::statusBadgeColor($order->status); @endphp
                             <tr>
                                 <td class="font-semibold text-[var(--dj-maroon)]">{{ $order->order_number }}</td>
                                 <td>{{ $order->created_at->translatedFormat('M j, Y') }}</td>
-                                <td><span class="dj-admin-badge dj-admin-badge-info">{{ __('orders.status_'.$order->status) }}</span></td>
+                                <td><span class="dj-admin-badge" style="background:{{ $djColor['bg'] }}; color:{{ $djColor['fg'] }};">{{ __('orders.status_'.$order->status) }}</span></td>
                                 <td>{{ number_format($order->total) }} EGP</td>
                                 <td class="text-end"><a href="{{ route('admin.orders.show', $order) }}" class="dj-admin-link">{{ __('general.view') }}</a></td>
                             </tr>
