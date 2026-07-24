@@ -22,8 +22,6 @@ return [
         'catalog' => 'الكتالوج',
         'products' => 'المنتجات',
         'categories' => 'الفئات',
-        'product_images' => 'صور المنتجات',
-        'variants' => 'المتغيرات',
         'inventory' => 'المخزون',
         'marketing' => 'التسويق',
         'wishlist' => 'المفضلة',
