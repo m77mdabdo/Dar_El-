@@ -235,6 +235,16 @@ class RelatedProductsTest extends TestCase
         $this->assertSame(0, $product->relatedProducts()->count());
     }
 
+    /**
+     * The picker is a touch-friendly chip UI now (a native <select multiple>
+     * needed a Ctrl/Cmd-click that has no touchscreen equivalent — see
+     * ProductSizesStockTest-style admin usability fixes this session), but
+     * the underlying contract is unchanged: every candidate ships to the
+     * client once as data-candidates JSON, the current selection as
+     * data-selected JSON, and selected items still submit as
+     * related_product_ids[] hidden inputs — same field name
+     * syncRelatedProducts() has always read.
+     */
     public function test_admin_product_form_renders_the_related_products_picker_with_correct_selection(): void
     {
         $admin = $this->admin();
@@ -246,9 +256,11 @@ class RelatedProductsTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.products.edit', $product));
 
         $response->assertOk();
+        $response->assertSee('x-data="djRelatedProductsPicker()"', false);
         $response->assertSee('name="related_product_ids[]"', false);
-        $response->assertSee('<option value="'.$pick->id.'" data-search="selected candidate selected candidate" selected', false);
-        $response->assertSee('<option value="'.$unselected->id.'" data-search="unselected candidate unselected candidate" >', false);
+        $response->assertSee('data-selected="['.$pick->id.']"', false);
+        $response->assertSee('&quot;id&quot;:'.$pick->id.',&quot;label_ar&quot;:&quot;Selected Candidate&quot;,&quot;label_en&quot;:&quot;Selected Candidate&quot;', false);
+        $response->assertSee('&quot;id&quot;:'.$unselected->id.',&quot;label_ar&quot;:&quot;Unselected Candidate&quot;,&quot;label_en&quot;:&quot;Unselected Candidate&quot;', false);
     }
 
     public function test_invalid_related_product_id_is_rejected(): void

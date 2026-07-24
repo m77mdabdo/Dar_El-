@@ -98,39 +98,63 @@
     </label>
 </div>
 
-<div class="dj-admin-card p-4 mt-2">
-    <label for="dj-related-select" class="font-semibold text-[var(--dj-maroon-dark)] block">{{ __('products.related_products_heading') }}</label>
+@php
+    $djSelectedRelatedIds = old('related_product_ids', isset($product) ? $product->relatedProducts->pluck('id')->all() : []);
+    $djRelatedCandidates = $relatableProducts->map(fn ($candidate) => [
+        'id' => $candidate->id,
+        'label_ar' => $candidate->name_ar,
+        'label_en' => $candidate->name_en,
+    ]);
+@endphp
+
+{{-- Tap/click-only multi-select — no Ctrl/Cmd-click required, so this works
+     the same on a tablet's touchscreen as it does with a mouse or keyboard.
+     Replaced a native <select multiple> that needed a keyboard modifier to
+     pick more than one option, which has no touchscreen equivalent at all.
+     All candidates + the current selection are handed to Alpine once via
+     these data-* attributes (this list is already fully loaded server-side,
+     same as the old select was — no new endpoint), and
+     related_product_ids[] is submitted the exact same way it always was,
+     via the hidden inputs generated below: syncRelatedProducts() on the
+     backend needed zero changes for this. --}}
+<div class="dj-admin-card p-4 mt-2 dj-admin-chip-picker"
+     x-data="djRelatedProductsPicker()"
+     data-candidates="{{ $djRelatedCandidates->toJson() }}"
+     data-selected="{{ json_encode($djSelectedRelatedIds) }}"
+     data-remove-label="{{ __('products.related_products_remove') }}"
+     @keydown.escape="open = false"
+     @click.outside="open = false">
+    <label for="dj-related-search" class="font-semibold text-[var(--dj-maroon-dark)] block">{{ __('products.related_products_heading') }}</label>
     <p class="dj-admin-hint mb-3">{{ __('products.related_products_hint') }}</p>
 
-    @php
-        $djSelectedRelatedIds = old('related_product_ids', isset($product) ? $product->relatedProducts->pluck('id')->all() : []);
-    @endphp
+    <div class="flex flex-wrap gap-2 mb-2" x-show="selected.length > 0" x-cloak>
+        <template x-for="item in selected" :key="item.id">
+            <span class="dj-admin-chip">
+                <span x-text="item.label"></span>
+                <button type="button" @click="remove(item.id)" :aria-label="removeLabel + ' ' + item.label">&times;</button>
+            </span>
+        </template>
+    </div>
 
-    <label for="dj-related-filter" class="sr-only">{{ __('products.related_products_search_placeholder') }}</label>
-    <input type="text" id="dj-related-filter" placeholder="{{ __('products.related_products_search_placeholder') }}" class="dj-admin-input mb-2">
-    <select name="related_product_ids[]" id="dj-related-select" multiple size="8" class="dj-admin-input" style="height:200px;">
-        @foreach ($relatableProducts as $candidate)
-            <option value="{{ $candidate->id }}" data-search="{{ \Illuminate\Support\Str::lower($candidate->name_ar.' '.$candidate->name_en) }}" @selected(in_array($candidate->id, $djSelectedRelatedIds))>{{ $candidate->name_ar }} — {{ $candidate->name_en }}</option>
-        @endforeach
-    </select>
+    <div class="relative">
+        <input type="text" id="dj-related-search" x-model="query" @focus="open = true"
+               placeholder="{{ __('products.related_products_search_placeholder') }}"
+               class="dj-admin-input" autocomplete="off">
+
+        <div class="dj-admin-chip-results" x-show="open" x-cloak>
+            <template x-for="item in filteredResults()" :key="item.id">
+                <button type="button" class="dj-admin-chip-result" @click="add(item)" x-text="item.label"></button>
+            </template>
+            <p class="dj-admin-hint p-3" x-show="filteredResults().length === 0" x-cloak>{{ __('products.related_products_no_results') }}</p>
+        </div>
+    </div>
+
+    <template x-for="item in selected" :key="'hidden-'+item.id">
+        <input type="hidden" name="related_product_ids[]" :value="item.id">
+    </template>
+
     @error('related_product_ids') <p class="dj-admin-error">{{ $message }}</p> @enderror
-    <p class="dj-admin-hint mt-1">{{ __('products.related_products_multiselect_hint') }}</p>
 </div>
-
-<script>
-    (function () {
-        var filterInput = document.getElementById('dj-related-filter');
-        var select = document.getElementById('dj-related-select');
-        if (! filterInput || ! select) return;
-
-        filterInput.addEventListener('input', function () {
-            var term = this.value.trim().toLowerCase();
-            select.querySelectorAll('option').forEach(function (option) {
-                option.hidden = term !== '' && option.dataset.search.indexOf(term) === -1;
-            });
-        });
-    })();
-</script>
 
 @isset($product)
     <div class="dj-admin-card p-4 mt-2">
