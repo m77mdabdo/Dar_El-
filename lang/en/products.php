@@ -69,7 +69,8 @@ return [
     'related_products_heading' => 'Related Products',
     'related_products_hint' => 'Hand-pick specific products to show under "You May Also Like" on this product\'s page (e.g. link a belt to a specific abaya). Leave empty to fall back to other active, in-stock products from the same category automatically.',
     'related_products_search_placeholder' => 'Search products...',
-    'related_products_multiselect_hint' => 'Hold Ctrl (Windows) or Cmd (Mac) to select multiple products.',
+    'related_products_remove' => 'Remove',
+    'related_products_no_results' => 'No matching products.',
 
     'selected' => 'selected',
     'bulk_publish' => 'Publish',

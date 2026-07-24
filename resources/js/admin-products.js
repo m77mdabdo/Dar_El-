@@ -361,4 +361,63 @@ document.addEventListener('alpine:init', () => {
             }
         },
     }));
+
+    /**
+     * Touch-friendly replacement for a <select multiple> that used to
+     * require holding Ctrl/Cmd to pick more than one option — no
+     * touchscreen equivalent of that gesture exists, so it was effectively
+     * unusable on a tablet. Every interaction here is a single tap/click on
+     * a button (add a candidate, remove a chip), same as it would be with a
+     * mouse or keyboard — nothing needs a modifier key. The candidate list
+     * and current selection are read once from data-* attributes (see
+     * admin/products/_form.blade.php) rather than passed as x-data
+     * arguments, since the candidate list can run to ~160 products and a
+     * giant inline JSON literal in an x-data="" string is a lot rougher to
+     * read/maintain than JSON.parse()-ing it in init().
+     */
+    window.Alpine.data('djRelatedProductsPicker', () => ({
+        query: '',
+        open: false,
+        candidates: [],
+        selected: [],
+        removeLabel: '',
+
+        init() {
+            const candidates = JSON.parse(this.$el.dataset.candidates || '[]');
+            const selectedIds = JSON.parse(this.$el.dataset.selected || '[]').map(Number);
+            this.removeLabel = this.$el.dataset.removeLabel || '';
+
+            this.candidates = candidates.map((c) => ({
+                id: c.id,
+                label: c.label_ar + ' — ' + c.label_en,
+                search: (c.label_ar + ' ' + c.label_en).toLowerCase(),
+            }));
+
+            this.selected = this.candidates.filter((c) => selectedIds.includes(c.id));
+        },
+
+        // Excludes already-selected candidates — once picked, an item moves
+        // from "results" to the chip row above rather than staying
+        // clickable (and therefore ambiguous-looking) in both places.
+        filteredResults() {
+            const term = this.query.trim().toLowerCase();
+            const selectedIds = this.selected.map((s) => s.id);
+
+            return this.candidates.filter((c) => {
+                if (selectedIds.includes(c.id)) return false;
+
+                return term === '' || c.search.indexOf(term) !== -1;
+            });
+        },
+
+        add(item) {
+            if (this.selected.some((s) => s.id === item.id)) return;
+            this.selected.push(item);
+            this.query = '';
+        },
+
+        remove(id) {
+            this.selected = this.selected.filter((s) => s.id !== id);
+        },
+    }));
 });
