@@ -49,7 +49,7 @@ return [
             // real, live feature; a second, redundant top-level nav entry
             // for either was never actually the plan, so removed rather
             // than left as a placeholder that would never get filled in.
-            ['label' => 'nav.inventory', 'route' => null, 'permission' => 'inventory.view'],
+            ['label' => 'nav.inventory', 'route' => 'admin.inventory.index', 'match' => 'admin.inventory.*', 'permission' => 'inventory.view'],
             ['label' => 'nav.reviews', 'route' => 'admin.reviews.index', 'match' => 'admin.reviews.*', 'permission' => 'reviews.view'],
         ],
     ],

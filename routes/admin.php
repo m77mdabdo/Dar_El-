@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailPreviewController;
+use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OrderChangeRequestController;
@@ -59,6 +60,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
         Route::patch('variants/{variant}', [ProductVariantController::class, 'update'])->name('variants.update');
         Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
     });
+
+    Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index')->middleware('admin.permission:inventory.view');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('coupons', CouponController::class)->except(['show']);
