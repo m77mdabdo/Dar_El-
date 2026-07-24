@@ -128,10 +128,6 @@
                 </a>
             @endauth
 
-            <button type="button" class="dj-cart-btn" onclick="djOpenCart()" aria-label="{{ __('Shopping Cart') }}">
-                🛍️ <span>{{ __('Cart') }}</span> <span class="dj-cart-count" id="dj-cart-count">{{ $cartCount ?? 0 }}</span>
-            </button>
-
             <a href="{{ route('lang.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="dj-lang-btn">
                 🌐 <span>{{ app()->getLocale() === 'ar' ? 'EN' : 'AR' }}</span>
             </a>
