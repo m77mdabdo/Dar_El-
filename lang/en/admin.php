@@ -22,8 +22,6 @@ return [
         'catalog' => 'Catalog',
         'products' => 'Products',
         'categories' => 'Categories',
-        'product_images' => 'Product Images',
-        'variants' => 'Variants',
         'inventory' => 'Inventory',
         'marketing' => 'Marketing',
         'wishlist' => 'Wishlist',
