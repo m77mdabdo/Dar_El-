@@ -54,6 +54,7 @@ return [
     'updated' => 'تم تحديث الإعدادات.',
 
     'image_home_hero_image' => 'خلفية الصفحة الرئيسية',
+    'home_hero_image_hint' => 'تُستخدم فقط عند عدم وجود بانر رئيسي مفعّل — راجعي "بانرات الصفحة الرئيسية" ضمن المحتوى.',
     'image_shop_hero_image' => 'صورة رأس صفحة المتجر',
     'image_about_hero_image' => 'صورة رأس صفحة من نحن',
     'image_about_story_image' => 'صورة قصة صفحة من نحن',

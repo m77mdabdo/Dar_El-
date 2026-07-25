@@ -80,7 +80,7 @@ return [
             ['label' => 'nav.services', 'route' => null],
             ['label' => 'nav.faq', 'route' => null],
             ['label' => 'nav.testimonials', 'route' => null],
-            ['label' => 'nav.hero_banners', 'route' => null, 'permission' => 'banners.manage'],
+            ['label' => 'nav.hero_banners', 'route' => 'admin.hero-banners.index', 'match' => 'admin.hero-banners.*', 'permission' => 'banners.manage'],
         ],
     ],
     [

@@ -54,6 +54,7 @@ return [
     'updated' => 'Settings updated.',
 
     'image_home_hero_image' => 'Homepage Hero Background',
+    'home_hero_image_hint' => 'Used only when no Hero Banner is active — see Hero Banners under Content.',
     'image_shop_hero_image' => 'Shop Page Hero',
     'image_about_hero_image' => 'About Page Hero',
     'image_about_story_image' => 'About Page Story Photo',

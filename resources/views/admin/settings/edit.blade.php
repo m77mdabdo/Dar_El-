@@ -200,6 +200,9 @@
                             @endif
                             <input type="file" name="{{ $key }}" accept="image/*" class="w-full text-sm">
                             @error($key) <p class="dj-admin-error">{{ $message }}</p> @enderror
+                            @if ($key === 'home_hero_image')
+                                <p class="dj-admin-hint">{{ __('settings.home_hero_image_hint') }}</p>
+                            @endif
                         </div>
                     @endforeach
                     <p class="dj-admin-hint">{{ __('settings.images_hint') }}</p>

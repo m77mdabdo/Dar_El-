@@ -48,6 +48,13 @@ class HomeController extends Controller
                     ->get(),
                 'collections' => Collection::where('is_active', true)->orderBy('sort_order')->take(6)->get(),
                 'offerBanners' => Banner::active()->ofType(Banner::TYPE_OFFER)->take(3)->get(),
+                // The first active hero banner (by sort_order) an admin has
+                // created replaces the default hero content below — see
+                // home.blade.php. Deliberately opt-in: null (no admin ever
+                // created one) falls back to the pre-existing hardcoded
+                // copy + home_hero_image Setting, so a store that's never
+                // touched the Hero Banners screen sees zero change.
+                'heroBanner' => Banner::active()->ofType(Banner::TYPE_HERO)->first(),
                 'trendingProducts' => $this->trendingProducts(),
             ];
         });
@@ -59,6 +66,7 @@ class HomeController extends Controller
             'categories' => $categories,
             'latestPosts' => $homeData['latestPosts'],
             'heroImage' => $heroImage,
+            'heroBanner' => $homeData['heroBanner'],
             'collections' => $homeData['collections'],
             'offerBanners' => $homeData['offerBanners'],
             'trendingProducts' => $homeData['trendingProducts'],

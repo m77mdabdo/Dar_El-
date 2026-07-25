@@ -17,14 +17,22 @@
 @section('content')
 
     <section class="dj-hero dj-photo-wrap dj-tint-maroon dj-strong">
-        <img src="{{ setting_image_url($heroImage) }}" alt="">
+        <img src="{{ $heroBanner?->image_url ?? setting_image_url($heroImage) }}" alt="">
         <div class="dj-mesh"><span></span><span></span><span></span></div>
         <div class="dj-particles" data-particles="18"></div>
         <div class="dj-lattice-bg"></div>
         <div class="dj-hero-eyebrow">{{ __('Dar El Jamila — Fashion Design House') }}</div>
-        <h1>{{ __('Your Beauty Deserves an ') }}<span>{{ __('Exceptional Touch') }}</span></h1>
-        <p>{{ __('Abayas and dresses crafted with care to highlight your elegance in every occasion — design that blends heritage with modernity.') }}</p>
-        <a href="{{ route('shop.index') }}" class="dj-hero-cta">{{ __('Shop the Collection →') }}</a>
+        @if ($heroBanner)
+            <h1>{{ trans_field($heroBanner, 'title') }}</h1>
+            @if (trans_field($heroBanner, 'subtitle'))
+                <p>{{ trans_field($heroBanner, 'subtitle') }}</p>
+            @endif
+            <a href="{{ $heroBanner->link_url ?: route('shop.index') }}" class="dj-hero-cta">{{ trans_field($heroBanner, 'cta_text') ?: __('Shop the Collection →') }}</a>
+        @else
+            <h1>{{ __('Your Beauty Deserves an ') }}<span>{{ __('Exceptional Touch') }}</span></h1>
+            <p>{{ __('Abayas and dresses crafted with care to highlight your elegance in every occasion — design that blends heritage with modernity.') }}</p>
+            <a href="{{ route('shop.index') }}" class="dj-hero-cta">{{ __('Shop the Collection →') }}</a>
+        @endif
         <svg class="dj-thread" viewBox="0 0 1200 70" preserveAspectRatio="none"><path d="M0,35 C150,5 300,65 450,35 C600,5 750,65 900,35 C1000,15 1100,50 1200,35" /></svg>
     </section>
 

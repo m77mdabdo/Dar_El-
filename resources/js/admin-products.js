@@ -8,41 +8,14 @@
    listener is attached before Alpine actually starts.
    ========================================================= */
 
-import Sortable from 'sortablejs';
-
+// Drag-to-reorder for [data-image-reorder] containers (used by the
+// gallery below) now lives in admin.js, shared with the Hero Banners
+// list — admin.js loads on every admin page, this file only on
+// admin/products/*, so the generic behavior moved to where it's
+// actually shared.
 function djAdminCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
-
-/**
- * Drag-to-reorder the gallery. Persists the full ordered id list in one
- * PATCH per drop, replacing the old one-number-box-per-image workflow.
- */
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-image-reorder]').forEach((container) => {
-        Sortable.create(container, {
-            animation: 150,
-            onEnd: async () => {
-                const ids = Array.from(container.querySelectorAll('[data-image-id]')).map((el) => el.dataset.imageId);
-
-                const response = await fetch(container.dataset.reorderUrl, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': djAdminCsrfToken(),
-                    },
-                    body: JSON.stringify({ ids }),
-                });
-
-                window.djToast?.(
-                    response.ok ? container.dataset.toastSuccess : container.dataset.toastError,
-                    response.ok ? 'success' : 'error'
-                );
-            },
-        });
-    });
-});
 
 /**
  * Debounced partial autosave for the product edit form. Additive
