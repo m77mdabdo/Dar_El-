@@ -144,21 +144,29 @@
         <div class="dj-ornament"><div class="dj-ln"></div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.8L21 11l-6.6 2.2L12 20l-2.4-6.8L3 11l6.6-2.2L12 2z"/></svg><div class="dj-ln dj-r"></div></div>
         <div class="dj-section-title"><h2>{{ __('What Our Customers Say') }}</h2><p>{{ __("Our customers' trust is our pride") }}</p></div>
         <div class="dj-test-grid">
-            <div class="dj-test-card dj-reveal">
-                <div class="dj-stars">★★★★★</div>
-                <p>"{{ __('The fabric is incredibly luxurious and the tailoring is millimeter-precise. I genuinely felt like it was made just for me.') }}"</p>
-                <div class="dj-test-author"><div class="dj-avatar">س</div><span>Sara A.</span></div>
-            </div>
-            <div class="dj-test-card dj-reveal">
-                <div class="dj-stars">★★★★★</div>
-                <p>"{{ __('Delivery was fast and the packaging was so elegant. The abaya looked even better than in the photo.') }}"</p>
-                <div class="dj-test-author"><div class="dj-avatar">م</div><span>Mona K.</span></div>
-            </div>
-            <div class="dj-test-card dj-reveal">
-                <div class="dj-stars">★★★★★</div>
-                <p>"{{ __('Dar El Jamila has become my go-to for every occasion. The designs are one-of-a-kind.') }}"</p>
-                <div class="dj-test-author"><div class="dj-avatar">ه</div><span>Heba S.</span></div>
-            </div>
+            @forelse ($featuredReviews as $review)
+                <div class="dj-test-card dj-reveal">
+                    <div class="dj-stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
+                    <p>"{{ $review->comment }}"</p>
+                    <div class="dj-test-author"><div class="dj-avatar">{{ mb_substr($review->name, 0, 1) }}</div><span>{{ $review->name }}</span></div>
+                </div>
+            @empty
+                <div class="dj-test-card dj-reveal">
+                    <div class="dj-stars">★★★★★</div>
+                    <p>"{{ __('The fabric is incredibly luxurious and the tailoring is millimeter-precise. I genuinely felt like it was made just for me.') }}"</p>
+                    <div class="dj-test-author"><div class="dj-avatar">س</div><span>Sara A.</span></div>
+                </div>
+                <div class="dj-test-card dj-reveal">
+                    <div class="dj-stars">★★★★★</div>
+                    <p>"{{ __('Delivery was fast and the packaging was so elegant. The abaya looked even better than in the photo.') }}"</p>
+                    <div class="dj-test-author"><div class="dj-avatar">م</div><span>Mona K.</span></div>
+                </div>
+                <div class="dj-test-card dj-reveal">
+                    <div class="dj-stars">★★★★★</div>
+                    <p>"{{ __('Dar El Jamila has become my go-to for every occasion. The designs are one-of-a-kind.') }}"</p>
+                    <div class="dj-test-author"><div class="dj-avatar">ه</div><span>Heba S.</span></div>
+                </div>
+            @endforelse
         </div>
     </section>
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Review extends Model
 {
@@ -16,6 +17,23 @@ class Review extends Model
         'status', 'is_verified_purchase', 'is_featured', 'helpful_count',
         'approved_at', 'approved_by', 'rejected_at', 'rejected_by', 'rejection_reason',
     ];
+
+    protected static function booted(): void
+    {
+        // Busts the storefront home-page cache (HomeController::index(),
+        // which reads approved+featured reviews for the testimonials
+        // section) on every write — approve/reject, feature/unfeature,
+        // delete, all fire saved()/deleted(). Mirrors Product/Banner's
+        // identical cache-busting; see their booted() for why these must
+        // NOT be arrow functions (Cache::forget() returning false would
+        // silently halt any later listener).
+        static::saved(function () {
+            Cache::forget('storefront.home.data');
+        });
+        static::deleted(function () {
+            Cache::forget('storefront.home.data');
+        });
+    }
 
     protected function casts(): array
     {

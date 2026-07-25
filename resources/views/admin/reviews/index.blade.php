@@ -10,12 +10,13 @@
             ['label' => __('reviews.stat_pending'), 'value' => number_format($stats['pending']), 'href' => route('admin.reviews.index', ['status' => 'pending'])],
             ['label' => __('reviews.stat_approved'), 'value' => number_format($stats['approved']), 'href' => route('admin.reviews.index', ['status' => 'approved'])],
             ['label' => __('reviews.stat_rejected'), 'value' => number_format($stats['rejected']), 'href' => route('admin.reviews.index', ['status' => 'rejected'])],
+            ['label' => __('reviews.stat_featured'), 'value' => number_format($stats['featured']), 'href' => route('admin.reviews.index', ['featured' => 1])],
             ['label' => __('reviews.stat_average_rating'), 'value' => $stats['average_rating']],
             ['label' => __('reviews.stat_today'), 'value' => number_format($stats['today'])],
             ['label' => __('reviews.stat_this_month'), 'value' => number_format($stats['this_month'])],
         ];
     @endphp
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 mb-8">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4 mb-8">
         @foreach ($djReviewCards as $card)
             @php $djTag = isset($card['href']) ? 'a' : 'div'; @endphp
             <{{ $djTag }} @if(isset($card['href'])) href="{{ $card['href'] }}" @endif class="dj-admin-stat-card">
@@ -24,6 +25,8 @@
             </{{ $djTag }}>
         @endforeach
     </div>
+
+    <p class="dj-admin-hint mb-3">{{ __('reviews.featured_hint') }}</p>
 
     {{-- ===== FILTERS ===== --}}
     <form method="GET" class="flex flex-wrap gap-2 mb-4">
@@ -54,6 +57,11 @@
             <option value="">{{ __('reviews.all_statuses') }}</option>
             <option value="1" {{ request('verified') === '1' ? 'selected' : '' }}>{{ __('reviews.verified_only') }}</option>
             <option value="0" {{ request('verified') === '0' ? 'selected' : '' }}>{{ __('reviews.unverified_only') }}</option>
+        </select>
+
+        <select name="featured" onchange="this.form.submit()" class="dj-admin-input w-auto" title="{{ __('reviews.featured_hint') }}">
+            <option value="">{{ __('reviews.all_reviews') }}</option>
+            <option value="1" {{ request('featured') === '1' ? 'selected' : '' }}>{{ __('reviews.featured_only') }}</option>
         </select>
 
         <input type="date" name="date_from" value="{{ request('date_from') }}" title="{{ __('reviews.date_from') }}" class="dj-admin-input w-auto">
