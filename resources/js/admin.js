@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 import { Chart, registerables } from 'chart.js';
+import Sortable from 'sortablejs';
 
 window.Alpine = Alpine;
 Alpine.start();
@@ -46,6 +47,41 @@ async function adminFetch(url, method = 'POST') {
 
     return response.json().catch(() => ({}));
 }
+
+/**
+ * Generic drag-to-reorder for any admin listing: a container tagged
+ * data-image-reorder with data-reorder-url/data-toast-success/
+ * data-toast-error, holding direct children each tagged data-image-id.
+ * Persists the full ordered id list in one PATCH per drop. Shared here
+ * (rather than living in admin-products.js, which only loads on
+ * admin/products/* pages) since it's used by both the product image
+ * gallery and the Hero Banners list.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-image-reorder]').forEach((container) => {
+        Sortable.create(container, {
+            animation: 150,
+            onEnd: async () => {
+                const ids = Array.from(container.querySelectorAll('[data-image-id]')).map((el) => el.dataset.imageId);
+
+                const response = await fetch(container.dataset.reorderUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': adminCsrfToken(),
+                    },
+                    body: JSON.stringify({ ids }),
+                });
+
+                window.djToast?.(
+                    response.ok ? container.dataset.toastSuccess : container.dataset.toastError,
+                    response.ok ? 'success' : 'error'
+                );
+            },
+        });
+    });
+});
 
 /* ===== CHARTS =====
    Declarative convention: any <canvas class="dj-admin-chart" data-config='{...}'>
