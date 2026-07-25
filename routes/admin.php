@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailPreviewController;
+use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\HeroBannerController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\NewsletterController;
@@ -72,6 +73,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::patch('hero-banners/reorder', [HeroBannerController::class, 'reorder'])->name('hero-banners.reorder')->middleware('admin.permission:banners.manage');
     Route::resource('hero-banners', HeroBannerController::class)->except(['show'])->middleware('admin.permission:banners.manage');
     Route::patch('hero-banners/{heroBanner}/toggle-active', [HeroBannerController::class, 'toggleActive'])->name('hero-banners.toggle-active')->middleware('admin.permission:banners.manage');
+
+    // reorder registered before the resource route — same PATCH-path
+    // collision reasoning as hero-banners/reorder above.
+    Route::patch('faqs/reorder', [FaqController::class, 'reorder'])->name('faqs.reorder')->middleware('admin.permission:pages.manage');
+    Route::resource('faqs', FaqController::class)->except(['show'])->middleware('admin.permission:pages.manage');
+    Route::patch('faqs/{faq}/toggle-active', [FaqController::class, 'toggleActive'])->name('faqs.toggle-active')->middleware('admin.permission:pages.manage');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('coupons', CouponController::class)->except(['show']);
