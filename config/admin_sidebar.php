@@ -79,7 +79,12 @@ return [
             ['label' => 'nav.blog_comments', 'route' => 'admin.blog-comments.index', 'match' => 'admin.blog-comments.*', 'permission' => 'comments.view'],
             ['label' => 'nav.services', 'route' => null],
             ['label' => 'nav.faq', 'route' => null],
-            ['label' => 'nav.testimonials', 'route' => null],
+            // Testimonials ARE featured reviews (Review::is_featured,
+            // ReviewController::feature()/unfeature()) — there's no
+            // separate testimonials table/page, so this points at the
+            // same real Reviews screen as Catalog > Reviews above, which
+            // now has a "Featured" filter/stat card to manage them.
+            ['label' => 'nav.testimonials', 'route' => 'admin.reviews.index', 'match' => 'admin.reviews.*', 'permission' => 'reviews.view'],
             ['label' => 'nav.hero_banners', 'route' => 'admin.hero-banners.index', 'match' => 'admin.hero-banners.*', 'permission' => 'banners.manage'],
         ],
     ],
