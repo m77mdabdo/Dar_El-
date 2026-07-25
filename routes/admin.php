@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -116,6 +117,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
 
     Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit')->middleware('admin.permission:settings.view');
     Route::patch('settings', [SettingController::class, 'update'])->name('settings.update')->middleware('admin.permission:settings.edit');
+
+    Route::resource('shipping-methods', ShippingMethodController::class)->except(['show'])->middleware('admin.permission:shipping_settings.edit');
+    Route::patch('shipping-methods/{shippingMethod}/toggle-active', [ShippingMethodController::class, 'toggleActive'])->name('shipping-methods.toggle-active')->middleware('admin.permission:shipping_settings.edit');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware('admin.permission:notifications.view');
     Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read')->middleware('admin.permission:notifications.view');
