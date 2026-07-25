@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Collection;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 
@@ -55,6 +56,12 @@ class HomeController extends Controller
                 // copy + home_hero_image Setting, so a store that's never
                 // touched the Hero Banners screen sees zero change.
                 'heroBanner' => Banner::active()->ofType(Banner::TYPE_HERO)->first(),
+                // Same opt-in pattern as heroBanner above: an empty
+                // collection (no reviews ever marked featured) falls back
+                // to the pre-existing hardcoded testimonial cards in
+                // home.blade.php, so a store that's never used the
+                // "Featured" filter on the Reviews screen sees zero change.
+                'featuredReviews' => Review::approved()->featured()->latest()->take(6)->get(),
                 'trendingProducts' => $this->trendingProducts(),
             ];
         });
@@ -69,6 +76,7 @@ class HomeController extends Controller
             'heroBanner' => $homeData['heroBanner'],
             'collections' => $homeData['collections'],
             'offerBanners' => $homeData['offerBanners'],
+            'featuredReviews' => $homeData['featuredReviews'],
             'trendingProducts' => $homeData['trendingProducts'],
         ]);
     }

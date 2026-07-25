@@ -25,6 +25,7 @@ class ReviewController extends Controller
             ->when($request->product_id, fn ($q) => $q->where('product_id', $request->product_id))
             ->when($request->verified === '1', fn ($q) => $q->where('is_verified_purchase', true))
             ->when($request->verified === '0', fn ($q) => $q->where('is_verified_purchase', false))
+            ->when($request->featured === '1', fn ($q) => $q->where('is_featured', true))
             ->when($request->date_from, fn ($q) => $q->whereDate('created_at', '>=', $request->date_from))
             ->when($request->date_to, fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
             ->when($request->search, fn ($q) => $q->where(fn ($sub) => $sub
@@ -152,6 +153,7 @@ class ReviewController extends Controller
             'pending' => Review::where('status', 'pending')->count(),
             'approved' => Review::where('status', 'approved')->count(),
             'rejected' => Review::where('status', 'rejected')->count(),
+            'featured' => Review::where('is_featured', true)->count(),
             'average_rating' => round(Review::where('status', 'approved')->avg('rating') ?? 0, 1),
             'today' => Review::whereDate('created_at', today())->count(),
             'this_month' => Review::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count(),
