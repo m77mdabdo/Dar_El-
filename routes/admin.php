@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailPreviewController;
+use App\Http\Controllers\Admin\HeroBannerController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\NotificationController;
@@ -63,6 +64,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     });
 
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index')->middleware('admin.permission:inventory.view');
+
+    // Must be registered before the resource route below — both match
+    // PATCH hero-banners/{something}, and Laravel matches in registration
+    // order, so this needs to win before {heroBanner} greedily captures
+    // "reorder" as an id and 404s on implicit binding.
+    Route::patch('hero-banners/reorder', [HeroBannerController::class, 'reorder'])->name('hero-banners.reorder')->middleware('admin.permission:banners.manage');
+    Route::resource('hero-banners', HeroBannerController::class)->except(['show'])->middleware('admin.permission:banners.manage');
+    Route::patch('hero-banners/{heroBanner}/toggle-active', [HeroBannerController::class, 'toggleActive'])->name('hero-banners.toggle-active')->middleware('admin.permission:banners.manage');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('coupons', CouponController::class)->except(['show']);
