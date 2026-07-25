@@ -100,7 +100,7 @@ return [
         'items' => [
             ['label' => 'nav.settings_website', 'route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'permission' => 'settings.view'],
             ['label' => 'nav.settings_payments', 'route' => null, 'permission' => 'payment_settings.edit'],
-            ['label' => 'nav.settings_shipping', 'route' => null, 'permission' => 'shipping_settings.edit'],
+            ['label' => 'nav.settings_shipping', 'route' => 'admin.shipping-methods.index', 'match' => 'admin.shipping-methods.*', 'permission' => 'shipping_settings.edit'],
             // Facebook/Instagram URLs are real, working fields on the
             // Website settings form (SettingController::edit()) — there's
             // no separate "social settings" page, so this points at the
