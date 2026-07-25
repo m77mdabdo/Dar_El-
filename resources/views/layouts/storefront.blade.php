@@ -230,6 +230,8 @@
                 <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
                 <a href="{{ route('return-policy') }}">{{ __('Return Policy') }}</a>
                 <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
+                <a href="{{ route('faq') }}">{{ __('FAQ') }}</a>
+                <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
                 <a href="{{ route('contact.show') }}">{{ __('Contact') }}</a>
                 <span class="dj-footer-dot" aria-hidden="true">&bull;</span>
                 <a href="{{ route('track-order.form') }}">{{ __('orders.track_title') }}</a>

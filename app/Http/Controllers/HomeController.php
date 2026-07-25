@@ -6,6 +6,7 @@ use App\Models\Banner;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Collection;
+use App\Models\Faq;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Review;
@@ -62,6 +63,11 @@ class HomeController extends Controller
                 // home.blade.php, so a store that's never used the
                 // "Featured" filter on the Reviews screen sees zero change.
                 'featuredReviews' => Review::approved()->featured()->latest()->take(6)->get(),
+                // Same opt-in pattern again: an empty collection (no admin
+                // has ever added a real FAQ) falls back to
+                // Faq::fallbackList() — the exact 5 questions that used
+                // to be hardcoded directly in this view.
+                'faqs' => Faq::active()->orderBy('sort_order')->orderBy('id')->take(5)->get(),
                 'trendingProducts' => $this->trendingProducts(),
             ];
         });
@@ -77,6 +83,9 @@ class HomeController extends Controller
             'collections' => $homeData['collections'],
             'offerBanners' => $homeData['offerBanners'],
             'featuredReviews' => $homeData['featuredReviews'],
+            'faqs' => $homeData['faqs']->isNotEmpty()
+                ? $homeData['faqs']->map(fn (Faq $faq) => ['q' => trans_field($faq, 'question'), 'a' => trans_field($faq, 'answer')])->all()
+                : Faq::fallbackList(),
             'trendingProducts' => $homeData['trendingProducts'],
         ]);
     }

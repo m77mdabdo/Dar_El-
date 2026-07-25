@@ -78,7 +78,7 @@ return [
             ['label' => 'nav.blog', 'route' => 'admin.blog.index', 'match' => 'admin.blog.*', 'permission' => 'blog.view'],
             ['label' => 'nav.blog_comments', 'route' => 'admin.blog-comments.index', 'match' => 'admin.blog-comments.*', 'permission' => 'comments.view'],
             ['label' => 'nav.services', 'route' => null],
-            ['label' => 'nav.faq', 'route' => null],
+            ['label' => 'nav.faq', 'route' => 'admin.faqs.index', 'match' => 'admin.faqs.*', 'permission' => 'pages.manage'],
             // Testimonials ARE featured reviews (Review::is_featured,
             // ReviewController::feature()/unfeature()) — there's no
             // separate testimonials table/page, so this points at the

@@ -226,12 +226,7 @@
     @endif
 
     <div class="dj-section-title"><h2>{{ __('Frequently Asked Questions') }}</h2><p>{{ __('Quick answers to the questions we get most') }}</p></div>
-    @include('partials.faq-accordion', ['faqs' => [
-        ['q' => __('How long does delivery take?'), 'a' => __('Delivery takes 2 to 5 business days depending on the governorate, and we send you a tracking number once your order ships.')],
-        ['q' => __('How do I choose the right size?'), 'a' => __('We have a detailed size chart available, and our team is happy to help you pick the right size before confirming your order.')],
-        ['q' => __('Can I exchange or return an item?'), 'a' => __('Yes, exchanges are available within 3 days of delivery, as long as the item is unused and in its original condition.')],
-        ['q' => __('Can I request a custom design or size?'), 'a' => __("Absolutely — our custom tailoring service is available. Reach out and we'll help you design your piece exactly the way you want.")],
-        ['q' => __('What payment methods are available?'), 'a' => __('We currently accept cash on delivery, with more payment options coming soon.')],
-    ]])
+    @include('partials.faq-accordion', ['faqs' => $faqs])
+    <p class="text-center"><a href="{{ route('faq') }}" class="dj-read-more">{{ __('See All FAQs') }} {{ app()->getLocale() === 'ar' ? '←' : '→' }}</a></p>
 
 @endsection
