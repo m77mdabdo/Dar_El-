@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Controllers\Admin\UserController;
@@ -79,6 +80,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::patch('faqs/reorder', [FaqController::class, 'reorder'])->name('faqs.reorder')->middleware('admin.permission:pages.manage');
     Route::resource('faqs', FaqController::class)->except(['show'])->middleware('admin.permission:pages.manage');
     Route::patch('faqs/{faq}/toggle-active', [FaqController::class, 'toggleActive'])->name('faqs.toggle-active')->middleware('admin.permission:pages.manage');
+
+    Route::patch('services/reorder', [ServiceController::class, 'reorder'])->name('services.reorder')->middleware('admin.permission:pages.manage');
+    Route::resource('services', ServiceController::class)->except(['show'])->middleware('admin.permission:pages.manage');
+    Route::patch('services/{service}/toggle-active', [ServiceController::class, 'toggleActive'])->name('services.toggle-active')->middleware('admin.permission:pages.manage');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('coupons', CouponController::class)->except(['show']);
