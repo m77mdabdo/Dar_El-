@@ -76,4 +76,9 @@ class OrderChangeRequest extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
 }

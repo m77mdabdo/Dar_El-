@@ -72,6 +72,20 @@ return [
     'dashboard' => [
         'title' => 'Dashboard',
         'welcome' => 'Welcome back, :name',
+
+        'attention_title' => 'Needs Your Attention',
+        'attention_subtitle' => "A quick look at what's waiting on you today",
+        'attention_pending_orders' => 'Pending Orders',
+        'attention_change_requests' => 'Order Change/Return Requests',
+        'attention_stock_alerts' => 'Stock Alerts',
+        'attention_stock_alerts_detail' => ':low low stock · :out out of stock',
+        'attention_unread_messages' => 'Unread Messages',
+        'attention_pending_reviews' => 'Pending Reviews',
+        'attention_all_clear' => "Nothing needs your attention right now — you're all caught up.",
+        'attention_empty_permissions' => "There's nothing to show here yet — check the sidebar for what you have access to.",
+        'analytics_title' => 'Analytics & Reports',
+        'analytics_subtitle' => 'For digging deeper — totals, trends, and charts',
+
         'total_orders' => 'Total Orders',
         'today_orders' => "Today's Orders",
         'pending_orders' => 'Pending Orders',
