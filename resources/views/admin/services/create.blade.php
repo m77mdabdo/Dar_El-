@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', __('services.add_service'))
+@section('title', __('admin_services.add_service'))
 
 @section('content')
     <div class="dj-admin-card p-4 sm:p-6 max-w-xl">

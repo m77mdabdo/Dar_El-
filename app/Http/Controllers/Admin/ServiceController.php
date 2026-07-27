@@ -46,7 +46,7 @@ class ServiceController extends Controller
 
         ActivityLog::record('created', $service, "Created service {$service->title_en}");
 
-        return redirect()->route('admin.services.index')->with('status', __('services.created'));
+        return redirect()->route('admin.services.index')->with('status', __('admin_services.created'));
     }
 
     public function edit(Service $service): View
@@ -60,7 +60,7 @@ class ServiceController extends Controller
 
         ActivityLog::record('updated', $service, "Updated service {$service->title_en}");
 
-        return redirect()->route('admin.services.index')->with('status', __('services.updated'));
+        return redirect()->route('admin.services.index')->with('status', __('admin_services.updated'));
     }
 
     public function destroy(Service $service): RedirectResponse
@@ -70,7 +70,7 @@ class ServiceController extends Controller
 
         ActivityLog::record('deleted', $service, "Deleted service {$name}");
 
-        return redirect()->route('admin.services.index')->with('status', __('services.deleted'));
+        return redirect()->route('admin.services.index')->with('status', __('admin_services.deleted'));
     }
 
     public function toggleActive(Service $service): RedirectResponse
@@ -84,8 +84,8 @@ class ServiceController extends Controller
         );
 
         return back()->with('status', $service->is_active
-            ? __('services.activated')
-            : __('services.deactivated'));
+            ? __('admin_services.activated')
+            : __('admin_services.deactivated'));
     }
 
     /**

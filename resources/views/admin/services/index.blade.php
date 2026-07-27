@@ -1,17 +1,17 @@
 @extends('admin.layout')
 
-@section('title', __('services.title'))
+@section('title', __('admin_services.title'))
 
 @section('content')
-    <p class="dj-admin-hint mb-4">{{ __('services.live_hint') }}</p>
+    <p class="dj-admin-hint mb-4">{{ __('admin_services.live_hint') }}</p>
 
     <div class="flex justify-end mb-4">
-        <a href="{{ route('admin.services.create') }}" class="dj-admin-btn dj-admin-btn-primary">+ {{ __('services.add_service') }}</a>
+        <a href="{{ route('admin.services.create') }}" class="dj-admin-btn dj-admin-btn-primary">+ {{ __('admin_services.add_service') }}</a>
     </div>
 
     <div class="dj-admin-card dj-admin-table-wrap">
         @if ($services->isNotEmpty())
-            <p class="dj-admin-hint px-4 pt-3">{{ __('services.drag_to_reorder') }}</p>
+            <p class="dj-admin-hint px-4 pt-3">{{ __('admin_services.drag_to_reorder') }}</p>
         @endif
         <table class="dj-admin-table">
             <thead>
@@ -26,12 +26,12 @@
             <tbody
                 data-image-reorder
                 data-reorder-url="{{ route('admin.services.reorder') }}"
-                data-toast-success="{{ __('services.order_updated') }}"
-                data-toast-error="{{ __('services.order_error') }}"
+                data-toast-success="{{ __('admin_services.order_updated') }}"
+                data-toast-error="{{ __('admin_services.order_error') }}"
             >
                 @forelse ($services as $service)
                     <tr data-image-id="{{ $service->id }}">
-                        <td class="cursor-grab text-[var(--dj-cream-3)]" title="{{ __('services.drag_to_reorder') }}">⠿</td>
+                        <td class="cursor-grab text-[var(--dj-cream-3)]" title="{{ __('admin_services.drag_to_reorder') }}">⠿</td>
                         <td>
                             <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg, var(--dj-maroon), var(--dj-maroon-soft));">
                                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--dj-gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">{!! $service->iconSvg() !!}</svg>
@@ -42,7 +42,7 @@
                             <span class="dj-admin-badge {{ $service->is_active ? 'dj-admin-badge-success' : 'dj-admin-badge-neutral' }}">
                                 {{ $service->is_active ? __('general.active') : __('general.inactive') }}
                             </span>
-                            <form method="POST" action="{{ route('admin.services.toggle-active', $service) }}" class="inline" onsubmit="return confirm('{{ __('services.confirm_toggle_active') }}')">
+                            <form method="POST" action="{{ route('admin.services.toggle-active', $service) }}" class="inline" onsubmit="return confirm('{{ __('admin_services.confirm_toggle_active') }}')">
                                 @csrf
                                 @method('PATCH')
                                 <button class="dj-admin-link-muted text-xs">{{ $service->is_active ? __('general.inactive') : __('general.active') }}</button>
@@ -50,7 +50,7 @@
                         </td>
                         <td class="text-end space-x-3 rtl:space-x-reverse">
                             <a href="{{ route('admin.services.edit', $service) }}" class="dj-admin-link">{{ __('general.edit') }}</a>
-                            <form method="POST" action="{{ route('admin.services.destroy', $service) }}" class="inline" onsubmit="return confirm('{{ __('services.confirm_delete') }}')">
+                            <form method="POST" action="{{ route('admin.services.destroy', $service) }}" class="inline" onsubmit="return confirm('{{ __('admin_services.confirm_delete') }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="dj-admin-link-muted">{{ __('general.delete') }}</button>
@@ -58,7 +58,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="dj-admin-table-empty">{{ __('services.no_services') }}</td></tr>
+                    <tr><td colspan="5" class="dj-admin-table-empty">{{ __('admin_services.no_services') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
