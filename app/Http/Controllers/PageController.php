@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Faq;
+use App\Models\Service;
 use App\Models\Setting;
 
 class PageController extends Controller
@@ -15,11 +16,24 @@ class PageController extends Controller
         return view('pages.about', compact('heroImage', 'storyImage'));
     }
 
+    /**
+     * The 6 service cards fall back to Service::fallbackList() — the
+     * exact originals that used to be hardcoded here — whenever no admin
+     * has added a real one yet, so this page looks unchanged by default.
+     * Unlike Hero Banners/Testimonials/FAQ, this page isn't cached
+     * anywhere (matches about()/returnPolicy() above), so there's no
+     * cache to bust when a Service is created/edited.
+     */
     public function services()
     {
         $heroImage = Setting::get('services_hero_image', 'https://images.unsplash.com/photo-1772474528936-4f1187eb1611?w=1600&q=80&auto=format&fit=crop');
 
-        return view('pages.services', compact('heroImage'));
+        $services = Service::active()->orderBy('sort_order')->orderBy('id')->get();
+        $services = $services->isNotEmpty()
+            ? $services->map(fn (Service $service) => ['icon' => $service->iconSvg(), 'title' => trans_field($service, 'title'), 'description' => trans_field($service, 'description')])->all()
+            : collect(Service::fallbackList())->map(fn (array $s) => ['icon' => Service::ICONS[$s['icon']], 'title' => $s['title'], 'description' => $s['description']])->all();
+
+        return view('pages.services', compact('heroImage', 'services'));
     }
 
     public function returnPolicy()
