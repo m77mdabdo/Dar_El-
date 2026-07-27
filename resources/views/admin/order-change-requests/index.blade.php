@@ -11,6 +11,7 @@
                     <th>{{ __('order_change_requests.admin_customer') }}</th>
                     <th>{{ __('order_change_requests.admin_type') }}</th>
                     <th>{{ __('order_change_requests.admin_reason') }}</th>
+                    <th>{{ __('order_change_requests.admin_notes') }}</th>
                     <th>{{ __('order_change_requests.admin_status') }}</th>
                     <th>{{ __('order_change_requests.admin_date') }}</th>
                     <th></th>
@@ -36,6 +37,27 @@
                         <td>{{ $changeRequest->order?->user?->name ?? $changeRequest->order?->customer_name ?? '—' }}</td>
                         <td>{{ __('order_change_requests.type_'.$changeRequest->type) }}</td>
                         <td>{{ __('order_change_requests.reason_'.$changeRequest->reason) }}</td>
+                        <td class="max-w-xs">
+                            @if ($changeRequest->notes)
+                                <details>
+                                    <summary class="cursor-pointer text-[var(--dj-ink)]">{{ Str::limit($changeRequest->notes, 60) }}</summary>
+                                    <p class="mt-2 text-[var(--dj-rose-dust)] whitespace-pre-line">{{ $changeRequest->notes }}</p>
+                                </details>
+                            @else
+                                <span class="text-[var(--dj-rose-dust)]">{{ __('order_change_requests.admin_no_notes') }}</span>
+                            @endif
+
+                            @if ($changeRequest->desired_variant)
+                                <p class="text-xs text-[var(--dj-maroon)] mt-1">{{ __('order_change_requests.admin_desired_variant') }}: {{ $changeRequest->desired_variant }}</p>
+                            @endif
+
+                            @if ($changeRequest->requestedItems()->isNotEmpty())
+                                <p class="text-xs text-[var(--dj-rose-dust)] mt-1">
+                                    {{ __('order_change_requests.admin_items') }}:
+                                    {{ $changeRequest->requestedItems()->map(fn ($item) => $item->product ? trans_field($item->product, 'name') : $item->product_name)->join(', ') }}
+                                </p>
+                            @endif
+                        </td>
                         <td><span class="dj-admin-badge {{ $djStatusBadge }}">{{ __('order_change_requests.status_'.$changeRequest->status) }}</span></td>
                         <td>{{ $changeRequest->created_at->translatedFormat('M j, Y H:i') }}</td>
                         <td class="text-end">
@@ -52,7 +74,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="dj-admin-table-empty">{{ __('order_change_requests.admin_no_requests') }}</td></tr>
+                    <tr><td colspan="8" class="dj-admin-table-empty">{{ __('order_change_requests.admin_no_requests') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

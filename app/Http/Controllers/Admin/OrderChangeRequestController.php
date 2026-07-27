@@ -15,10 +15,13 @@ class OrderChangeRequestController extends Controller
      * simplicity of ContactMessageController/NewsletterController. order.user
      * is eager-loaded for the customer-name column (a guest order has none,
      * so the view falls back to the order's own customer_name snapshot).
+     * order.items.product is eager-loaded too so the list can resolve
+     * order_item_ids (the specific items a request concerns) to real
+     * product names/sizes without an N+1 per row.
      */
     public function index()
     {
-        $requests = OrderChangeRequest::with('order.user')->latest()->paginate(20);
+        $requests = OrderChangeRequest::with('order.user', 'order.items.product')->latest()->paginate(20);
 
         return view('admin.order-change-requests.index', compact('requests'));
     }

@@ -378,4 +378,73 @@ class OrderChangeRequestTest extends TestCase
         $response->assertRedirect();
         $this->assertSame('resolved', $changeRequest->fresh()->status);
     }
+
+    /**
+     * Admin usability fix: the list used to show only the generic type/
+     * reason labels — the customer's actual free-text notes (never
+     * rendered anywhere in the admin panel) are now visible, both a
+     * truncated preview and the full text.
+     */
+    public function test_admin_list_shows_a_preview_and_the_full_customer_notes(): void
+    {
+        $admin = $this->makeAdmin();
+        $order = $this->makeOrder();
+        $longNote = 'the sleeve has a loose thread and a small stain near the cuff, I want to return it and get a refund via bank transfer please';
+        OrderChangeRequest::create([
+            'order_id' => $order->id, 'type' => 'return', 'reason' => 'defective', 'notes' => $longNote,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.order-change-requests.index'));
+
+        $response->assertOk();
+        $response->assertSee(\Illuminate\Support\Str::limit($longNote, 60));
+        $response->assertSee($longNote);
+    }
+
+    public function test_admin_list_shows_the_desired_variant_when_present(): void
+    {
+        $admin = $this->makeAdmin();
+        $order = $this->makeOrder();
+        OrderChangeRequest::create([
+            'order_id' => $order->id, 'type' => 'exchange', 'reason' => 'wrong_size',
+            'desired_variant' => 'Size L in burgundy',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.order-change-requests.index'));
+
+        $response->assertOk();
+        $response->assertSee('Size L in burgundy');
+    }
+
+    public function test_admin_list_shows_no_notes_placeholder_when_notes_is_empty(): void
+    {
+        $admin = $this->makeAdmin();
+        $order = $this->makeOrder();
+        OrderChangeRequest::create(['order_id' => $order->id, 'type' => 'modify', 'reason' => 'wrong_size']);
+
+        $response = $this->actingAs($admin)->get(route('admin.order-change-requests.index'));
+
+        $response->assertOk();
+        $response->assertSee(__('order_change_requests.admin_no_notes'));
+    }
+
+    public function test_admin_list_resolves_requested_item_ids_to_the_real_product_name(): void
+    {
+        $admin = $this->makeAdmin();
+        $order = $this->makeOrder();
+        $itemId = $order->items()->first()->id;
+        OrderChangeRequest::create([
+            'order_id' => $order->id, 'type' => 'exchange', 'reason' => 'wrong_size',
+            'order_item_ids' => [$itemId],
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.order-change-requests.index'));
+
+        $response->assertOk();
+        $response->assertSee(__('order_change_requests.admin_items'));
+        // The admin UI is locale-aware (trans_field) — under the default
+        // test locale (ar) the product's Arabic name renders, not its
+        // English one.
+        $response->assertSee('منتج');
+    }
 }
