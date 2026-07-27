@@ -81,4 +81,19 @@ class OrderChangeRequest extends Model
     {
         return $query->where('status', self::STATUS_PENDING);
     }
+
+    /**
+     * Resolves order_item_ids to the actual OrderItem rows they reference,
+     * from the already-loaded order.items relation (no extra query) —
+     * empty when the request concerns the whole order (order_item_ids is
+     * null) rather than specific items.
+     */
+    public function requestedItems(): \Illuminate\Support\Collection
+    {
+        if (empty($this->order_item_ids) || ! $this->relationLoaded('order') || ! $this->order?->relationLoaded('items')) {
+            return collect();
+        }
+
+        return $this->order->items->whereIn('id', $this->order_item_ids)->values();
+    }
 }
