@@ -9,8 +9,10 @@ use App\Models\CartReminder;
 use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\Order;
+use App\Models\OrderChangeRequest;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\User;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
@@ -25,6 +27,7 @@ class DashboardController extends Controller
             return [
                 'summary' => $this->summary(),
                 'charts' => $this->charts(),
+                'needsAttention' => $this->needsAttention(),
                 'recentOrders' => Order::latest()->take(8)->get(),
                 'recentCustomers' => User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))->latest()->take(5)->get(),
                 'recentMessages' => ContactMessage::latest()->take(5)->get(),
@@ -32,13 +35,98 @@ class DashboardController extends Controller
             ];
         });
 
+        // Every item above is computed unconditionally and shared across
+        // all admin users via the one cache key — role-based visibility
+        // can't live inside the cached closure (the first user to hit a
+        // cache miss would decide what every other role sees for the next
+        // 60s). So filtering by the CURRENT request's permissions happens
+        // here instead, every request, cheaply (hasAdminAccess() only
+        // touches the already-loaded permission relation).
+        $user = $request->user();
+        $data['needsAttention'] = collect($data['needsAttention'])
+            ->filter(fn (array $item) => $user->hasAdminAccess($item['permission']))
+            ->values()
+            ->all();
+
         return view('admin.dashboard', $data + [
             // Per-admin-user data — must stay outside the shared cache key
             // above, or the first admin to hit a cache miss would have
             // their own notifications served to every other admin for the
             // next 60s.
             'recentNotifications' => $request->user()->notifications()->latest()->take(5)->get(),
+
+            // Role-based simplification: the dense stat-card/chart block is
+            // real BI/analytics territory, not something a minimally-
+            // permissioned employee needs — gated behind the one
+            // reports-related permission that already exists for exactly
+            // this purpose. Each Recent Activity panel is gated on its own
+            // narrower, operational permission instead (an inventory-only
+            // employee should still see the low-stock list even without
+            // reports.view) rather than tying every panel to the same
+            // all-or-nothing analytics gate.
+            'showAnalytics' => $user->hasAdminAccess('reports.view'),
+            'canViewOrders' => $user->hasAdminAccess('orders.view'),
+            'canViewCustomers' => $user->hasAdminAccess('customers.view'),
+            'canViewMessages' => $user->hasAdminAccess('messages.view'),
+            'canViewInventory' => $user->hasAdminAccess('inventory.view'),
         ]);
+    }
+
+    /**
+     * The "what needs my attention today" list — every item an admin
+     * screen already exposes some form of, just never surfaced together
+     * anywhere: pending orders, pending order-change/return requests
+     * (built earlier and, per the admin usability audit, had zero
+     * dashboard presence until now), combined low+out-of-stock alerts
+     * (reusing Product::filterByStockStatus() — the exact scope the
+     * Inventory page itself filters on), unread contact messages, and
+     * reviews awaiting moderation. Computed unconditionally (cheap
+     * counts) and filtered down to what the current user may see in
+     * index() above, not here.
+     */
+    protected function needsAttention(): array
+    {
+        $lowStockCount = Product::filterByStockStatus('low_stock')->count();
+        $outOfStockCount = Product::filterByStockStatus('out_of_stock')->count();
+
+        return [
+            [
+                'permission' => 'orders.view',
+                'label' => __('admin.dashboard.attention_pending_orders'),
+                'value' => Order::where('status', 'pending')->count(),
+                'href' => route('admin.orders.index', ['status' => 'pending']),
+                'icon' => 'cart',
+            ],
+            [
+                'permission' => 'orders.view',
+                'label' => __('admin.dashboard.attention_change_requests'),
+                'value' => OrderChangeRequest::pending()->count(),
+                'href' => route('admin.order-change-requests.index'),
+                'icon' => 'exchange',
+            ],
+            [
+                'permission' => 'inventory.view',
+                'label' => __('admin.dashboard.attention_stock_alerts'),
+                'value' => $lowStockCount + $outOfStockCount,
+                'sublabel' => __('admin.dashboard.attention_stock_alerts_detail', ['low' => $lowStockCount, 'out' => $outOfStockCount]),
+                'href' => route('admin.inventory.index', ['sort' => 'stock_asc']),
+                'icon' => 'warning',
+            ],
+            [
+                'permission' => 'messages.view',
+                'label' => __('admin.dashboard.attention_unread_messages'),
+                'value' => ContactMessage::where('is_read', false)->count(),
+                'href' => route('admin.contact-messages.index'),
+                'icon' => 'envelope',
+            ],
+            [
+                'permission' => 'reviews.view',
+                'label' => __('admin.dashboard.attention_pending_reviews'),
+                'value' => Review::pending()->count(),
+                'href' => route('admin.reviews.index', ['status' => 'pending']),
+                'icon' => 'star',
+            ],
+        ];
     }
 
     protected function summary(): array

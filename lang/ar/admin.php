@@ -72,6 +72,20 @@ return [
     'dashboard' => [
         'title' => 'لوحة التحكم',
         'welcome' => 'أهلًا بعودتك، :name',
+
+        'attention_title' => 'يحتاج انتباهك',
+        'attention_subtitle' => 'نظرة سريعة على ما ينتظرك اليوم',
+        'attention_pending_orders' => 'طلبات قيد الانتظار',
+        'attention_change_requests' => 'طلبات تعديل/استبدال الطلبات',
+        'attention_stock_alerts' => 'تنبيهات المخزون',
+        'attention_stock_alerts_detail' => ':low مخزون منخفض · :out نفد من المخزون',
+        'attention_unread_messages' => 'رسائل غير مقروءة',
+        'attention_pending_reviews' => 'تقييمات قيد المراجعة',
+        'attention_all_clear' => 'لا يوجد ما يحتاج انتباهك الآن — كل شيء على ما يرام.',
+        'attention_empty_permissions' => 'لا يوجد ما يُعرض هنا بعد — راجعي القائمة الجانبية لمعرفة ما لديك صلاحية الوصول إليه.',
+        'analytics_title' => 'التحليلات والتقارير',
+        'analytics_subtitle' => 'للمزيد من التفاصيل — الإجماليات والاتجاهات والرسوم البيانية',
+
         'total_orders' => 'إجمالي الطلبات',
         'today_orders' => 'طلبات اليوم',
         'pending_orders' => 'طلبات قيد الانتظار',
