@@ -164,6 +164,26 @@ class ReportSalesTest extends TestCase
         $this->actingAs($employee)->get(route('admin.reports.sales.export'))->assertForbidden();
     }
 
+    /**
+     * customer_name is checkout input (required|string|max:255, no
+     * character restriction) and gets written straight into the CSV.
+     * A name starting with =, +, -, or @ is interpreted as a formula by
+     * Excel/LibreOffice/Sheets when the admin opens the export — the
+     * export must neutralize it rather than pass it through raw.
+     */
+    public function test_a_formula_like_customer_name_is_neutralized_in_the_export(): void
+    {
+        $admin = $this->makeAdmin();
+        $this->makeOrder(['customer_name' => "=cmd|'/c calc'!A0", 'total' => 500]);
+
+        $response = $this->actingAs($admin)->get(route('admin.reports.sales.export'));
+
+        $response->assertOk();
+        $content = $response->streamedContent();
+        $this->assertStringNotContainsString(",=cmd", $content);
+        $this->assertStringContainsString("'=cmd|'/c calc'!A0", $content);
+    }
+
     // ---------------------------------------------------------------
     // Cairo day-boundary regression (2026-07 timezone audit)
     // ---------------------------------------------------------------
