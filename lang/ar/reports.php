@@ -24,4 +24,15 @@ return [
     'export_customer' => 'العميلة',
     'export_status' => 'الحالة',
     'export_total' => 'الإجمالي',
+
+    'products_title' => 'تقرير المنتجات',
+    'products_subtitle' => 'الأكثر والأقل مبيعًا من حيث الكمية والإيرادات خلال فترة زمنية يمكن اختيارها.',
+    'products_top_by_quantity' => 'الأكثر مبيعًا حسب الكمية',
+    'products_top_by_revenue' => 'الأكثر مبيعًا حسب الإيرادات',
+    'products_worst_by_quantity' => 'الأقل مبيعًا حسب الكمية',
+    'products_worst_hint' => 'المنتجات الأقل مبيعًا من بين ما بيع مرة واحدة على الأقل خلال هذه الفترة.',
+    'products_product' => 'المنتج',
+    'products_quantity_sold' => 'الكمية المباعة',
+    'products_revenue' => 'الإيرادات',
+    'products_no_data' => 'لم تُباع أي منتجات في هذه الفترة.',
 ];
