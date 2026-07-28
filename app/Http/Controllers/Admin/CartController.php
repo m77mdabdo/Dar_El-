@@ -7,6 +7,7 @@ use App\Jobs\SendAbandonedCartReminderJob;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\CartReminder;
+use App\Support\BusinessDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -153,7 +154,7 @@ class CartController extends Controller
             'expired' => $expired,
             'conversion_rate' => $totalClosed > 0 ? round($converted / $totalClosed * 100, 1) : 0,
             'abandoned_value' => (int) Cart::where('status', 'abandoned')->sum('total'),
-            'reminders_sent_today' => CartReminder::whereDate('created_at', today())->where('status', 'sent')->count(),
+            'reminders_sent_today' => CartReminder::whereBetween('created_at', BusinessDay::todayRange())->where('status', 'sent')->count(),
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Support\BusinessDay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -26,19 +27,21 @@ class ReportController extends Controller
 {
     /**
      * Shared by every report method: a caller-selected [from, to] range,
-     * defaulting to the last 30 days (inclusive) when not given.
+     * defaulting to the last 30 days (inclusive) when not given. Day
+     * boundaries are anchored to Cairo calendar days (via BusinessDay),
+     * not UTC ones — see BusinessDay's docblock for why.
      *
      * @return array{0: Carbon, 1: Carbon}
      */
     protected function dateRange(Request $request): array
     {
         $from = $request->filled('from')
-            ? Carbon::parse($request->input('from'))->startOfDay()
-            : now()->subDays(29)->startOfDay();
+            ? BusinessDay::startOfDay($request->input('from'))
+            : BusinessDay::startOfDay(BusinessDay::now()->subDays(29)->toDateString());
 
         $to = $request->filled('to')
-            ? Carbon::parse($request->input('to'))->endOfDay()
-            : now()->endOfDay();
+            ? BusinessDay::endOfDay($request->input('to'))
+            : BusinessDay::endOfDay();
 
         return [$from, $to];
     }
@@ -62,11 +65,21 @@ class ReportController extends Controller
         $totalRevenue = (int) (clone $ordersInRange)->where('status', '!=', 'cancelled')->sum('total');
         $averageOrderValue = $completedOrders > 0 ? round($totalRevenue / $completedOrders, 2) : 0;
 
-        $daily = Order::selectRaw("DATE(created_at) as day, COUNT(*) as orders_count, SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END) as revenue")
-            ->whereBetween('created_at', [$from, $to])
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get();
+        // Grouped in PHP rather than SQL's DATE(created_at) — that would
+        // bucket by UTC calendar day, not Cairo. Doing the conversion in
+        // SQL (e.g. CONVERT_TZ) would need MySQL's timezone tables loaded
+        // on the server, which isn't guaranteed on shared hosting; PHP's
+        // Carbon always has full, DST-aware tzdata regardless.
+        $daily = Order::whereBetween('created_at', [$from, $to])
+            ->get(['created_at', 'status', 'total'])
+            ->groupBy(fn (Order $order) => $order->created_at->copy()->setTimezone(BusinessDay::TIMEZONE)->toDateString())
+            ->map(fn ($orders, $day) => (object) [
+                'day' => $day,
+                'orders_count' => $orders->count(),
+                'revenue' => $orders->where('status', '!=', 'cancelled')->sum('total'),
+            ])
+            ->sortBy('day')
+            ->values();
 
         return view('admin.reports.sales', compact(
             'from', 'to', 'totalOrders', 'completedOrders', 'cancelledOrders', 'totalRevenue', 'averageOrderValue', 'daily'

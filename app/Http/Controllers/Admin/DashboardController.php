@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\Wishlist;
+use App\Support\BusinessDay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -135,15 +136,21 @@ class DashboardController extends Controller
             ->get(['id'])
             ->map(fn ($product) => (int) $product->total_stock);
 
+        // "Today" per the Cairo business calendar, not UTC — see
+        // BusinessDay's docblock. Every "today" stat below shares this one
+        // computed range rather than each calling today()/whereDate()
+        // separately.
+        $todayRange = BusinessDay::todayRange();
+
         return [
             'total_orders' => Order::count(),
-            'today_orders' => Order::whereDate('created_at', today())->count(),
+            'today_orders' => Order::whereBetween('created_at', $todayRange)->count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'completed_orders' => Order::where('status', 'delivered')->count(),
             'cancelled_orders' => Order::where('status', 'cancelled')->count(),
 
             'total_revenue' => (int) Order::where('status', '!=', 'cancelled')->sum('total'),
-            'today_revenue' => (int) Order::whereDate('created_at', today())->where('status', '!=', 'cancelled')->sum('total'),
+            'today_revenue' => (int) Order::whereBetween('created_at', $todayRange)->where('status', '!=', 'cancelled')->sum('total'),
             'monthly_revenue' => (int) Order::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->where('status', '!=', 'cancelled')->sum('total'),
 
             'total_customers' => User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))->count(),
@@ -157,14 +164,14 @@ class DashboardController extends Controller
             'low_stock_count' => $stockCounts->filter(fn ($s) => $s > 0 && $s <= Product::LOW_STOCK_THRESHOLD)->count(),
             'out_of_stock_count' => $stockCounts->filter(fn ($s) => $s <= 0)->count(),
 
-            'new_customers_today' => User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))->whereDate('created_at', today())->count(),
+            'new_customers_today' => User::whereHas('roles', fn ($q) => $q->where('name', 'customer'))->whereBetween('created_at', $todayRange)->count(),
 
             'active_carts_count' => Cart::where('status', 'active')->count(),
             'abandoned_carts_count' => Cart::where('status', 'abandoned')->count(),
             'converted_carts_count' => Cart::where('status', 'converted')->count(),
             'cart_conversion_rate' => $this->cartConversionRate(),
             'abandoned_cart_value' => (int) Cart::where('status', 'abandoned')->sum('total'),
-            'reminders_sent_today' => CartReminder::whereDate('created_at', today())->where('status', 'sent')->count(),
+            'reminders_sent_today' => CartReminder::whereBetween('created_at', $todayRange)->where('status', 'sent')->count(),
         ];
     }
 

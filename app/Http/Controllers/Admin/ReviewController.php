@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Product;
 use App\Models\Review;
 use App\Notifications\ReviewStatusUpdated;
+use App\Support\BusinessDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -155,7 +156,7 @@ class ReviewController extends Controller
             'rejected' => Review::where('status', 'rejected')->count(),
             'featured' => Review::where('is_featured', true)->count(),
             'average_rating' => round(Review::where('status', 'approved')->avg('rating') ?? 0, 1),
-            'today' => Review::whereDate('created_at', today())->count(),
+            'today' => Review::whereBetween('created_at', BusinessDay::todayRange())->count(),
             'this_month' => Review::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count(),
         ];
     }

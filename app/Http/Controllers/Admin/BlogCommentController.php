@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\BlogComment;
 use App\Models\BlogPost;
 use App\Notifications\BlogCommentStatusUpdated;
+use App\Support\BusinessDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -127,7 +128,7 @@ class BlogCommentController extends Controller
             'pending' => BlogComment::where('status', 'pending')->count(),
             'approved' => BlogComment::where('status', 'approved')->count(),
             'rejected' => BlogComment::where('status', 'rejected')->count(),
-            'today' => BlogComment::whereDate('created_at', today())->count(),
+            'today' => BlogComment::whereBetween('created_at', BusinessDay::todayRange())->count(),
             'this_month' => BlogComment::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count(),
         ];
     }
