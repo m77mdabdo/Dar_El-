@@ -76,10 +76,12 @@ class SidebarTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         $response->assertOk();
-        // "Wishlist" (nav.wishlist, under Marketing) is still genuinely
-        // unbuilt — rendered as a <span>, never an <a>, so there's no href
-        // to visit at all, and carries the Soon badge.
-        $this->assertSidebarItemIsSoon($response->getContent(), __('admin.nav.wishlist'));
+        // "Payments" (nav.settings_payments, under Settings) is still
+        // genuinely unbuilt — rendered as a <span>, never an <a>, so
+        // there's no href to visit at all, and carries the Soon badge.
+        // ("Wishlist" used to be this test's example, but shipped as
+        // Admin\WishlistAnalyticsController — see WishlistAnalyticsTest.)
+        $this->assertSidebarItemIsSoon($response->getContent(), __('admin.nav.settings_payments'));
     }
 
     public function test_product_images_and_variants_are_no_longer_listed_as_separate_soon_placeholders(): void
