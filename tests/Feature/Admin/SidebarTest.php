@@ -186,4 +186,21 @@ class SidebarTest extends TestCase
         $response->assertOk();
         $this->assertSeeSidebarLink($response->getContent(), route('admin.inventory.index'));
     }
+
+    /**
+     * "Reports" (nav.reports) is now fully real — Sales, Products,
+     * Customers, Wishlist (shared with Marketing > Wishlist), and
+     * Inventory all shipped this session — mirroring the Catalog test
+     * above against the ACTUAL live config now that it's safe to do so.
+     */
+    public function test_reports_group_is_now_fully_real_and_does_not_show_a_soon_badge(): void
+    {
+        $admin = $this->makeAdmin();
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $buttonMarkup = $this->extractGroupButtonMarkup($response->getContent(), __('admin.nav.reports'));
+        $this->assertStringNotContainsString('dj-admin-soon-badge', $buttonMarkup);
+    }
 }
