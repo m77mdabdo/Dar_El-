@@ -165,6 +165,31 @@ class ReportSalesTest extends TestCase
     }
 
     /**
+     * The on-screen Sales report is aggregate-only (daily totals, no
+     * customer names) and stays gated by reports.sales alone. The CSV
+     * export is row-level (order#, customer_name, total per order) and
+     * additionally requires orders.view — an employee trusted with pure
+     * sales analytics shouldn't automatically be able to pull a
+     * spreadsheet of every customer's name (2026-07 audit finding,
+     * confirmed decision with the user).
+     */
+    public function test_csv_export_requires_orders_view_in_addition_to_reports_sales(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'reports.sales');
+
+        // reports.sales alone: the aggregate page is fine...
+        $this->actingAs($employee)->get(route('admin.reports.sales'))->assertOk();
+        // ...but the row-level export is not.
+        $this->actingAs($employee)->get(route('admin.reports.sales.export'))->assertForbidden();
+
+        $this->grant($employee, 'orders.view');
+
+        // Both permissions together: export is allowed.
+        $this->actingAs($employee)->get(route('admin.reports.sales.export'))->assertOk();
+    }
+
+    /**
      * customer_name is checkout input (required|string|max:255, no
      * character restriction) and gets written straight into the CSV.
      * A name starting with =, +, -, or @ is interpreted as a formula by

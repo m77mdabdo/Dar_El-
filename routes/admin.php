@@ -72,7 +72,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::get('wishlist-analytics', [WishlistAnalyticsController::class, 'index'])->name('wishlist-analytics.index')->middleware('admin.permission:reports.wishlist');
 
     Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales')->middleware('admin.permission:reports.sales');
-    Route::get('reports/sales/export', [ReportController::class, 'salesExport'])->name('reports.sales.export')->middleware('admin.permission:reports.sales');
+    // CSV export additionally requires orders.view — unlike the on-screen
+    // report (daily aggregates only), the export contains row-level
+    // customer_name/order data, which reports.sales alone was never meant
+    // to expose (2026-07 audit finding, confirmed with the user).
+    Route::get('reports/sales/export', [ReportController::class, 'salesExport'])->name('reports.sales.export')->middleware(['admin.permission:reports.sales', 'admin.permission:orders.view']);
     Route::get('reports/products', [ReportController::class, 'products'])->name('reports.products')->middleware('admin.permission:reports.products');
     Route::get('reports/customers', [ReportController::class, 'customers'])->name('reports.customers')->middleware('admin.permission:reports.customers');
     Route::get('reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory')->middleware('admin.permission:reports.inventory');
