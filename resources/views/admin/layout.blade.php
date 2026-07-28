@@ -69,6 +69,7 @@
                         <svg class="absolute {{ $rtl ? 'right-3.5' : 'left-3.5' }} top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--dj-rose-dust)] pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m21 21-4.3-4.3"/></svg>
                         <input
                             type="search" name="search" placeholder="{{ __('admin.search_placeholder') }}"
+                            title="{{ __('admin.search_placeholder') }}"
                             class="{{ $rtl ? 'pe-10' : 'ps-10' }}"
                         >
                     </label>

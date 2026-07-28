@@ -8,7 +8,7 @@ return [
     'menu' => 'Menu',
     'soon' => 'Soon',
     'view_all' => 'View All',
-    'search' => 'Search',
+    'search' => 'Search products',
     'search_placeholder' => 'Search products…',
     'language' => 'Language',
 
