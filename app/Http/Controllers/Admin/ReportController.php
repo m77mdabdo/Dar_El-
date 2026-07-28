@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -173,5 +174,42 @@ class ReportController extends Controller
         return view('admin.reports.customers', compact(
             'from', 'to', 'topByOrderCount', 'topBySpend', 'totalCustomers', 'newCustomers', 'returningCustomers'
         ));
+    }
+
+    /**
+     * Stock valuation (quantity x price per product) and a low-stock
+     * summary — not a date-ranged report like the other four (stock is a
+     * point-in-time snapshot, not something that happened "between two
+     * dates"). Deliberately reuses Product::filterByStockStatus() (the
+     * exact same scope InventoryController::index() uses) rather than
+     * re-deriving low/out-of-stock logic here, and the same
+     * category/withSum('sizes as total_stock') shape as that page, so
+     * this is a valuation/ranking view over the same data rather than a
+     * second, drifting definition of "low stock".
+     */
+    public function inventory(Request $request): View
+    {
+        $stockExpr = '(select coalesce(sum(stock), 0) from product_sizes where product_sizes.product_id = products.id)';
+
+        $products = Product::query()
+            ->with('category:id,name_ar,name_en')
+            ->withSum('sizes as total_stock', 'stock')
+            ->addSelect(DB::raw("({$stockExpr}) * products.price as stock_value"))
+            ->filterByStockStatus($request->stock_status)
+            ->when(
+                $request->sort === 'stock_asc',
+                fn ($q) => $q->orderBy('total_stock'),
+                fn ($q) => $request->sort === 'value_asc'
+                    ? $q->orderBy('stock_value')
+                    : $q->orderByDesc('stock_value')
+            )
+            ->paginate(20)
+            ->withQueryString();
+
+        $totalValuation = (int) Product::query()->selectRaw("SUM(({$stockExpr}) * products.price) as total")->value('total');
+        $lowStockCount = Product::query()->filterByStockStatus('low_stock')->count();
+        $outOfStockCount = Product::query()->filterByStockStatus('out_of_stock')->count();
+
+        return view('admin.reports.inventory', compact('products', 'totalValuation', 'lowStockCount', 'outOfStockCount'));
     }
 }
