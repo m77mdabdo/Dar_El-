@@ -125,4 +125,53 @@ class ReportController extends Controller
 
         return view('admin.reports.products', compact('from', 'to', 'topByQuantity', 'topByRevenue', 'worstByQuantity'));
     }
+
+    /**
+     * Top customers by order count / total spend over the selected range,
+     * plus a new-vs-returning breakdown. Guest checkout doesn't exist in
+     * this app (CheckoutController always attaches the authenticated
+     * user's id), so grouping by user_id is safe — every non-cancelled
+     * order in range has one. "Returning" means the customer already had
+     * at least one order (of any status) before the range started; "new"
+     * means their first-ever order falls inside the range. Cancelled
+     * orders are excluded from the ranking tables (same convention as
+     * Reports > Products) but NOT from the returning-customer lookback,
+     * since a cancelled order still proves the person was already a
+     * customer before this range.
+     */
+    public function customers(Request $request): View
+    {
+        [$from, $to] = $this->dateRange($request);
+
+        $baseQuery = fn () => Order::query()
+            ->select('user_id', DB::raw('COUNT(*) as orders_count'), DB::raw('SUM(total) as total_spent'))
+            ->whereNotNull('user_id')
+            ->whereBetween('created_at', [$from, $to])
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('user_id')
+            ->with('user:id,name,email');
+
+        $topByOrderCount = $baseQuery()->orderByDesc('orders_count')->take(10)->get();
+        $topBySpend = $baseQuery()->orderByDesc('total_spent')->take(10)->get();
+
+        $customerIdsInRange = Order::query()
+            ->whereNotNull('user_id')
+            ->whereBetween('created_at', [$from, $to])
+            ->where('status', '!=', 'cancelled')
+            ->distinct()
+            ->pluck('user_id');
+
+        $returningCustomers = $customerIdsInRange->isEmpty() ? 0 : Order::query()
+            ->whereIn('user_id', $customerIdsInRange)
+            ->where('created_at', '<', $from)
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $totalCustomers = $customerIdsInRange->count();
+        $newCustomers = $totalCustomers - $returningCustomers;
+
+        return view('admin.reports.customers', compact(
+            'from', 'to', 'topByOrderCount', 'topBySpend', 'totalCustomers', 'newCustomers', 'returningCustomers'
+        ));
+    }
 }

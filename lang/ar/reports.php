@@ -35,4 +35,16 @@ return [
     'products_quantity_sold' => 'الكمية المباعة',
     'products_revenue' => 'الإيرادات',
     'products_no_data' => 'لم تُباع أي منتجات في هذه الفترة.',
+
+    'customers_title' => 'تقرير العملاء',
+    'customers_subtitle' => 'أفضل العملاء حسب عدد الطلبات والإنفاق، مع توزيع العملاء الجدد مقابل العائدين خلال فترة زمنية يمكن اختيارها.',
+    'customers_total' => 'إجمالي العملاء',
+    'customers_new' => 'عملاء جدد',
+    'customers_returning' => 'عملاء عائدون',
+    'customers_top_by_orders' => 'الأكثر طلبًا',
+    'customers_top_by_spend' => 'الأكثر إنفاقًا',
+    'customers_customer' => 'العميلة',
+    'customers_orders_count' => 'عدد الطلبات',
+    'customers_total_spent' => 'إجمالي الإنفاق',
+    'customers_no_data' => 'لا يوجد عملاء لديهم طلبات في هذه الفترة.',
 ];

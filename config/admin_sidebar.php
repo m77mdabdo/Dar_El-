@@ -100,7 +100,7 @@ return [
         'items' => [
             ['label' => 'nav.reports_sales', 'route' => 'admin.reports.sales', 'match' => 'admin.reports.sales*', 'permission' => 'reports.sales'],
             ['label' => 'nav.reports_products', 'route' => 'admin.reports.products', 'match' => 'admin.reports.products', 'permission' => 'reports.products'],
-            ['label' => 'nav.reports_customers', 'route' => null, 'permission' => 'reports.customers'],
+            ['label' => 'nav.reports_customers', 'route' => 'admin.reports.customers', 'match' => 'admin.reports.customers', 'permission' => 'reports.customers'],
             ['label' => 'nav.reports_wishlist', 'route' => null, 'permission' => 'reports.wishlist'],
             ['label' => 'nav.reports_inventory', 'route' => null, 'permission' => 'reports.inventory'],
         ],
