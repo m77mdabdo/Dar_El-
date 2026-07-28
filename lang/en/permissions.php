@@ -98,6 +98,7 @@ return [
         'customers' => 'View Customer Reports',
         'products' => 'View Product Reports',
         'inventory' => 'View Inventory Reports',
+        'wishlist' => 'View Wishlist Reports',
     ],
 
     'settings' => [
