@@ -101,8 +101,13 @@ return [
             ['label' => 'nav.reports_sales', 'route' => 'admin.reports.sales', 'match' => 'admin.reports.sales*', 'permission' => 'reports.sales'],
             ['label' => 'nav.reports_products', 'route' => 'admin.reports.products', 'match' => 'admin.reports.products', 'permission' => 'reports.products'],
             ['label' => 'nav.reports_customers', 'route' => 'admin.reports.customers', 'match' => 'admin.reports.customers', 'permission' => 'reports.customers'],
-            ['label' => 'nav.reports_wishlist', 'route' => null, 'permission' => 'reports.wishlist'],
-            ['label' => 'nav.reports_inventory', 'route' => null, 'permission' => 'reports.inventory'],
+            // Same shared WishlistAnalyticsController page as Marketing >
+            // Wishlist above (config/admin_sidebar.php's Marketing group) —
+            // both entries were pre-wired to the identical reports.wishlist
+            // permission slug, which is why this links to that one page
+            // rather than a second, duplicate wishlist screen.
+            ['label' => 'nav.reports_wishlist', 'route' => 'admin.wishlist-analytics.index', 'match' => 'admin.wishlist-analytics.*', 'permission' => 'reports.wishlist'],
+            ['label' => 'nav.reports_inventory', 'route' => 'admin.reports.inventory', 'match' => 'admin.reports.inventory', 'permission' => 'reports.inventory'],
         ],
     ],
     [
