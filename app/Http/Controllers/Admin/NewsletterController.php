@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\NewsletterSubscriber;
+use App\Support\Csv;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class NewsletterController extends Controller
@@ -23,7 +24,7 @@ class NewsletterController extends Controller
 
             NewsletterSubscriber::orderBy('created_at')->chunk(200, function ($subscribers) use ($handle) {
                 foreach ($subscribers as $subscriber) {
-                    fputcsv($handle, [$subscriber->email, $subscriber->created_at->toDateTimeString()]);
+                    fputcsv($handle, Csv::safeRow([$subscriber->email, $subscriber->created_at->toDateTimeString()]));
                 }
             });
 
