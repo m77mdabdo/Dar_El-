@@ -137,6 +137,29 @@ class HeroBannerTest extends TestCase
         ]);
     }
 
+    /**
+     * link_url previously accepted any string — a javascript: URI would
+     * execute in a storefront visitor's browser the moment they clicked
+     * the hero CTA (2026-07 audit finding, stored XSS reachable by any
+     * banners.manage account). SafeLinkUrl closes this at the same
+     * validation layer used for every other field here.
+     */
+    public function test_a_javascript_uri_link_url_is_rejected(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+
+        $response = $this->actingAs($admin)->post(route('admin.hero-banners.store'), [
+            'title_ar' => 'عنوان جديد', 'title_en' => 'New Hero Banner',
+            'link_url' => 'javascript:alert(document.cookie)',
+            'is_active' => '1',
+            'image' => UploadedFile::fake()->image('hero.jpg'),
+        ]);
+
+        $response->assertSessionHasErrors('link_url');
+        $this->assertDatabaseMissing('banners', ['title_en' => 'New Hero Banner']);
+    }
+
     public function test_image_is_required_when_creating(): void
     {
         $admin = $this->makeAdmin();
