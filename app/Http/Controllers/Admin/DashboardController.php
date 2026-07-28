@@ -49,6 +49,30 @@ class DashboardController extends Controller
             ->values()
             ->all();
 
+        $canViewOrders = $user->hasAdminAccess('orders.view');
+        $canViewCustomers = $user->hasAdminAccess('customers.view');
+        $canViewMessages = $user->hasAdminAccess('messages.view');
+        $canViewInventory = $user->hasAdminAccess('inventory.view');
+
+        // Belt-and-suspenders alongside the @if guards already in
+        // admin/dashboard.blade.php: emptying the underlying collection
+        // here means a future accidentally-deleted @if can't leak this
+        // data across roles — the view would just render nothing instead
+        // of silently exposing it, matching how needsAttention is already
+        // filtered above rather than left to the view alone.
+        if (! $canViewOrders) {
+            $data['recentOrders'] = collect();
+        }
+        if (! $canViewCustomers) {
+            $data['recentCustomers'] = collect();
+        }
+        if (! $canViewMessages) {
+            $data['recentMessages'] = collect();
+        }
+        if (! $canViewInventory) {
+            $data['lowStockProducts'] = collect();
+        }
+
         return view('admin.dashboard', $data + [
             // Per-admin-user data — must stay outside the shared cache key
             // above, or the first admin to hit a cache miss would have
@@ -66,10 +90,10 @@ class DashboardController extends Controller
             // reports.view) rather than tying every panel to the same
             // all-or-nothing analytics gate.
             'showAnalytics' => $user->hasAdminAccess('reports.view'),
-            'canViewOrders' => $user->hasAdminAccess('orders.view'),
-            'canViewCustomers' => $user->hasAdminAccess('customers.view'),
-            'canViewMessages' => $user->hasAdminAccess('messages.view'),
-            'canViewInventory' => $user->hasAdminAccess('inventory.view'),
+            'canViewOrders' => $canViewOrders,
+            'canViewCustomers' => $canViewCustomers,
+            'canViewMessages' => $canViewMessages,
+            'canViewInventory' => $canViewInventory,
         ]);
     }
 
