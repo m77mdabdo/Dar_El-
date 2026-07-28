@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\ProductOptionValueController;
 use App\Http\Controllers\Admin\ProductVariantBulkActionController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
@@ -69,6 +70,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index')->middleware('admin.permission:inventory.view');
 
     Route::get('wishlist-analytics', [WishlistAnalyticsController::class, 'index'])->name('wishlist-analytics.index')->middleware('admin.permission:reports.wishlist');
+
+    Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales')->middleware('admin.permission:reports.sales');
+    Route::get('reports/sales/export', [ReportController::class, 'salesExport'])->name('reports.sales.export')->middleware('admin.permission:reports.sales');
 
     // Must be registered before the resource route below — both match
     // PATCH hero-banners/{something}, and Laravel matches in registration

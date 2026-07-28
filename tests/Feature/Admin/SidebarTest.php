@@ -135,16 +135,30 @@ class SidebarTest extends TestCase
         return substr($html, $buttonStart, $buttonEnd - $buttonStart);
     }
 
+    /**
+     * Deliberately stubs config('admin_sidebar') rather than asserting
+     * against whichever real group happens to be 100%-unbuilt today —
+     * that was "Reports" when this test was first written, but every one
+     * of Reports' 5 items shipped as real pages in this same session
+     * (Wishlist, Sales, Products, Customers, Inventory), which would have
+     * made this test permanently unfixable without either picking a new
+     * real group each time one gets finished, or (this fix) testing the
+     * actual logic in isolation from the ever-changing live config.
+     */
     public function test_a_group_where_every_item_is_still_unbuilt_shows_a_soon_badge_on_the_group_itself(): void
     {
+        config(['admin_sidebar' => [
+            ['label' => 'nav.dashboard', 'route' => 'admin.dashboard', 'match' => 'admin.dashboard', 'icon' => 'home'],
+            ['label' => 'nav.reports', 'icon' => 'chart-pie', 'items' => [
+                ['label' => 'nav.reports_sales', 'route' => null],
+                ['label' => 'nav.reports_products', 'route' => null],
+            ]],
+        ]]);
         $admin = $this->makeAdmin();
 
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         $response->assertOk();
-        // "Reports" (nav.reports): every one of its 5 items is still
-        // route => null, so the group header itself should carry a Soon
-        // badge — flagged before an employee even expands it.
         $buttonMarkup = $this->extractGroupButtonMarkup($response->getContent(), __('admin.nav.reports'));
         $this->assertStringContainsString('dj-admin-soon-badge', $buttonMarkup);
     }
