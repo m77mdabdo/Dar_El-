@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account\OrderController as AccountOrderController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\BlogCommentController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\CartController as AdminCartController;
@@ -176,5 +177,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
         Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
         Route::get('roles/{role}', [RoleController::class, 'show'])->name('roles.show');
         Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+
+        Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     });
 });
