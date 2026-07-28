@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ShippingMethodController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WishlistAnalyticsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin'])->group(function () {
@@ -66,6 +67,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     });
 
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index')->middleware('admin.permission:inventory.view');
+
+    Route::get('wishlist-analytics', [WishlistAnalyticsController::class, 'index'])->name('wishlist-analytics.index')->middleware('admin.permission:reports.wishlist');
 
     // Must be registered before the resource route below — both match
     // PATCH hero-banners/{something}, and Laravel matches in registration

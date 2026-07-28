@@ -57,7 +57,7 @@ return [
         'label' => 'nav.marketing',
         'icon' => 'megaphone',
         'items' => [
-            ['label' => 'nav.wishlist', 'route' => null, 'permission' => 'reports.wishlist'],
+            ['label' => 'nav.wishlist', 'route' => 'admin.wishlist-analytics.index', 'match' => 'admin.wishlist-analytics.*', 'permission' => 'reports.wishlist'],
             ['label' => 'nav.newsletter', 'route' => 'admin.newsletter.index', 'match' => 'admin.newsletter.*', 'permission' => 'newsletter.view'],
             ['label' => 'nav.coupons', 'route' => 'admin.coupons.index', 'match' => 'admin.coupons.*', 'permission' => 'coupons.view'],
         ],
