@@ -126,6 +126,15 @@ return [
             ['label' => 'nav.settings_admin_users', 'route' => 'admin.users.index', 'match' => 'admin.users.*', 'permission' => 'users.view'],
             ['label' => 'nav.settings_roles', 'route' => 'admin.roles.index', 'match' => 'admin.roles.*', 'permission' => 'roles.view'],
             ['label' => 'nav.settings_permissions', 'route' => 'admin.permissions.index', 'match' => 'admin.permissions.*', 'permission' => 'permissions.view'],
+            // Reuses 'users.view' rather than a new permission slug —
+            // hasAdminAccess() hardcodes users./roles./permissions. as
+            // the three Super-Admin-exclusive prefixes, so a new slug
+            // here wouldn't get that exclusion for free and would need
+            // touching that method just for this one nav entry. The
+            // route itself is what actually enforces Super-Admin-only
+            // access (see routes/admin.php's super_admin middleware
+            // group) — same as Users/Roles/Permissions above.
+            ['label' => 'nav.settings_activity_log', 'route' => 'admin.activity-log.index', 'match' => 'admin.activity-log.*', 'permission' => 'users.view'],
         ],
     ],
 ];
