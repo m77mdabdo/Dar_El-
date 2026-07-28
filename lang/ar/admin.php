@@ -8,7 +8,7 @@ return [
     'menu' => 'القائمة',
     'soon' => 'قريبًا',
     'view_all' => 'عرض الكل',
-    'search' => 'بحث',
+    'search' => 'ابحث في المنتجات',
     'search_placeholder' => 'ابحث في المنتجات…',
     'language' => 'اللغة',
 
