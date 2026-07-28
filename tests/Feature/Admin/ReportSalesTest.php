@@ -163,4 +163,57 @@ class ReportSalesTest extends TestCase
 
         $this->actingAs($employee)->get(route('admin.reports.sales.export'))->assertForbidden();
     }
+
+    // ---------------------------------------------------------------
+    // Cairo day-boundary regression (2026-07 timezone audit)
+    // ---------------------------------------------------------------
+
+    /**
+     * Reproduces the exact scenario from the audit: an order placed at
+     * 00:30 Cairo time is stored as 21:30 UTC the PREVIOUS calendar day
+     * (Cairo observes DST/+3 in July). A report for the Cairo calendar
+     * day it was actually placed on must include it — before the
+     * BusinessDay fix, the UTC-anchored range would have missed it
+     * entirely (it would only show up under "yesterday").
+     */
+    public function test_an_order_placed_just_after_cairo_midnight_is_attributed_to_the_correct_cairo_day(): void
+    {
+        $admin = $this->makeAdmin();
+
+        // Cairo 2026-07-16 00:30:00 (+03:00 DST) == UTC 2026-07-15 21:30:00.
+        $order = $this->makeOrder(['order_number' => 'ORD-CAIRO-MIDNIGHT', 'total' => 500]);
+        $order->forceFill(['created_at' => '2026-07-15 21:30:00'])->save();
+
+        // An admin asking for the Cairo calendar day "2026-07-16" should
+        // see this order — it's the whole first half-hour of that day.
+        $response = $this->actingAs($admin)->get(route('admin.reports.sales', [
+            'from' => '2026-07-16', 'to' => '2026-07-16',
+        ]));
+
+        $response->assertOk();
+        $this->assertSame(1, $response->viewData('totalOrders'));
+
+        // And it must NOT leak into the previous Cairo day's report.
+        $previousDay = $this->actingAs($admin)->get(route('admin.reports.sales', [
+            'from' => '2026-07-15', 'to' => '2026-07-15',
+        ]));
+        $this->assertSame(0, $previousDay->viewData('totalOrders'));
+    }
+
+    public function test_the_daily_breakdown_buckets_by_cairo_calendar_day_not_utc(): void
+    {
+        $admin = $this->makeAdmin();
+
+        $order = $this->makeOrder(['total' => 500]);
+        $order->forceFill(['created_at' => '2026-07-15 21:30:00'])->save();
+
+        $response = $this->actingAs($admin)->get(route('admin.reports.sales', [
+            'from' => '2026-07-16', 'to' => '2026-07-16',
+        ]));
+
+        $response->assertOk();
+        $daily = $response->viewData('daily');
+        $this->assertCount(1, $daily);
+        $this->assertSame('2026-07-16', $daily->first()->day);
+    }
 }
