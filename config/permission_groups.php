@@ -43,7 +43,7 @@ return [
 
     'reports' => [
         'reports.view', 'reports.sales', 'reports.revenue', 'reports.customers',
-        'reports.products', 'reports.inventory',
+        'reports.products', 'reports.inventory', 'reports.wishlist',
     ],
 
     'settings' => [
