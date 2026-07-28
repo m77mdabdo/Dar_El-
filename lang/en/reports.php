@@ -35,4 +35,16 @@ return [
     'products_quantity_sold' => 'Quantity Sold',
     'products_revenue' => 'Revenue',
     'products_no_data' => 'No products sold in this date range.',
+
+    'customers_title' => 'Customers Report',
+    'customers_subtitle' => 'Top customers by order count and spend, plus a new-vs-returning breakdown over a selectable date range.',
+    'customers_total' => 'Total Customers',
+    'customers_new' => 'New Customers',
+    'customers_returning' => 'Returning Customers',
+    'customers_top_by_orders' => 'Top by Order Count',
+    'customers_top_by_spend' => 'Top by Spend',
+    'customers_customer' => 'Customer',
+    'customers_orders_count' => 'Orders',
+    'customers_total_spent' => 'Total Spent',
+    'customers_no_data' => 'No customers ordered in this date range.',
 ];
