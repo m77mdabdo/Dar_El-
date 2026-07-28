@@ -203,4 +203,32 @@ class SidebarTest extends TestCase
         $buttonMarkup = $this->extractGroupButtonMarkup($response->getContent(), __('admin.nav.reports'));
         $this->assertStringNotContainsString('dj-admin-soon-badge', $buttonMarkup);
     }
+
+    /**
+     * Audit finding: the top-bar search box always posts to Products
+     * search regardless of which admin page it's shown on (Reports,
+     * Wishlist Analytics, Email Preview, etc. all share the same
+     * layout header) — the placeholder text already said "Search
+     * products…", but the screen-reader-only accessible name just said
+     * the generic "Search", and there was no visible hint (e.g. a hover
+     * title) reinforcing the scope. Checked from a page that is NOT
+     * Products itself, since that's exactly where the ambiguity bites.
+     */
+    public function test_top_bar_search_is_clearly_labeled_as_product_search_on_a_non_product_page(): void
+    {
+        app()->setLocale('en');
+        $admin = $this->makeAdmin();
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString('action="'.route('admin.products.index').'"', $html);
+        $this->assertStringContainsString(__('admin.search'), $html);
+        $this->assertStringContainsString(__('admin.search_placeholder'), $html);
+        // The accessible name and the visible placeholder must agree —
+        // both say "products", not a generic "Search".
+        $this->assertStringContainsString('products', strtolower(__('admin.search')));
+    }
 }
