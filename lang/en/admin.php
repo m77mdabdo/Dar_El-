@@ -52,6 +52,7 @@ return [
         'settings_admin_users' => 'Admin Users',
         'settings_roles' => 'Roles',
         'settings_permissions' => 'Permissions',
+        'settings_activity_log' => 'Activity Log',
         'reviews' => 'Reviews',
     ],
 

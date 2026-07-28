@@ -52,6 +52,7 @@ return [
         'settings_admin_users' => 'مستخدمو الإدارة',
         'settings_roles' => 'الأدوار',
         'settings_permissions' => 'الصلاحيات',
+        'settings_activity_log' => 'سجل النشاط',
         'reviews' => 'التقييمات',
     ],
 
