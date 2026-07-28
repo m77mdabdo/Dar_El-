@@ -73,6 +73,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
 
     Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales')->middleware('admin.permission:reports.sales');
     Route::get('reports/sales/export', [ReportController::class, 'salesExport'])->name('reports.sales.export')->middleware('admin.permission:reports.sales');
+    Route::get('reports/products', [ReportController::class, 'products'])->name('reports.products')->middleware('admin.permission:reports.products');
 
     // Must be registered before the resource route below — both match
     // PATCH hero-banners/{something}, and Laravel matches in registration

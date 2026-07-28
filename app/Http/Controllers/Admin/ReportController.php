@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -97,5 +99,30 @@ class ReportController extends Controller
 
             fclose($handle);
         }, 'sales-report-'.$from->toDateString().'-to-'.$to->toDateString().'.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    /**
+     * Best/worst sellers by quantity and by revenue over the selected
+     * range. Grouped by product_id + the order item's own product_name
+     * snapshot (same convention as OrderItem itself — a since-renamed or
+     * deleted product still reads correctly here), non-cancelled orders
+     * only. "Worst sellers" means the lowest quantity/revenue *among
+     * products that sold at least once* in the range — not zero-sold
+     * products, a different question this doesn't attempt to answer.
+     */
+    public function products(Request $request): View
+    {
+        [$from, $to] = $this->dateRange($request);
+
+        $baseQuery = fn () => OrderItem::query()
+            ->select('product_id', 'product_name', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(quantity * price) as total_revenue'))
+            ->whereHas('order', fn ($q) => $q->whereBetween('created_at', [$from, $to])->where('status', '!=', 'cancelled'))
+            ->groupBy('product_id', 'product_name');
+
+        $topByQuantity = $baseQuery()->orderByDesc('total_quantity')->take(10)->get();
+        $topByRevenue = $baseQuery()->orderByDesc('total_revenue')->take(10)->get();
+        $worstByQuantity = $baseQuery()->orderBy('total_quantity')->take(10)->get();
+
+        return view('admin.reports.products', compact('from', 'to', 'topByQuantity', 'topByRevenue', 'worstByQuantity'));
     }
 }
