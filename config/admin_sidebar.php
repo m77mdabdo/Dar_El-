@@ -98,7 +98,7 @@ return [
         'label' => 'nav.reports',
         'icon' => 'chart-pie',
         'items' => [
-            ['label' => 'nav.reports_sales', 'route' => null, 'permission' => 'reports.sales'],
+            ['label' => 'nav.reports_sales', 'route' => 'admin.reports.sales', 'match' => 'admin.reports.sales*', 'permission' => 'reports.sales'],
             ['label' => 'nav.reports_products', 'route' => null, 'permission' => 'reports.products'],
             ['label' => 'nav.reports_customers', 'route' => null, 'permission' => 'reports.customers'],
             ['label' => 'nav.reports_wishlist', 'route' => null, 'permission' => 'reports.wishlist'],
