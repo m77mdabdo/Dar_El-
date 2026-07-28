@@ -24,4 +24,15 @@ return [
     'export_customer' => 'Customer',
     'export_status' => 'Status',
     'export_total' => 'Total',
+
+    'products_title' => 'Products Report',
+    'products_subtitle' => 'Best and worst sellers by quantity and revenue over a selectable date range.',
+    'products_top_by_quantity' => 'Top Sellers by Quantity',
+    'products_top_by_revenue' => 'Top Sellers by Revenue',
+    'products_worst_by_quantity' => 'Worst Sellers by Quantity',
+    'products_worst_hint' => 'Lowest-selling products that still sold at least once in this range.',
+    'products_product' => 'Product',
+    'products_quantity_sold' => 'Quantity Sold',
+    'products_revenue' => 'Revenue',
+    'products_no_data' => 'No products sold in this date range.',
 ];
