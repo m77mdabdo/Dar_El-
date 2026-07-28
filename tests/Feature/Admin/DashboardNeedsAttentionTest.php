@@ -255,4 +255,31 @@ class DashboardNeedsAttentionTest extends TestCase
         $response->assertDontSee(__('admin.dashboard.recent_orders'));
         $response->assertSee(__('admin.dashboard.attention_stock_alerts'));
     }
+
+    /**
+     * Hardening added alongside the Blade @if guards: the underlying
+     * collections themselves must be empty for a user without the
+     * matching permission, not just hidden by markup — so a future
+     * accidentally-deleted @if in dashboard.blade.php can't silently
+     * leak this data across roles. Checks the raw view data directly
+     * rather than rendered HTML, which is exactly what the @if-only
+     * approach couldn't guarantee.
+     */
+    public function test_recent_activity_collections_are_empty_at_the_data_layer_not_just_hidden_in_markup(): void
+    {
+        $employee = $this->makeEmployee();
+        $this->grant($employee, 'inventory.view');
+        $this->makeOrder();
+        $this->makeProduct(1);
+        \App\Models\ContactMessage::create(['name' => 'Visitor', 'email' => 'v@example.com', 'subject' => 'Hi', 'message' => 'Hello', 'is_read' => false]);
+
+        $response = $this->actingAs($employee)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $this->assertTrue($response->viewData('recentOrders')->isEmpty());
+        $this->assertTrue($response->viewData('recentCustomers')->isEmpty());
+        $this->assertTrue($response->viewData('recentMessages')->isEmpty());
+        // The one permission this employee DOES have keeps its data.
+        $this->assertFalse($response->viewData('lowStockProducts')->isEmpty());
+    }
 }
