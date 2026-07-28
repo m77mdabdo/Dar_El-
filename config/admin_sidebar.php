@@ -68,7 +68,13 @@ return [
         'items' => [
             ['label' => 'nav.contact_messages', 'route' => 'admin.contact-messages.index', 'match' => 'admin.contact-messages.*', 'permission' => 'messages.view'],
             ['label' => 'nav.notifications', 'route' => 'admin.notifications.index', 'match' => 'admin.notifications.*', 'permission' => 'notifications.view'],
-            ['label' => 'nav.emails', 'route' => null],
+            // No permission gate — matches Dashboard's precedent of "no
+            // permission key = visible to any staff member". The real
+            // access control here is the environment check in
+            // EmailPreviewController itself (a local-only dev/QA tool);
+            // adding an RBAC permission on top would be gating a feature
+            // that's already fully inert in production regardless.
+            ['label' => 'nav.emails', 'route' => 'admin.email-preview.index', 'match' => 'admin.email-preview.*'],
         ],
     ],
     [

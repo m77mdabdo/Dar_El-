@@ -153,6 +153,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin']
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
+    Route::get('email-preview', [EmailPreviewController::class, 'index'])->name('email-preview.index');
     Route::get('email-preview/{type}', [EmailPreviewController::class, 'show'])->name('email-preview.show');
 
     Route::middleware('super_admin')->group(function () {
