@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Banner;
+use App\Rules\SafeLinkUrl;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -160,7 +161,7 @@ class HeroBannerController extends Controller
             'subtitle_en' => ['nullable', 'string', 'max:500'],
             'cta_text_ar' => ['nullable', 'string', 'max:100'],
             'cta_text_en' => ['nullable', 'string', 'max:100'],
-            'link_url' => ['nullable', 'string', 'max:2048'],
+            'link_url' => ['nullable', 'string', 'max:2048', new SafeLinkUrl],
             'is_active' => ['boolean'],
             // Required on create (the image column is NOT NULL); optional
             // on edit, where an existing stored image already satisfies it.
