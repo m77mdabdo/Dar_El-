@@ -165,6 +165,44 @@ class UserManagementTest extends TestCase
         $this->assertFalse($employee->hasAdminAccess('customers.view'));
     }
 
+    /**
+     * Regression for the 2026-07 audit finding: 'reports.wishlist' was
+     * used as a live permission.php gate on the Wishlist Analytics /
+     * Reports > Wishlist routes, but was missing from
+     * config/permission_groups.php entirely — meaning it was never
+     * seeded and never appeared as a grantable checkbox here, so a
+     * Super Admin had no legitimate way to give an Employee access to
+     * those pages. Confirms the checkbox now exists and that granting
+     * it actually unlocks the real route end-to-end.
+     */
+    public function test_reports_wishlist_is_grantable_and_actually_unlocks_wishlist_analytics(): void
+    {
+        $superAdmin = $this->makeSuperAdmin();
+        $this->seed(\Database\Seeders\PermissionSeeder::class);
+
+        // The checkbox itself must be present on the create form.
+        $createResponse = $this->actingAs($superAdmin)->get(route('admin.users.create'));
+        $createResponse->assertOk();
+        $createResponse->assertSee('value="reports.wishlist"', false);
+
+        $this->actingAs($superAdmin)->post('/admin/users', [
+            'name' => 'Wishlist Employee',
+            'email' => 'wishlist-employee@example.com',
+            'phone' => '01000000000',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => 'employee',
+            'is_active' => '1',
+            'email_verified' => '1',
+            'permissions' => ['reports.wishlist'],
+        ])->assertRedirect(route('admin.users.index'));
+
+        $employee = User::where('email', 'wishlist-employee@example.com')->firstOrFail();
+
+        $this->assertTrue($employee->hasAdminAccess('reports.wishlist'));
+        $this->actingAs($employee)->get(route('admin.wishlist-analytics.index'))->assertOk();
+    }
+
     public function test_updating_an_employees_permissions_replaces_the_previous_set(): void
     {
         $superAdmin = $this->makeSuperAdmin();
