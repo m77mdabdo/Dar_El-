@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Support\BusinessDay;
+use App\Support\Csv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -101,13 +102,13 @@ class ReportController extends Controller
                 ->orderBy('created_at')
                 ->chunk(200, function ($orders) use ($handle) {
                     foreach ($orders as $order) {
-                        fputcsv($handle, [
+                        fputcsv($handle, Csv::safeRow([
                             $order->order_number,
                             $order->created_at->toDateTimeString(),
                             $order->customer_name,
                             $order->status,
                             $order->total,
-                        ]);
+                        ]));
                     }
                 });
 
