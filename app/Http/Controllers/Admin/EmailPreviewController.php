@@ -39,9 +39,67 @@ use App\Models\Review;
 use App\Models\User;
 use App\Models\Wishlist;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class EmailPreviewController extends Controller
 {
+    /**
+     * Every previewable template, grouped for the index page. Keys must
+     * exactly match the match() arms in show() below — TEMPLATES is the
+     * single source of truth for both the index listing and (implicitly,
+     * since it's just a docs-style list) what show() supports.
+     */
+    protected const TEMPLATES = [
+        'customer_account' => [
+            'otp' => 'OTP Verification Code',
+            'login-alert' => 'New Login Alert',
+        ],
+        'customer_orders' => [
+            'order-confirmation' => 'Order Confirmation (Invoice)',
+            'order-status-updated' => 'Order Status Updated',
+            'payment-success' => 'Payment Success',
+            'payment-failed' => 'Payment Failed',
+        ],
+        'customer_engagement' => [
+            'cart-abandoned-reminder' => 'Abandoned Cart Reminder',
+            'wishlist-reminder' => 'Wishlist Reminder',
+            'back-in-stock' => 'Back-in-Stock Alert',
+            'newsletter-welcome' => 'Newsletter Welcome',
+        ],
+        'customer_content' => [
+            'review-approved' => 'Review Approved',
+            'review-rejected' => 'Review Rejected',
+            'blog-comment-approved' => 'Blog Comment Approved',
+            'blog-comment-rejected' => 'Blog Comment Rejected',
+        ],
+        'admin_notifications' => [
+            'admin-new-order' => 'New Order Placed',
+            'admin-new-review' => 'New Review Submitted',
+            'admin-new-blog-comment' => 'New Blog Comment Submitted',
+            'admin-low-stock' => 'Product Low Stock',
+            'admin-out-of-stock' => 'Product Out of Stock',
+            'admin-new-customer' => 'New Customer Registered',
+            'admin-new-contact-message' => 'New Contact Message',
+        ],
+    ];
+
+    /**
+     * Lists every previewable template, grouped, each linking to show()
+     * below. Never 404s — shown a "not available here" message instead of
+     * a raw 404/500 when accessed outside local, since this is the page
+     * an admin actually lands on from the sidebar first. show() itself
+     * keeps its own hard 404 outside local unchanged (defense in depth);
+     * moot in practice since this index is what stops a non-local visit
+     * from ever reaching it.
+     */
+    public function index(): View
+    {
+        return view('admin.email-preview.index', [
+            'templates' => self::TEMPLATES,
+            'isLocal' => app()->environment('local'),
+        ]);
+    }
+
     /**
      * Local-only, read-only rendering of every email template with sample
      * data — never sends anything. Gated by both the admin route group and
