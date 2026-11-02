@@ -39,6 +39,7 @@
   <a href="#-at-a-glance">At a Glance</a> •
   <a href="#-gallery">Gallery</a> •
   <a href="#-features">Features</a> •
+  <a href="#-how-an-order-works">How an Order Works</a> •
   <a href="#-architecture">Architecture</a> •
   <a href="#-getting-started">Getting Started</a> •
   <a href="#-deployment">Deployment</a> •
@@ -224,22 +225,172 @@ It was designed around three convictions:
 
 ---
 
+## 🛒 How an Order Works
+
+From “Add to Cart” to the invoice in the customer’s inbox: stock is locked inside a single transaction, and everything slow happens **after** the order is safely saved.
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Inter, Segoe UI, sans-serif",
+    "fontSize": "14px",
+    "actorBkg": "#6B1A2E",
+    "actorBorder": "#E8C39E",
+    "actorTextColor": "#FFF8F0",
+    "actorLineColor": "#C9A27E",
+    "signalColor": "#8A5A44",
+    "signalTextColor": "#3D0F1B",
+    "labelBoxBkgColor": "#E8C39E",
+    "labelBoxBorderColor": "#6B1A2E",
+    "labelTextColor": "#3D0F1B",
+    "loopTextColor": "#6B1A2E",
+    "noteBkgColor": "#FFF4E6",
+    "noteBorderColor": "#E8C39E",
+    "noteTextColor": "#3D0F1B",
+    "activationBkgColor": "#F3DCC4",
+    "activationBorderColor": "#6B1A2E",
+    "sequenceNumberColor": "#FFF8F0"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant C as 🛍️ Customer
+    participant W as 🌸 Storefront
+    participant CO as 🧾 Checkout
+    participant DB as 🗄️ MySQL
+    participant Q as ⚡ Queue
+    participant M as 📧 Mail & Alerts
+    participant A as 👑 Admin
+
+    rect rgba(232, 195, 158, 0.18)
+    Note over C,W: Browse & choose
+    C->>W: pick product · size · quantity
+    W->>DB: live stock check
+    DB-->>W: available ✓
+    C->>W: add to cart · apply coupon
+    end
+
+    rect rgba(107, 26, 46, 0.08)
+    Note over C,DB: Place the order — one atomic transaction
+    C->>CO: shipping method · address · payment
+    activate CO
+    CO->>DB: BEGIN · SELECT … FOR UPDATE on each size row
+    alt a size just sold out
+        DB-->>CO: not enough stock
+        CO-->>C: “only N piece(s) left — please update your cart”
+    else stock available
+        CO->>DB: create order (pending) · decrement stock · use coupon
+        DB-->>CO: COMMIT ✓
+    end
+    deactivate CO
+    end
+
+    rect rgba(232, 195, 158, 0.18)
+    Note over CO,A: After commit — each step isolated, never blocks the order
+    CO-)M: order confirmation email (customer’s language)
+    CO-)M: in-app notification to the customer
+    CO-)A: 🔔 new order alert
+    CO-)Q: GenerateAndSendInvoice · afterCommit
+    CO-->>C: success page 🎉
+    end
+
+    rect rgba(107, 26, 46, 0.08)
+    Note over Q,M: Cron worker — retry-safe & idempotent
+    Q->>Q: render bilingual PDF (mPDF · RTL)
+    Q-)M: invoice email with PDF
+    Note right of Q: 3 tries · backoff 1 m / 5 m / 15 m<br/>status: pending → generated → emailed
+    end
+
+    A->>DB: update status in /admin
+    M-)C: 📦 status update email · tracking link
+```
+
+---
+
 ## 🏗️ Architecture
 
 ```mermaid
-flowchart LR
-    U([Customer / Staff]) --> R[Routes<br/>web · admin · auth]
-    R --> M[Middleware<br/>locale · auth · verified<br/>admin · permission]
-    M --> FR[Form Requests]
-    FR --> C[Thin Controllers]
-    C --> P{Policies}
-    P --> S[Service Layer<br/>Cart · Invoice · OTP<br/>Stock · Push · Social]
-    S --> E[(Eloquent / MySQL)]
-    S -. afterCommit .-> Q[[Database Queue]]
-    Q --> J[Jobs<br/>Invoices · Reminders]
-    J --> MAIL[Mail & Notifications]
-    CRON((Cron)) --> Q
-    CRON --> SCH[Scheduled Commands]
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Inter, Segoe UI, sans-serif",
+    "fontSize": "14px",
+    "lineColor": "#B08968",
+    "primaryColor": "#FFF4E6",
+    "primaryBorderColor": "#E8C39E",
+    "primaryTextColor": "#3D0F1B",
+    "clusterBkg": "#FFFAF4",
+    "clusterBorder": "#E8C39E",
+    "edgeLabelBackground": "#FFF8F0"
+  },
+  "flowchart": { "curve": "basis", "padding": 18, "nodeSpacing": 40, "rankSpacing": 55 }
+}}%%
+flowchart TB
+    V(["🛍️ Customer"]):::actor
+    S(["👑 Staff"]):::actor
+
+    subgraph EDGE["🌐 Entry"]
+        direction LR
+        RT["Localized routes<br/>ar · en"]:::layer --> MW["Middleware<br/>locale · auth · OTP-verified<br/>admin · permission"]:::layer
+    end
+
+    subgraph APP["⚙️ Application"]
+        direction LR
+        CT["Thin controllers<br/>+ Form Requests"]:::layer
+        PL{{"Policies<br/>4 roles · ~75 permissions"}}:::guard
+        VW["Blade · Tailwind<br/>Alpine.js"]:::view
+    end
+
+    subgraph DOMAIN["💎 Domain services"]
+        direction LR
+        CS["CartService<br/>CartTracking"]:::svc
+        IS["InvoicePdfService<br/>mPDF · RTL"]:::svc
+        ST["StockAlert<br/>BackInStock"]:::svc
+        AU["OtpService<br/>SocialAuthenticator"]:::svc
+        PU["PushNotification<br/>Service"]:::svc
+    end
+
+    DB[("🗄️ MySQL")]:::data
+    AL["📝 Activity log"]:::guard
+    QU[["⚡ Database queue"]]:::data
+    CR(("⏱️ Cron<br/>every minute")):::cron
+
+    subgraph OUT["📬 Delivery"]
+        direction LR
+        JB["Jobs<br/>invoices · cart reminders"]:::job --> ML["20 branded emails<br/>notifications · Web Push"]:::job
+    end
+
+    SC["Scheduler<br/>publish · reminders · prune"]:::job
+
+    V -->|"/ar · /en"| RT
+    S -->|"/admin"| RT
+    MW --> CT
+    CT --> VW
+    CT --> PL
+    PL --> DOMAIN
+    PL -.->|"audited"| AL
+    DOMAIN --> DB
+    AL --> DB
+    DOMAIN -.->|"afterCommit"| QU
+    CR --> QU
+    CR --> SC
+    QU --> JB
+    SC --> DB
+
+    classDef actor fill:#6B1A2E,stroke:#E8C39E,stroke-width:2px,color:#FFF8F0,font-weight:bold
+    classDef cron fill:#E8C39E,stroke:#6B1A2E,stroke-width:2px,color:#3D0F1B,font-weight:bold
+    classDef layer fill:#FFF4E6,stroke:#C9A27E,stroke-width:1.5px,color:#3D0F1B
+    classDef view fill:#FDEBD8,stroke:#C9A27E,stroke-width:1.5px,color:#3D0F1B
+    classDef guard fill:#F6E1C8,stroke:#8A5A44,stroke-width:2px,color:#3D0F1B
+    classDef svc fill:#FFFFFF,stroke:#6B1A2E,stroke-width:1.5px,color:#6B1A2E
+    classDef data fill:#3D0F1B,stroke:#E8C39E,stroke-width:2px,color:#FFF8F0,font-weight:bold
+    classDef job fill:#F3E6F0,stroke:#8E5A7A,stroke-width:1.5px,color:#3D0F1B
+
+    style EDGE fill:#FFFAF4,stroke:#E8C39E,stroke-width:1.5px,color:#6B1A2E
+    style APP fill:#FFFAF4,stroke:#E8C39E,stroke-width:1.5px,color:#6B1A2E
+    style DOMAIN fill:#FFF8F0,stroke:#6B1A2E,stroke-width:2px,color:#6B1A2E
+    style OUT fill:#FBF4F9,stroke:#8E5A7A,stroke-width:1.5px,color:#6B1A2E
 ```
 
 **Design principles**
