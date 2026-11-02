@@ -24,3 +24,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local project bundles (may contain .env and databases)
+/dar-el-jamila.zip
+/*.zip
