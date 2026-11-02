@@ -1,0 +1,44 @@
+name: Build assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'resources/**'
+      - 'vite.config.js'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f public/build
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "chore: build assets [skip ci]"
+          git push
