@@ -24,3 +24,10 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Never commit project archives or local env files (they can contain secrets)
+/*.zip
+/*.tar.gz
+/*.rar
+.env.*
+!.env.example
